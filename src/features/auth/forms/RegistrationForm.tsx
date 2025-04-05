@@ -1,7 +1,8 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { Button, PasswordInput, Stack, TextInput } from '@mantine/core';
+import { Link } from 'react-router-dom';
+import { Button, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
 import { RegistrationFormData } from '../types';
 import { RegistrationValidationSchema } from '../utils/validation';
 
@@ -23,6 +24,16 @@ const RegistrationForm = () => {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
       <Stack gap={'md'}>
+        <Text
+          variant="gradient"
+          size="xl"
+          mb="md"
+          style={{ textWrap: 'wrap' }}
+          fw={700}
+          ta={'center'}
+        >
+          Create an account
+        </Text>
         <Controller
           control={form.control}
           name="firstName"
@@ -99,6 +110,14 @@ const RegistrationForm = () => {
           )}
         />
         <Button type="submit">Register</Button>
+        <Flex justify={'flex-start'} align={'center'}>
+          <Text>Already have an account?</Text>
+          <Link to={'/login'}>
+            <Button variant="transparent" p={'xs'}>
+              Sign in
+            </Button>
+          </Link>
+        </Flex>
       </Stack>
     </form>
   );

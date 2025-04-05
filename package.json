@@ -23,6 +23,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@mantine/core": "7.17.2",
     "@mantine/hooks": "7.17.2",
+    "@tabler/icons-react": "^3.31.0",
     "axios": "^1.8.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -6,8 +6,6 @@ export function HomePage() {
   return (
     <>
       <Welcome />
-      <APITest />
-      <ColorSchemeToggle />
     </>
   );
 }

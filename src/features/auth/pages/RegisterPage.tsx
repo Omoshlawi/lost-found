@@ -1,11 +1,12 @@
 import React from 'react';
+import { Container } from '@mantine/core';
 import { RegistrationForm } from '../forms';
 
 const RegisterPage = () => {
   return (
-    <div>
+    <Container size={'xs'} mt={100} mb={100}>
       <RegistrationForm />
-    </div>
+    </Container>
   );
 };
 
