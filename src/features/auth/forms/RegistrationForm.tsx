@@ -1,14 +1,22 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
+import { handleApiErrors } from '@/lib/api';
+import { useAuthAPi } from '../hooks';
 import { RegistrationFormData } from '../types';
 import { RegistrationValidationSchema } from '../utils/validation';
 
 const RegistrationForm = () => {
+  const { registerUser } = useAuthAPi();
+  const [searchParams] = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
+  const navigate = useNavigate();
+
   const form = useForm<RegistrationFormData>({
     defaultValues: {
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -18,8 +26,21 @@ const RegistrationForm = () => {
     },
     resolver: zodResolver(RegistrationValidationSchema),
   });
-  const handleSubmit: SubmitHandler<RegistrationFormData> = (data) => {
-    console.log(data);
+  const handleSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
+    try {
+      await registerUser(data);
+      // TODO: Handle success
+      if (callbackUrl) navigate(callbackUrl, { replace: true });
+    } catch (error) {
+      const e = handleApiErrors<RegistrationFormData>(error);
+      if (e.detail) {
+        // showSnackbar({ title: "error", subtitle: e.detail, kind: "error" });
+        alert(e.detail);
+      } else
+        Object.entries(e).forEach(([key, val]) =>
+          form.setError(key as keyof RegistrationFormData, { message: val })
+        );
+    }
   };
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -56,6 +77,18 @@ const RegistrationForm = () => {
               label="Last name"
               error={fieldState.error?.message}
               placeholder="e.g doe"
+            />
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="username"
+          render={({ field, fieldState }) => (
+            <TextInput
+              {...field}
+              label="Username"
+              error={fieldState.error?.message}
+              placeholder="e.g joe"
             />
           )}
         />
@@ -112,7 +145,9 @@ const RegistrationForm = () => {
         <Button type="submit">Register</Button>
         <Flex justify={'flex-start'} align={'center'}>
           <Text>Already have an account?</Text>
-          <Link to={'/login'}>
+          <Link
+            to={`/login${callbackUrl ? '?callbackUrl=' + encodeURIComponent(callbackUrl) : ''}`}
+          >
             <Button variant="transparent" p={'xs'}>
               Sign in
             </Button>

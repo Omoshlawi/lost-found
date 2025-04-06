@@ -2,17 +2,18 @@ import { z } from 'zod';
 import { PHONE_NUMBER_REGEX } from '@/constants';
 
 export const LoginValidationSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
+  identifier: z.string().min(1, 'Username is required'),
+  password: z.string().min(4, 'Password must be at least 4 characters long'),
 });
 export const RegistrationValidationSchema = z
   .object({
+    username: z.string().min(4, 'Username must be atleast 4 characters long'),
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
     email: z.string().email('Invalid email address'),
     phoneNumber: z.string().regex(PHONE_NUMBER_REGEX, 'Invalid phone number'),
-    password: z.string().min(8, 'Password must be at least 8 characters long'),
-    confirmPassword: z.string().min(8, 'Password must be at least 8 characters long'),
+    password: z.string().min(4, 'Password must be at least 4 characters long'),
+    confirmPassword: z.string().min(4, 'Password must be at least 4 characters long'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
