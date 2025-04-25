@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   IconActivity,
   IconChevronRight,
@@ -8,23 +7,12 @@ import {
   IconSettings,
 } from '@tabler/icons-react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  AppShell,
-  Avatar,
-  Box,
-  Button,
-  Container,
-  Flex,
-  NavLink,
-  ScrollArea,
-  Text,
-  Title,
-} from '@mantine/core';
+import { AppShell, Avatar, Flex, NavLink, ScrollArea, Text, Title } from '@mantine/core';
 import { authClient } from '@/lib/api';
 
 const SideNav = () => {
   const location = useLocation();
-
+  const { data: user } = authClient.useSession();
   const items = data.map((item, index) => {
     // Check if current path starts with the dashboard item path
     const isActive =
@@ -57,7 +45,7 @@ const SideNav = () => {
           <Avatar>LO</Avatar>
           <Title order={4}>
             <Text variant="gradient" fw={'bold'}>
-              Laurent omondi
+              {user?.user.name}
             </Text>
           </Title>
         </Flex>

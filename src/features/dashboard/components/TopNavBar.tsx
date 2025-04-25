@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppShell, Avatar, Burger, Drawer, Flex, Group, Text, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ColorSchemeToggle } from '@/components';
+import { ColorSchemeToggle, Logo } from '@/components';
 import { useSession } from '@/lib/global-store';
 import { getNameInitials } from '@/lib/utils';
 import SideNav from './SideNav';
@@ -22,6 +22,7 @@ const TopNavBar = () => {
           <AppShell.Section>
             <Flex display={'flex'} gap={'sm'} justify={'center'} align={'center'}>
               <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
+              <Logo />
               <Title variant="radiant" order={4} lineClamp={1}>
                 <Text
                   inherit
