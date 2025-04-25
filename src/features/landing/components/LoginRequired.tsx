@@ -1,16 +1,16 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSession } from '@/lib/global-store';
+import { authClient } from '@/lib/api';
 
 type LoginRequiredProps = PropsWithChildren<{
   redirectTo?: string;
 }>;
 const LoginRequired: FC<LoginRequiredProps> = ({ children, redirectTo = '/login' }) => {
-  const { isAuthenticated } = useSession();
+  const { data, isPending, error } = authClient.useSession();
   const location = useLocation();
   const callbackUrl = location.pathname + location.search;
   const redirectUrl = redirectTo + '?callbackUrl=' + encodeURIComponent(callbackUrl);
-  if (!isAuthenticated) {
+  if (!data && !isPending) {
     return <Navigate to={redirectUrl} />;
   }
   return <>{children}</>;

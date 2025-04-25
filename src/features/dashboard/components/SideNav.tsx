@@ -20,6 +20,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { authClient } from '@/lib/api';
 
 const SideNav = () => {
   const location = useLocation();
@@ -71,6 +72,9 @@ const SideNav = () => {
           leftSection={<IconLogout size={16} stroke={1.5} />}
           pb={'lg'}
           rightSection={<IconChevronRight size={16} stroke={1.5} />}
+          onClick={async () => {
+            await authClient.signOut({});
+          }}
         />
       </AppShell.Section>
     </>

@@ -1,41 +1,51 @@
-import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
-import { handleApiErrors } from '@/lib/api';
-import { useAuthAPi } from '../hooks';
+import { Box, Button, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
+import { authClient, handleApiErrors } from '@/lib/api';
+import { showSnackbar } from '@/lib/utils';
 import { RegistrationFormData } from '../types';
 import { RegistrationValidationSchema } from '../utils/validation';
 
 const RegistrationForm = () => {
-  const { registerUser } = useAuthAPi();
   const [searchParams] = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
   const navigate = useNavigate();
 
   const form = useForm<RegistrationFormData>({
     defaultValues: {
-      username: '',
       email: '',
       password: '',
       confirmPassword: '',
       firstName: '',
       lastName: '',
-      phoneNumber: '',
     },
     resolver: zodResolver(RegistrationValidationSchema),
   });
-  const handleSubmit: SubmitHandler<RegistrationFormData> = async (data) => {
+  const handleSubmit: SubmitHandler<RegistrationFormData> = async (values) => {
     try {
-      await registerUser(data);
-      // TODO: Handle success
+      const { data, error } = await authClient.signUp.email({
+        ...values,
+        name: `${values.firstName} ${values.lastName}`,
+      });
+      if (error) {
+        throw error;
+      }
+      showSnackbar({
+        title: 'Registration successful',
+        message: 'You have successfully registered',
+        color: 'green',
+        position: 'bottom-left',
+      });
       if (callbackUrl) navigate(callbackUrl, { replace: true });
     } catch (error) {
       const e = handleApiErrors<RegistrationFormData>(error);
       if (e.detail) {
-        // showSnackbar({ title: "error", subtitle: e.detail, kind: "error" });
-        alert(e.detail);
+        showSnackbar({
+          title: 'Registration Failed',
+          message: e.detail,
+          color: 'red',
+        });
       } else
         Object.entries(e).forEach(([key, val]) =>
           form.setError(key as keyof RegistrationFormData, { message: val })
@@ -45,16 +55,12 @@ const RegistrationForm = () => {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
       <Stack gap={'md'}>
-        <Text
-          variant="gradient"
-          size="xl"
-          mb="md"
-          style={{ textWrap: 'wrap' }}
-          fw={700}
-          ta={'center'}
-        >
-          Create an account
-        </Text>
+        <Box>
+          <Text variant="gradient" size="xl" mb="md" style={{ textWrap: 'wrap' }} fw={700}>
+            Sign Up
+          </Text>
+          <Text c={'gray'}>Enter your information to create an account</Text>
+        </Box>
         <Controller
           control={form.control}
           name="firstName"
@@ -80,18 +86,7 @@ const RegistrationForm = () => {
             />
           )}
         />
-        <Controller
-          control={form.control}
-          name="username"
-          render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              label="Username"
-              error={fieldState.error?.message}
-              placeholder="e.g joe"
-            />
-          )}
-        />
+
         <Controller
           control={form.control}
           name="email"
@@ -102,18 +97,6 @@ const RegistrationForm = () => {
               type="email"
               error={fieldState.error?.message}
               placeholder="e.g joedoe@abc.com"
-            />
-          )}
-        />
-        <Controller
-          control={form.control}
-          name="phoneNumber"
-          render={({ field, fieldState }) => (
-            <TextInput
-              {...field}
-              label="Phone number"
-              error={fieldState.error?.message}
-              placeholder="e.g 254712345678"
             />
           )}
         />
@@ -142,7 +125,9 @@ const RegistrationForm = () => {
             />
           )}
         />
-        <Button type="submit">Register</Button>
+        <Button type="submit" loading={form.formState.isSubmitting} variant="gradient">
+          Register
+        </Button>
         <Flex justify={'flex-start'} align={'center'}>
           <Text>Already have an account?</Text>
           <Link

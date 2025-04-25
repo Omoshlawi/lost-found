@@ -1,28 +1,30 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Box, LoadingOverlay } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { LoginPage, RegisterPage } from '@/features/auth/pages';
-import { LoginRequired } from './features/auth/components';
-import { useLoadInitialAuthState } from './features/auth/hooks';
+import { LoginPage, RegisterPage } from '@/features/landing/pages';
 import { DashboardLayout } from './features/dashboard/components';
+import { LoginRequired } from './features/landing/components';
+import { useLoadInitialAuthState } from './features/landing/hooks';
+import LandingLayout from './features/landing/pages/LandingLayout';
 import { HomePage } from './pages/Home.page';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
+    element: <LandingLayout />,
+    children: [
+      { index: true, element: <HomePage /> },
+      {
+        path: '/register',
+        element: <RegisterPage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+    ],
   },
   {
     path: '/dashboard',
-
     element: (
       <LoginRequired>
         <DashboardLayout />
@@ -43,13 +45,5 @@ export function Router() {
 
   if (isLoading) return;
 
-  return (
-    <>
-      <RouterProvider router={router} />
-      <p>{error?.message}</p>
-      <Box pos="relative">
-        <LoadingOverlay visible={visible} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
-      </Box>
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
