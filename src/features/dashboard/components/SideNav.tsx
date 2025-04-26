@@ -1,6 +1,7 @@
 import {
   IconActivity,
   IconChevronRight,
+  IconComponents,
   IconFingerprint,
   IconGauge,
   IconLogout,
@@ -8,6 +9,11 @@ import {
 } from '@tabler/icons-react';
 import { Link, useLocation } from 'react-router-dom';
 import { AppShell, Avatar, Flex, NavLink, ScrollArea, Text, Title } from '@mantine/core';
+import {
+  getAllTablerIconNames,
+  getTablerIconCategories,
+  TablerIcon,
+} from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 
 const SideNav = () => {
@@ -57,9 +63,9 @@ const SideNav = () => {
         <NavLink
           label="Logout"
           variant="filled"
-          leftSection={<IconLogout size={16} stroke={1.5} />}
+          leftSection={<TablerIcon name="logout" size={16} stroke={1.5} color="red" />}
           pb={'lg'}
-          rightSection={<IconChevronRight size={16} stroke={1.5} />}
+          rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
           onClick={async () => {
             await authClient.signOut({});
           }}
@@ -87,5 +93,10 @@ const data = [
     icon: IconSettings,
     label: 'Account settings',
     href: 'settings',
+  },
+  {
+    icon: IconComponents,
+    label: 'Components',
+    href: 'components',
   },
 ];

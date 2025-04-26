@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
+import { TablerIcon } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import handleAPIErrors from '@/lib/api/handleApiErrors';
 import { showSnackbar } from '@/lib/utils';
@@ -31,7 +32,7 @@ const LoginForm = () => {
         title: 'Login successful',
         message: 'You have successfully logged in',
         color: 'green',
-        position: 'bottom-left',
+        position: 'top-right',
       });
       if (callbackUrl) navigate(callbackUrl, { replace: true });
     } catch (error) {
@@ -41,6 +42,7 @@ const LoginForm = () => {
           title: 'Login Failed',
           message: e.detail,
           color: 'red',
+          position: 'top-right',
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>

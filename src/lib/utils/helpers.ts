@@ -17,11 +17,5 @@ export const getNameInitialsFromEmail = (email: string) => {
 export const showSnackbar = (notification: NotificationData) => {
   notifications.show({
     ...notification,
-    style: {
-      position: 'absolute',
-      bottom: '20px',
-      right: '20px',
-      zIndex: 9999,
-    },
   });
 };

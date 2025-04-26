@@ -1,13 +1,12 @@
 import { FC } from 'react';
 import { Outlet } from 'react-router-dom';
-import { AppShell, Button } from '@mantine/core';
+import { AppShell } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import SideNav from './SideNav';
 import TopNavBar from './TopNavBar';
 
 const DashboardLayout: FC = () => {
   const [opened, { toggle }] = useDisclosure();
-
   return (
     <AppShell
       header={{ height: 60 }}

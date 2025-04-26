@@ -24,6 +24,7 @@
     "@mantine/core": "7.17.2",
     "@mantine/hooks": "7.17.2",
     "@mantine/notifications": "^7.17.5",
+    "@mantine/spotlight": "^7.17.5",
     "@tabler/icons-react": "^3.31.0",
     "axios": "^1.8.4",
     "better-auth": "^1.2.7",

@@ -858,6 +858,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/spotlight@npm:^7.17.5":
+  version: 7.17.5
+  resolution: "@mantine/spotlight@npm:7.17.5"
+  dependencies:
+    "@mantine/store": "npm:7.17.5"
+  peerDependencies:
+    "@mantine/core": 7.17.5
+    "@mantine/hooks": 7.17.5
+    react: ^18.x || ^19.x
+    react-dom: ^18.x || ^19.x
+  checksum: 10c0/05e66f259d952f7d1b3620ef28d75340ea0984260f0d0933fff4e3ec557c29aa0969a9b4913af1e93448601ac6c96a53eff233345dfe1b94a4bda34ec32583b2
+  languageName: node
+  linkType: hard
+
 "@mantine/store@npm:7.17.5":
   version: 7.17.5
   resolution: "@mantine/store@npm:7.17.5"
@@ -4414,6 +4428,7 @@ __metadata:
     "@mantine/core": "npm:7.17.2"
     "@mantine/hooks": "npm:7.17.2"
     "@mantine/notifications": "npm:^7.17.5"
+    "@mantine/spotlight": "npm:^7.17.5"
     "@storybook/react": "npm:^8.6.8"
     "@storybook/react-vite": "npm:^8.6.8"
     "@tabler/icons-react": "npm:^3.31.0"
