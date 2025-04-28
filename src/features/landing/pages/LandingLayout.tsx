@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
-import { AppShell, Burger, Flex, Group } from '@mantine/core';
+import { Anchor, AppShell, Burger, Flex, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Logo } from '@/components';
+import { ColorSchemeToggle, Logo } from '@/components';
 
 const LandingLayout = () => {
   const [opened, { toggle }] = useDisclosure();
@@ -18,20 +18,19 @@ const LandingLayout = () => {
     >
       <AppShell.Header>
         <Flex justify={'space-between'} align={'center'} p={'xs'}>
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <Logo />
           <Group w={'fit-content'}>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Logo />
-          </Group>
-          <Group w={'fit-content'} visibleFrom="sm">
-            <Link to="/login">
+            <Anchor component={Link} to="/login" visibleFrom="sm">
               <span>Login</span>
-            </Link>
-            <Link to="/register">
+            </Anchor>
+            <Anchor component={Link} to="/register" visibleFrom="sm">
               <span>Register</span>
-            </Link>
-            <Link to="/dashboard">
+            </Anchor>
+            <Anchor component={Link} to="/dashboard" visibleFrom="sm">
               <span>Dashboard</span>
-            </Link>
+            </Anchor>
+            <ColorSchemeToggle />
           </Group>
         </Flex>
       </AppShell.Header>

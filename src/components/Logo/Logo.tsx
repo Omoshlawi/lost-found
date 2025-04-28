@@ -4,8 +4,11 @@ import styles from './Logo.module.css';
 
 const Logo = () => {
   return (
-    <Box flex={1} display={'flex'} className={styles.logoContainer} p={'xs'}>
+    <Box display={'flex'} className={styles.logoContainer} w={'fit-content'}>
       <Image src={image} h={'30'} w={'30'} />
+      <Text fw={'bold'} size="xl">
+        Ducufind
+      </Text>
     </Box>
   );
 };

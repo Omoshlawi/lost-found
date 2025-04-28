@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
-import { TablerIcon } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import handleAPIErrors from '@/lib/api/handleApiErrors';
 import { showSnackbar } from '@/lib/utils';
@@ -35,6 +34,7 @@ const LoginForm = () => {
         position: 'top-right',
       });
       if (callbackUrl) navigate(callbackUrl, { replace: true });
+      else navigate('/dashboard');
     } catch (error) {
       const e = handleAPIErrors<LoginFormData>(error);
       if (e.detail) {

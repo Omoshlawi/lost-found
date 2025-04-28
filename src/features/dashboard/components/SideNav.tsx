@@ -15,6 +15,7 @@ import {
   TablerIcon,
 } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
+import { getNameInitials } from '@/lib/utils';
 
 const SideNav = () => {
   const location = useLocation();
@@ -48,7 +49,7 @@ const SideNav = () => {
     <>
       <AppShell.Section>
         <Flex align={'baseline'} gap={'sm'} p={'sm'} style={{}}>
-          <Avatar>LO</Avatar>
+          {user?.user && <Avatar size={'md'}>{getNameInitials(user?.user?.name)}</Avatar>}
           <Title order={4}>
             <Text variant="gradient" fw={'bold'}>
               {user?.user.name}

@@ -33,7 +33,7 @@ export function ColorSchemeToggle() {
       variant="outline"
       aria-label="Theme Settings"
       onClick={toggleTheme}
-      size={'lg'}
+      size={'md'}
       radius={'xl'}
     >
       {colorScheme === 'dark' && (
