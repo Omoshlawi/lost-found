@@ -7,7 +7,7 @@ const Logo = () => {
     <Box display={'flex'} className={styles.logoContainer} w={'fit-content'}>
       <Image src={image} h={'30'} w={'30'} />
       <Text fw={'bold'} size="xl">
-        Ducufind
+        Docufind
       </Text>
     </Box>
   );

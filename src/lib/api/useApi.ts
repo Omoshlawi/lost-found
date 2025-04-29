@@ -6,7 +6,6 @@ const useApi = <T>(
   options?: SWRConfiguration
 ) => {
   const res = useSWR<T>(resource, fetcher ?? null, options);
-  res.data;
   return res;
 };
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useApi } from '@/lib/api';
+import { Logo, TablerIcon, } from '@/components';
+import { constructUrl, useApi } from '@/lib/api';
 import { APIFetchResponse } from '@/lib/api/types';
 
 const APITest = () => {
@@ -8,7 +8,8 @@ const APITest = () => {
   if (error) return <p color={'text'}>{JSON.stringify(error, null, 2)}</p>;
   return (
     <div>
-      <p color={'text'}>{JSON.stringify(data, null, 2)}</p>
+      <Logo/>
+\      <p color={'text'}>{JSON.stringify(data, null, 2)}</p>
     </div>
   );
 };
@@ -23,6 +24,6 @@ const useTodos = () => {
       title: string;
       completed: boolean;
     }>
-  >('https://jsonplaceholder.typicode.com/todos/1');
+  >(constructUrl('/documents', { userId: '1234', page: 20 }));
   return { data: data?.data, isLoading, error };
 };

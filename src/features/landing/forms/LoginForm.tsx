@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -11,6 +12,7 @@ import { LoginValidationSchema } from '../utils/validation';
 const LoginForm = () => {
   const [searchParams] = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
+  const { data } = authClient.useSession();
 
   const navigate = useNavigate();
   const form = useForm<LoginFormData>({
@@ -51,6 +53,14 @@ const LoginForm = () => {
       }
     }
   };
+
+  useEffect(() => {
+    if (data) {
+      if (callbackUrl) navigate(callbackUrl, { replace: true });
+      else navigate('/dashboard');
+    }
+  }, [data, navigate]);
+
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
       <Stack gap={'md'}>

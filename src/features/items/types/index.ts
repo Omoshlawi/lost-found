@@ -1,0 +1,3 @@
+interface LostItem {
+  id: string;
+}
