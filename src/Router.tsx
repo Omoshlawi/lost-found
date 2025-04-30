@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/landing/pages';
+import { DocumentTypesPage } from './features/admin/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: 'items/found', element: <div>Found Items</div> },
       { path: 'settings', element: <div>Account settings</div> },
       { path: 'components', element: <UiComponents /> },
+      { path: 'document-types', element: <DocumentTypesPage /> },
     ],
   },
 ]);

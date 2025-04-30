@@ -1,18 +1,10 @@
-import {
-  IconActivity,
-  IconChevronRight,
-  IconComponents,
-  IconFingerprint,
-  IconGauge,
-  IconLogout,
-  IconSettings,
-} from '@tabler/icons-react';
 import { Link, useLocation } from 'react-router-dom';
 import { AppShell, Avatar, Flex, NavLink, ScrollArea, Text, Title } from '@mantine/core';
 import {
   getAllTablerIconNames,
   getTablerIconCategories,
   TablerIcon,
+  TablerIconName,
 } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import { getNameInitials } from '@/lib/utils';
@@ -38,8 +30,8 @@ const SideNav = () => {
           active={isActive}
           label={item.label}
           description={item.description}
-          rightSection={<IconChevronRight size={16} stroke={1.5} />}
-          leftSection={<item.icon size={16} stroke={1.5} />}
+          rightSection={<TablerIcon name={'chevronRight'} size={16} stroke={1.5} />}
+          leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
         />
       </Link>
     );
@@ -78,25 +70,31 @@ const SideNav = () => {
 
 export default SideNav;
 
-const data = [
-  { icon: IconGauge, label: 'Dashboard', description: 'Item with description', href: '' },
+const data: Array<{ icon: TablerIconName; label: string; href: string; description?: string }> = [
+  { icon: 'gauge', label: 'Dashboard', description: 'Item with description', href: '' },
   {
-    icon: IconFingerprint,
+    icon: 'clipboardText',
+    label: 'Document types',
+    description: 'Manage Document types',
+    href: 'document-types',
+  },
+  {
+    icon: 'fingerprint',
     label: 'Lost items',
     href: 'items/lost',
   },
   {
-    icon: IconActivity,
+    icon: 'activity',
     label: 'Found items',
     href: 'items/found',
   },
   {
-    icon: IconSettings,
+    icon: 'settings',
     label: 'Account settings',
     href: 'settings',
   },
   {
-    icon: IconComponents,
+    icon: 'components',
     label: 'Components',
     href: 'components',
   },
