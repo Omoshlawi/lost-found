@@ -3,9 +3,9 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
 import { authClient, handleApiErrors } from '@/lib/api';
-import { showSnackbar } from '@/lib/utils';
 import { RegistrationFormData } from '../types';
 import { RegistrationValidationSchema } from '../utils/validation';
+import { showNotification } from '@mantine/notifications';
 
 const RegistrationForm = () => {
   const [searchParams] = useSearchParams();
@@ -31,7 +31,7 @@ const RegistrationForm = () => {
       if (error) {
         throw error;
       }
-      showSnackbar({
+      showNotification({
         title: 'Registration successful',
         message: 'You have successfully registered',
         color: 'green',
@@ -41,7 +41,7 @@ const RegistrationForm = () => {
     } catch (error) {
       const e = handleApiErrors<RegistrationFormData>(error);
       if (e.detail) {
-        showSnackbar({
+        showNotification({
           title: 'Registration Failed',
           message: e.detail,
           color: 'red',

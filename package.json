@@ -23,6 +23,7 @@
     "@hookform/resolvers": "^5.0.1",
     "@mantine/core": "7.17.2",
     "@mantine/hooks": "7.17.2",
+    "@mantine/modals": "^7.17.5",
     "@mantine/notifications": "^7.17.5",
     "@mantine/spotlight": "^7.17.5",
     "@tabler/icons-react": "^3.31.0",

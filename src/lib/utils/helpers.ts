@@ -13,9 +13,3 @@ export const getNameInitialsFromEmail = (email: string) => {
   const name = email.split('@')[0];
   return getNameInitials(name);
 };
-
-export const showSnackbar = (notification: NotificationData) => {
-  notifications.show({
-    ...notification,
-  });
-};

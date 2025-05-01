@@ -1,5 +1,6 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/landing/pages';
+import { DocumentTypeForm } from './features/admin/forms';
 import { DocumentTypesPage } from './features/admin/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { LoginRequired } from './features/landing/components';
@@ -36,7 +37,19 @@ const router = createBrowserRouter([
       { path: 'items/found', element: <div>Found Items</div> },
       { path: 'settings', element: <div>Account settings</div> },
       { path: 'components', element: <UiComponents /> },
-      { path: 'document-types', element: <DocumentTypesPage /> },
+      {
+        path: 'document-types',
+        element: (
+          <>
+            <Outlet />
+          </>
+        ),
+        children: [
+          { index: true, element: <DocumentTypesPage /> },
+          { path: 'add', element: <DocumentTypeForm /> },
+          { path: ':documentTypeId/update', element: <DocumentTypeForm /> },
+        ],
+      },
     ],
   },
 ]);

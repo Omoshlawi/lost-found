@@ -5,9 +5,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
 import { authClient } from '@/lib/api';
 import handleAPIErrors from '@/lib/api/handleApiErrors';
-import { showSnackbar } from '@/lib/utils';
 import { LoginFormData } from '../types';
 import { LoginValidationSchema } from '../utils/validation';
+import { showNotification } from '@mantine/notifications';
 
 const LoginForm = () => {
   const [searchParams] = useSearchParams();
@@ -29,7 +29,7 @@ const LoginForm = () => {
       if (error) {
         throw error;
       }
-      showSnackbar({
+      showNotification({
         title: 'Login successful',
         message: 'You have successfully logged in',
         color: 'green',
@@ -40,7 +40,7 @@ const LoginForm = () => {
     } catch (error) {
       const e = handleAPIErrors<LoginFormData>(error);
       if (e.detail) {
-        showSnackbar({
+        showNotification({
           title: 'Login Failed',
           message: e.detail,
           color: 'red',

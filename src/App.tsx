@@ -1,7 +1,9 @@
 import '@mantine/core/styles.css';
 import '@mantine/spotlight/styles.css';
 import '@mantine/notifications/styles.css';
+
 import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
 import { Notifications } from '@mantine/notifications';
 import { ApiConfigProvider } from '@/lib/api';
 import { Router } from '@/Router';
@@ -10,10 +12,12 @@ import { theme } from '@/theme';
 export default function App() {
   return (
     <MantineProvider theme={theme}>
-      <Notifications />
-      <ApiConfigProvider>
-        <Router />
-      </ApiConfigProvider>
+      <ModalsProvider>
+        <Notifications />
+        <ApiConfigProvider>
+          <Router />
+        </ApiConfigProvider>
+      </ModalsProvider>
     </MantineProvider>
   );
 }

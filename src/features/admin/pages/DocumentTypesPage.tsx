@@ -1,19 +1,58 @@
 import { useMemo } from 'react';
-import { ActionIcon, Button, Card, Menu, Table, TableData } from '@mantine/core';
-import { EmptyState, ErrorState, TablerIcon, TableSkeleton } from '@/components';
+import { Link } from 'react-router-dom';
+import { ActionIcon, Button, Card, Menu, Table, TableData, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
+import { EmptyState, ErrorState, TablerIcon, TablerIconName, TableSkeleton } from '@/components';
 import CardHeader from '@/components/CardHeader/CardHeader';
-import { useDocumentTypes } from '../hooks';
+import handleAPIErrors from '@/lib/api/handleApiErrors';
+import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
+import { DocumentType } from '../types';
 
 const DocumentTypesPage = () => {
   const { documentTypes, isLoading, error } = useDocumentTypes();
-
+  const { deleteDocumentType, mutateDocumentTypes } = useDocumentTypesApi();
+  const handleDelete = (documentType: DocumentType) => {
+    modals.openConfirmModal({
+      title: 'Delete your profile',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete {documentType.name}? This action is destructive and can
+          only be reveredby admin users
+        </Text>
+      ),
+      labels: { confirm: 'Delete', cancel: "No don't delete it" },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await deleteDocumentType(documentType.id);
+          showNotification({
+            title: 'success',
+            message: 'Document type deleted succesfully!',
+            color: 'green',
+          });
+          mutateDocumentTypes();
+        } catch (error) {
+          const e = handleAPIErrors<{}>(error);
+          if (e.detail) {
+            showNotification({
+              title: 'Error deleting document type',
+              message: e.detail,
+              color: 'red',
+              position: 'top-right',
+            });
+          }
+        }
+      },
+    });
+  };
   const tableData = useMemo<TableData>(
     () => ({
       caption: 'document types',
       foot: [
-        'Name',
-        'Description',
         'Icon',
+        'Name',
         'Created at',
         'Updated at',
         'Average Replacement Cost',
@@ -22,9 +61,8 @@ const DocumentTypesPage = () => {
         'Actions',
       ],
       head: [
-        'Name',
-        'Description',
         'Icon',
+        'Name',
         'Created at',
         'Updated at',
         'Average Replacement Cost',
@@ -33,9 +71,8 @@ const DocumentTypesPage = () => {
         'Actions',
       ],
       body: documentTypes.map((docType) => [
+        docType.icon ? <TablerIcon name={docType.icon as TablerIconName} /> : '--',
         docType.name,
-        docType.description,
-        docType.icon,
         new Date(docType.createdAt).toDateString(),
         new Date(docType.updatedAt).toDateString(),
         docType.averageReplacementCost,
@@ -52,10 +89,19 @@ const DocumentTypesPage = () => {
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<TablerIcon name="edit" size={14} />} color="green">
+            <Menu.Item
+              component={Link}
+              leftSection={<TablerIcon name="edit" size={14} />}
+              color="green"
+              to={`${docType.id}/update`}
+            >
               Edit
             </Menu.Item>
-            <Menu.Item leftSection={<TablerIcon name="trash" size={14} />} color="red">
+            <Menu.Item
+              leftSection={<TablerIcon name="trash" size={14} />}
+              color="red"
+              onClick={() => handleDelete(docType)}
+            >
               Delete
             </Menu.Item>
           </Menu.Dropdown>
@@ -64,6 +110,7 @@ const DocumentTypesPage = () => {
     }),
     [documentTypes]
   );
+
   if (isLoading) return <TableSkeleton />;
   if (error) return <ErrorState headerTitle="Document types" error={error} />;
   if (documentTypes.length === 0)
@@ -71,7 +118,12 @@ const DocumentTypesPage = () => {
   return (
     <Card>
       <CardHeader title="Document types">
-        <Button leftSection={<TablerIcon name="plus" size={16} />} variant="transparent">
+        <Button
+          component={Link}
+          leftSection={<TablerIcon name="plus" size={16} />}
+          variant="transparent"
+          to={'add'}
+        >
           Add document type
         </Button>
       </CardHeader>

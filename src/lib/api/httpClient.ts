@@ -3,7 +3,7 @@ import { BASE_URL, restBaseUrl } from '@/constants';
 import { TokenPair, useSessionStore } from '../global-store';
 
 const httpClient = axios.create({
-  baseURL: `${BASE_URL}${restBaseUrl}`,
+  // baseURL: `/${restBaseUrl}`,
 });
 
 httpClient.interceptors.request.use(

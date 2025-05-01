@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { DocumentTypeSchema } from '../utils';
+
 export interface DocumentType {
   id: string;
   name: string;
@@ -8,6 +11,8 @@ export interface DocumentType {
   isActive: boolean;
   replacementInstructions: string;
   averageReplacementCost: number;
-  requiredVerification: string;
+  requiredVerification: 'LOW' | 'STANDARD' | 'HIGH' | 'INSTITUTIONAL';
   voided: boolean;
 }
+
+export type DocumentTypeFormData = z.infer<typeof DocumentTypeSchema>;

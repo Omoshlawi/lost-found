@@ -1,1 +1,1 @@
-export { default as useDocumentTypes } from './useDocumentTypes';
+export * from './useDocumentTypes';

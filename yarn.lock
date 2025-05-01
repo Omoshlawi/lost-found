@@ -843,6 +843,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/modals@npm:^7.17.5":
+  version: 7.17.5
+  resolution: "@mantine/modals@npm:7.17.5"
+  peerDependencies:
+    "@mantine/core": 7.17.5
+    "@mantine/hooks": 7.17.5
+    react: ^18.x || ^19.x
+    react-dom: ^18.x || ^19.x
+  checksum: 10c0/b0d34e3f90d8e84dbdd687d965407b7af873b1b477809e9e03d9c731796a86dcb00706eb583c9f35fd59f5d8f333b3374db00b1bea3ec2d0aa0b719b57eabe5a
+  languageName: node
+  linkType: hard
+
 "@mantine/notifications@npm:^7.17.5":
   version: 7.17.5
   resolution: "@mantine/notifications@npm:7.17.5"
@@ -4427,6 +4439,7 @@ __metadata:
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.1"
     "@mantine/core": "npm:7.17.2"
     "@mantine/hooks": "npm:7.17.2"
+    "@mantine/modals": "npm:^7.17.5"
     "@mantine/notifications": "npm:^7.17.5"
     "@mantine/spotlight": "npm:^7.17.5"
     "@storybook/react": "npm:^8.6.8"
