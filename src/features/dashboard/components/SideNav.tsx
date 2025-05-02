@@ -20,20 +20,17 @@ const SideNav = () => {
         : location.pathname.startsWith(`/dashboard/${item.href}`);
 
     return (
-      <Link
-        to={`/dashboard${item.href ? `/${item.href}` : ''}`}
+      <NavLink
         key={index}
         style={{ textDecoration: 'none', color: 'inherit' }}
-      >
-        <NavLink
-          key={item.label}
-          active={isActive}
-          label={item.label}
-          description={item.description}
-          rightSection={<TablerIcon name={'chevronRight'} size={16} stroke={1.5} />}
-          leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
-        />
-      </Link>
+        to={`/dashboard${item.href ? `/${item.href}` : ''}`}
+        component={Link}
+        active={isActive}
+        label={item.label}
+        description={item.description}
+        rightSection={<TablerIcon name={'chevronRight'} size={16} stroke={1.5} />}
+        leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
+      />
     );
   });
 

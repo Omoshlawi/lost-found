@@ -1,4 +1,3 @@
-import { NotificationData, notifications } from '@mantine/notifications';
 
 export const getNameInitials = (name: string) => {
   const nameParts = name.split(' ');
@@ -13,3 +12,4 @@ export const getNameInitialsFromEmail = (email: string) => {
   const name = email.split('@')[0];
   return getNameInitials(name);
 };
+

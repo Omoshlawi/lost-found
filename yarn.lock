@@ -1526,6 +1526,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash@npm:^4.17.16":
+  version: 4.17.16
+  resolution: "@types/lodash@npm:4.17.16"
+  checksum: 10c0/cf017901b8ab1d7aabc86d5189d9288f4f99f19a75caf020c0e2c77b8d4cead4db0d0b842d009b029339f92399f49f34377dd7c2721053388f251778b4c23534
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^22.13.11":
   version: 22.15.2
   resolution: "@types/node@npm:22.15.2"
@@ -4449,6 +4456,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.2.0"
     "@testing-library/user-event": "npm:^14.6.1"
+    "@types/lodash": "npm:^4.17.16"
     "@types/node": "npm:^22.13.11"
     "@types/react": "npm:^19.0.12"
     "@types/react-dom": "npm:^19.0.4"
@@ -4462,6 +4470,7 @@ __metadata:
     identity-obj-proxy: "npm:^3.0.0"
     jsdom: "npm:^26.0.0"
     jwt-decode: "npm:^4.0.0"
+    lodash: "npm:^4.17.21"
     postcss: "npm:^8.5.3"
     postcss-preset-mantine: "npm:1.17.0"
     postcss-simple-vars: "npm:^7.0.1"

@@ -2,11 +2,13 @@ import { FC } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppShell } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useWorkspace } from '@/components/Workspace';
 import SideNav from './SideNav';
 import TopNavBar from './TopNavBar';
 
 const DashboardLayout: FC = () => {
   const [opened, { toggle }] = useDisclosure();
+  const { workspace, width } = useWorkspace();
   return (
     <AppShell
       header={{ height: 60 }}
@@ -15,7 +17,7 @@ const DashboardLayout: FC = () => {
         breakpoint: 'sm',
         collapsed: { mobile: !opened },
       }}
-      aside={{ collapsed: { mobile: !opened }, breakpoint: 'sm', width: 50 }}
+      aside={{ collapsed: { mobile: !opened }, breakpoint: 'sm', width: width ?? 50 }}
       padding="md"
     >
       <TopNavBar />
@@ -23,7 +25,8 @@ const DashboardLayout: FC = () => {
         <SideNav />
       </AppShell.Navbar>
       <AppShell.Aside>
-        <div>Aside</div>
+        {!workspace && <div>Aside</div>}
+        {workspace?.component}
       </AppShell.Aside>
       <AppShell.Main>
         <Outlet />

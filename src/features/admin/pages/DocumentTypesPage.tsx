@@ -5,6 +5,7 @@ import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { EmptyState, ErrorState, TablerIcon, TablerIconName, TableSkeleton } from '@/components';
 import CardHeader from '@/components/CardHeader/CardHeader';
+import { launchWorkspace } from '@/components/Workspace';
 import handleAPIErrors from '@/lib/api/handleApiErrors';
 import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
 import { DocumentType } from '../types';
@@ -118,6 +119,18 @@ const DocumentTypesPage = () => {
   return (
     <Card>
       <CardHeader title="Document types">
+        <Button
+          leftSection={<TablerIcon name="hexagonPlus" />}
+          onClick={() =>
+            launchWorkspace(<>Some simple component</>, {
+              width: 'extra-wide',
+              expandable: true,
+              title: 'Document Type Form',
+            })
+          }
+        >
+          Launch Workspace
+        </Button>
         <Button
           component={Link}
           leftSection={<TablerIcon name="plus" size={16} />}
