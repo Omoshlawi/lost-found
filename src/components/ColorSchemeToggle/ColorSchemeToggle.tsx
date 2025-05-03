@@ -1,17 +1,10 @@
 import { useCallback } from 'react';
 import {
-  IconAdjustments,
   IconBrightnessAutoFilled,
   IconBrightnessDownFilled,
   IconMoonFilled,
 } from '@tabler/icons-react';
-import {
-  ActionIcon,
-  Button,
-  Group,
-  MantineColorScheme,
-  useMantineColorScheme,
-} from '@mantine/core';
+import { ActionIcon, Button, Group, useMantineColorScheme } from '@mantine/core';
 
 export function ColorSchemeToggle() {
   const { setColorScheme, colorScheme } = useMantineColorScheme();
@@ -30,21 +23,15 @@ export function ColorSchemeToggle() {
 
   return (
     <ActionIcon
-      variant="outline"
+      variant="light"
       aria-label="Theme Settings"
       onClick={toggleTheme}
-      size={'md'}
+      size={'lg'}
       radius={'xl'}
     >
-      {colorScheme === 'dark' && (
-        <IconMoonFilled style={{ width: '70%', height: '70%' }} stroke={1.5} />
-      )}
-      {colorScheme === 'light' && (
-        <IconBrightnessDownFilled style={{ width: '70%', height: '70%' }} stroke={1.5} />
-      )}
-      {colorScheme === 'auto' && (
-        <IconBrightnessAutoFilled style={{ width: '70%', height: '70%' }} stroke={1.5} />
-      )}
+      {colorScheme === 'dark' && <IconMoonFilled stroke={1.5} />}
+      {colorScheme === 'light' && <IconBrightnessDownFilled stroke={1.5} />}
+      {colorScheme === 'auto' && <IconBrightnessAutoFilled stroke={1.5} />}
     </ActionIcon>
   );
 

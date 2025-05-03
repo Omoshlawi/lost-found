@@ -1,15 +1,18 @@
 import React from 'react';
 import { AppShell, Avatar, Burger, Drawer, Flex, Group, Text, Title } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { ColorSchemeToggle, Logo } from '@/components';
 import { authClient } from '@/lib/api';
 import { useSession } from '@/lib/global-store';
 import { getNameInitials } from '@/lib/utils';
 import SideNav from './SideNav';
+import UserActionsMenu from './UserActionsMenu';
 
 const TopNavBar = () => {
   const [opened, { toggle, close }] = useDisclosure();
   const { data } = authClient.useSession();
+  const isMobile = useMediaQuery('(max-width: 50em)');
+
   return (
     <>
       <Drawer opened={opened} onClose={close} size={'sm'}>
@@ -19,11 +22,11 @@ const TopNavBar = () => {
       </Drawer>
       <AppShell.Header>
         <Flex justify={'space-between'} align={'center'} w={'100%'} h={'100%'} px={'xs'}>
-          <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="50em" />
+          {isMobile && <Burger opened={opened} onClick={toggle} size="sm" />}
           <Logo />
           <Group>
             <ColorSchemeToggle />
-            {/* {data?.user && <Avatar size={'md'}>{getNameInitials(data?.user?.name)}</Avatar>} */}
+            <UserActionsMenu />
           </Group>
         </Flex>
       </AppShell.Header>

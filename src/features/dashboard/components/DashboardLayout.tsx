@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { Outlet } from 'react-router-dom';
-import { AppShell, Box } from '@mantine/core';
+import { ActionIcon, AppShell, Box, Stack } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { TablerIcon } from '@/components';
 import { useWorkspace } from '@/components/Workspace';
 import SideNav from './SideNav';
 import TopNavBar from './TopNavBar';
@@ -32,7 +33,26 @@ const DashboardLayout: FC = () => {
         <SideNav />
       </AppShell.Navbar>
       <AppShell.Aside>
-        {!workspace && <div>Aside</div>}
+        {!workspace && (
+          <Stack align="center" py={'sm'}>
+            <ActionIcon
+              size={35}
+              radius={'50%'}
+              variant="outline"
+              aria-label="ActionIcon with size as a number"
+            >
+              <TablerIcon name="plus" size={24} />
+            </ActionIcon>
+            <ActionIcon
+              size={35}
+              radius={'50%'}
+              variant="outline"
+              aria-label="ActionIcon with size as a number"
+            >
+              <TablerIcon name="bell" size={24} />
+            </ActionIcon>
+          </Stack>
+        )}
         {workspace?.component}
       </AppShell.Aside>
       <AppShell.Main>
