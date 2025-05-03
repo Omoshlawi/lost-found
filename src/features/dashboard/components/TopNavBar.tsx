@@ -19,7 +19,7 @@ const TopNavBar = () => {
       </Drawer>
       <AppShell.Header>
         <Flex justify={'space-between'} align={'center'} w={'100%'} h={'100%'} px={'xs'}>
-          <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
+          <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="50em" />
           <Logo />
           <Group>
             <ColorSchemeToggle />

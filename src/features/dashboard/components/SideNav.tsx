@@ -37,7 +37,7 @@ const SideNav = () => {
   return (
     <>
       <AppShell.Section>
-        <Flex align={'baseline'} gap={'sm'} p={'sm'} style={{}}>
+        <Flex align={'baseline'} gap={'sm'} p={'sm'}>
           {user?.user && <Avatar size={'md'}>{getNameInitials(user?.user?.name)}</Avatar>}
           <Title order={4}>
             <Text variant="gradient" fw={'bold'}>
@@ -57,7 +57,7 @@ const SideNav = () => {
           pb={'lg'}
           rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
           onClick={async () => {
-            await authClient.signOut({});
+            await authClient.signOut();
           }}
         />
       </AppShell.Section>

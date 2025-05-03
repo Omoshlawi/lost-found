@@ -8,6 +8,7 @@ import {
   Text,
   useComputedColorScheme,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { TablerIcon } from '../TablerIcon';
 import { useWorkspaceStore } from './store';
 
@@ -17,7 +18,7 @@ type WorkspaceWrapperProps = PropsWithChildren<{
   expandable?: boolean;
   id: string;
 }>;
-const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
+export const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
   children,
   onClose,
   title,
@@ -27,6 +28,7 @@ const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
   const theme = useComputedColorScheme();
   const workspaces = useWorkspaceStore((state) => state.workspaces);
   const updateWorkspaces = useWorkspaceStore((state) => state.updateWorkspaces);
+  const isMobile = useMediaQuery('(max-width: 50em)');
 
   const expanded = useMemo(() => {
     const workspace = workspaces.find(({ id: uid }) => id === uid);
@@ -56,7 +58,7 @@ const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
           </Text>
         </Flex>
         <Group gap={0}>
-          {expandable && (
+          {expandable && !isMobile && (
             <>
               <ActionIcon
                 variant="subtle"
@@ -77,7 +79,7 @@ const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
             radius={0}
             size={60}
           >
-            <TablerIcon name="arrowRight" stroke={1.5} />
+            <TablerIcon name={isMobile ? 'x' : 'arrowRight'} stroke={1.5} />
           </ActionIcon>
           <Divider orientation="vertical" />
         </Group>
@@ -91,4 +93,15 @@ const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
   );
 };
 
-export default WorkspaceWrapper;
+type WorkspaceModalWrapperProps = Pick<WorkspaceWrapperProps, 'children'> & {};
+
+export const WorkspaceModalWrapper: React.FC<WorkspaceModalWrapperProps> = ({ children }) => {
+  return (
+    <Stack w={'100%'} h={'100%'} gap={0}>
+      <Divider size={'xs'} />
+      <Flex flex={1} direction={'column'}>
+        {children}
+      </Flex>
+    </Stack>
+  );
+};

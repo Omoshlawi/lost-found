@@ -43,7 +43,7 @@ export const useWorkspace = () => {
   const latestWorkspace = workspaces.at(-1);
 
   const widthMapping = (width: WorkspaceOptions['width']) => {
-    if (latestWorkspace?.expanded) return '80vw';
+    if (latestWorkspace?.expanded) return '95vw';
     switch (width) {
       case 'narrow':
         return 420;
