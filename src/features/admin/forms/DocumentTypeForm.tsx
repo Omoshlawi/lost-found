@@ -1,14 +1,12 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   ActionIcon,
-  Box,
   Button,
   Checkbox,
   Group,
-  LoadingOverlay,
   NumberInput,
   Select,
   Stack,
@@ -16,47 +14,52 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon, TablerIconName, TablerIconPicker } from '@/components';
-import { mutate } from '@/lib/api';
 import handleAPIErrors from '@/lib/api/handleApiErrors';
-import { useDocumentType, useDocumentTypesApi } from '../hooks';
-import { DocumentTypeFormData } from '../types';
+import { useDocumentTypesApi } from '../hooks';
+import { DocumentType, DocumentTypeFormData } from '../types';
 import { DocumentTypeSchema } from '../utils';
 
-const DocumentTypeForm = () => {
+type DocumentTypeFormProps = {
+  documentType?: DocumentType;
+  onSuccess?: (documentType: DocumentType) => void;
+  closeWorkspace?: () => void;
+};
+
+const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
+  documentType,
+  onSuccess,
+  closeWorkspace,
+}) => {
   const form = useForm<DocumentTypeFormData>({
     defaultValues: {
-      name: '',
-      averageReplacementCost: 0,
-      isActive: true,
-      description: '',
-      icon: '',
-      replacementInstructions: '',
-      requiredVerification: 'STANDARD',
+      name: documentType?.name ?? '',
+      averageReplacementCost: documentType?.averageReplacementCost ?? 0,
+      isActive: documentType?.isActive ?? true,
+      description: documentType?.description ?? '',
+      icon: documentType?.icon ?? '',
+      replacementInstructions: documentType?.replacementInstructions ?? '',
+      requiredVerification: documentType?.requiredVerification ?? 'STANDARD',
     },
     resolver: zodResolver(DocumentTypeSchema),
   });
   const { createDocumentType, updateDocumentType, mutateDocumentTypes } = useDocumentTypesApi();
-  const params = useParams<{ documentTypeId: string }>();
-  const { documentTypeId } = params ?? {};
-  const { isLoading, documentType, error } = useDocumentType(documentTypeId);
-  const [visible, { close, open }] = useDisclosure(isLoading);
 
   const navigate = useNavigate();
   const handleSubmit: SubmitHandler<DocumentTypeFormData> = async (data) => {
     try {
-      const doc = documentTypeId
-        ? await updateDocumentType(documentTypeId, data)
+      const doc = documentType
+        ? await updateDocumentType(documentType.id, data)
         : await createDocumentType(data);
+      onSuccess?.(doc);
       showNotification({
         title: 'duccess',
         color: 'green',
-        message: `Document type ${documentTypeId ? 'updated' : 'created'} succesfully`,
+        message: `Document type ${documentType ? 'updated' : 'created'} succesfully`,
       });
       mutateDocumentTypes();
-      navigate(-1);
+      closeWorkspace?.();
     } catch (error) {
       const e = handleAPIErrors<DocumentTypeFormData>(error);
       if (e.detail) {
@@ -74,35 +77,17 @@ const DocumentTypeForm = () => {
     }
   };
 
-  useEffect(() => {
-    if (isLoading) open();
-    else close();
-  }, [isLoading, open, close]);
-
-  useEffect(() => {
-    if (documentType) {
-      form.setValue('averageReplacementCost', documentType.averageReplacementCost);
-      form.setValue('description', documentType.description);
-      form.setValue('icon', documentType.icon);
-      form.setValue('isActive', documentType.isActive);
-      form.setValue('name', documentType.name);
-      form.setValue('replacementInstructions', documentType.replacementInstructions);
-      form.setValue('requiredVerification', documentType.requiredVerification);
-    }
-  }, [documentType, form]);
-
   return (
-    <Box pos="relative">
-      <LoadingOverlay visible={visible} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
-      {/* ...other content */}
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
+    <form
+      onSubmit={form.handleSubmit(handleSubmit)}
+      style={{
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}
+    >
+      <Stack p={'md'} h={'100%'} justify="space-between">
         <Stack gap={'md'}>
-          <Box>
-            <Text variant="gradient" size="xl" mb="md" style={{ textWrap: 'wrap' }} fw={700}>
-              Document types
-            </Text>
-            <Text c={'gray'}>Some description</Text>
-          </Box>
           <Controller
             control={form.control}
             name="name"
@@ -215,17 +200,25 @@ const DocumentTypeForm = () => {
               />
             )}
           />
+        </Stack>
+        <Group gap={1}>
+          <Button flex={1} variant="default" radius={0} onClick={closeWorkspace}>
+            Cancel
+          </Button>
           <Button
+            radius={0}
+            flex={1}
+            fullWidth
             type="submit"
-            variant="gradient"
+            variant="filled"
             loading={form.formState.isSubmitting}
             disabled={form.formState.isSubmitting}
           >
             Submit
           </Button>
-        </Stack>
-      </form>
-    </Box>
+        </Group>
+      </Stack>
+    </form>
   );
 };
 

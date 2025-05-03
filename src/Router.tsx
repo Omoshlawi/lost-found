@@ -40,16 +40,7 @@ const router = createBrowserRouter([
       { path: 'components', element: <UiComponents /> },
       {
         path: 'document-types',
-        element: (
-          <>
-            <Outlet />
-          </>
-        ),
-        children: [
-          { index: true, element: <DocumentTypesPage /> },
-          { path: 'add', element: <DocumentTypeForm /> },
-          { path: ':documentTypeId/update', element: <DocumentTypeForm /> },
-        ],
+        element: <DocumentTypesPage />,
       },
     ],
   },

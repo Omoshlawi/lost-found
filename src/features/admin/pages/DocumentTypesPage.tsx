@@ -3,10 +3,17 @@ import { Link } from 'react-router-dom';
 import { ActionIcon, Button, Card, Menu, Table, TableData, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { EmptyState, ErrorState, TablerIcon, TablerIconName, TableSkeleton } from '@/components';
+import {
+  EmptyState,
+  ErrorState,
+  launchWorkspace,
+  TablerIcon,
+  TablerIconName,
+  TableSkeleton,
+} from '@/components';
 import CardHeader from '@/components/CardHeader/CardHeader';
-import { launchWorkspace } from '@/components/Workspace';
 import handleAPIErrors from '@/lib/api/handleApiErrors';
+import { DocumentTypeForm } from '../forms';
 import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
 import { DocumentType } from '../types';
 
@@ -47,6 +54,16 @@ const DocumentTypesPage = () => {
         }
       },
     });
+  };
+
+  const handleLaunchFormWorkspace = (documentType?: DocumentType) => {
+    const closeWorkspace = launchWorkspace(
+      <DocumentTypeForm closeWorkspace={() => closeWorkspace()} documentType={documentType} />,
+      {
+        width: 'narrow',
+        title: 'Document type form',
+      }
+    );
   };
   const tableData = useMemo<TableData>(
     () => ({
@@ -91,10 +108,9 @@ const DocumentTypesPage = () => {
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item
-              component={Link}
               leftSection={<TablerIcon name="edit" size={14} />}
               color="green"
-              to={`${docType.id}/update`}
+              onClick={() => handleLaunchFormWorkspace(docType)}
             >
               Edit
             </Menu.Item>
@@ -120,22 +136,9 @@ const DocumentTypesPage = () => {
     <Card>
       <CardHeader title="Document types">
         <Button
-          leftSection={<TablerIcon name="hexagonPlus" />}
-          onClick={() =>
-            launchWorkspace(<>Some simple component</>, {
-              width: 'extra-wide',
-              expandable: true,
-              title: 'Document Type Form',
-            })
-          }
-        >
-          Launch Workspace
-        </Button>
-        <Button
-          component={Link}
           leftSection={<TablerIcon name="plus" size={16} />}
           variant="transparent"
-          to={'add'}
+          onClick={() => handleLaunchFormWorkspace()}
         >
           Add document type
         </Button>
