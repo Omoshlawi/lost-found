@@ -85,21 +85,21 @@ export const WorkspaceWrapper: React.FC<WorkspaceWrapperProps> = ({
         </Group>
       </Group>
       <Divider size={'xs'} />
-
-      <Flex flex={1} direction={'column'}>
-        {children}
-      </Flex>
-    </Stack>
-  );
-};
-
-type WorkspaceModalWrapperProps = Pick<WorkspaceWrapperProps, 'children'> & {};
-
-export const WorkspaceModalWrapper: React.FC<WorkspaceModalWrapperProps> = ({ children }) => {
-  return (
-    <Stack w={'100%'} h={'100%'} gap={0}>
-      <Divider size={'xs'} />
-      <Flex flex={1} direction={'column'}>
+      <Flex
+        flex={1}
+        direction={'column'}
+        style={{
+          overflow: 'auto',
+          // Hide scrollbar
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          '::-webkit-scrollbar': { display: 'none' },
+          // Add narrow scrobar of 2px width
+          // '::-webkit-scrollbar': { width: '1px' },
+          // '::-webkit-scrollbar-track': { background: 'transparent' },
+          // '::-webkit-scrollbar-thumb': { background: '#888' },
+        }}
+      >
         {children}
       </Flex>
     </Stack>

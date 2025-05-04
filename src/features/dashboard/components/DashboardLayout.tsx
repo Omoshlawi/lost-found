@@ -34,7 +34,9 @@ const DashboardLayout: FC = () => {
         }}
         aside={{ collapsed: { mobile: !opened }, breakpoint: '50em', width: width ?? 50 }}
         styles={{
-          aside: { transition: 'width 300ms ease' },
+          aside: {
+            transition: 'width 300ms ease',
+          },
         }}
         padding="md"
       >
@@ -65,7 +67,7 @@ const DashboardLayout: FC = () => {
           )}
           {workspace?.component}
         </AppShell.Aside>
-        <AppShell.Main style={{ position: 'relative' }}>
+        <AppShell.Main>
           <Outlet />
         </AppShell.Main>
         <AppShell.Footer>
@@ -78,9 +80,10 @@ const DashboardLayout: FC = () => {
         fullScreen
         radius={0}
         withCloseButton={false}
-        transitionProps={{ transition: 'slide-up', duration: 200 }}
+        transitionProps={{ transition: 'slide-up', duration: 300 }}
         p={0}
         m={0}
+        
         styles={{
           body: { padding: 0, width: '100%', height: '100%', flex: 1 },
         }}

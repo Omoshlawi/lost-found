@@ -16,7 +16,7 @@ const BasicReportInfoStep = () => {
   const form = useFormContext<DocumentReportFormData>();
   const observableReportType = form.watch('type');
   return (
-    <Stack >
+    <Stack>
       <Controller
         control={form.control}
         name="type"
