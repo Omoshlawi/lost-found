@@ -7,7 +7,7 @@ const FoundItemsPage = () => {
   const { isLoading, error, reports } = useDocumentReport();
 
   const handleLaunchReportForm = () => {
-    launchWorkspace(<DocumentReportForm />, {
+    const close = launchWorkspace(<DocumentReportForm closeWorkspase={() => close()} />, {
       expandable: true,
       width: 'wide',
       title: 'Document report form',

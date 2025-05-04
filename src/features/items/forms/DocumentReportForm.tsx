@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import {
   Autocomplete,
   Box,
@@ -15,15 +15,21 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { DocumentReport, DocumentReportFormData } from '../types';
 import { ReportLostOrFoundDocumentSchema } from '../utils';
+import AddressInfoStep from './Steps/AddressInfoStep';
 import BasicReportInfoStep from './Steps/BasicReportInfoStep';
 import DocumentInfoSteps from './Steps/DocumentInfoSteps';
 
 type DocumentReportFormProps = {
   report?: DocumentReport;
   onSuccess?: (report: DocumentReport) => void;
+  closeWorkspase?: () => void;
 };
 
-const DocumentReportForm: React.FC<DocumentReportFormProps> = ({ onSuccess, report }) => {
+const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
+  onSuccess,
+  report,
+  closeWorkspase,
+}) => {
   const form = useForm<DocumentReportFormData>({
     defaultValues: {
       // countyCode: '',
@@ -58,33 +64,46 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({ onSuccess, repo
     resolver: zodResolver(ReportLostOrFoundDocumentSchema) as any,
   });
   const isMobile = useMediaQuery('(max-width: 48em)');
+  const [activeTab, setActiveTab] = useState<'basic' | 'document' | 'address' | null>('basic');
 
+  const handleSubmit: SubmitHandler<DocumentReportFormData> = async (data) => {};
   return (
     <FormProvider {...form}>
-      <form style={{ height: '100%' }}>
+      <form style={{ height: '100%' }} onSubmit={form.handleSubmit(handleSubmit)}>
         <Box p={'sm'} h={'100%'}>
           <Tabs
-            defaultValue="basic"
             orientation={isMobile ? 'horizontal' : 'vertical'}
             variant="default"
             h={'100%'}
+            value={activeTab}
+            onChange={setActiveTab as any}
           >
             <Tabs.List justify={isMobile ? 'space-between' : undefined}>
               <Tabs.Tab value="basic" p={'lg'}>
                 Basic Info
+              </Tabs.Tab>
+              <Tabs.Tab p={'lg'} value="address">
+                Address
               </Tabs.Tab>
               <Tabs.Tab p={'lg'} value="document">
                 Document
               </Tabs.Tab>
             </Tabs.List>
 
-            <Tabs.Panel value="basic" p={'sm'} h={'100%'}>
-              <ScrollArea type="scroll">
-                <BasicReportInfoStep />
-              </ScrollArea>
+            <Tabs.Panel value="basic" p={'sm'}>
+              <BasicReportInfoStep
+                onCancel={closeWorkspase}
+                onNext={() => setActiveTab('address')}
+              />
             </Tabs.Panel>
-            <Tabs.Panel value="document" p={'sm'} h={'100%'}>
-              <DocumentInfoSteps />
+            <Tabs.Panel value="address" p={'sm'}>
+              <AddressInfoStep
+                onPrevious={() => setActiveTab('basic')}
+                onNext={() => setActiveTab('document')}
+              />
+            </Tabs.Panel>
+            <Tabs.Panel value="document" p={'sm'}>
+              <DocumentInfoSteps onPrevious={() => setActiveTab('address')} />
             </Tabs.Panel>
           </Tabs>
         </Box>
