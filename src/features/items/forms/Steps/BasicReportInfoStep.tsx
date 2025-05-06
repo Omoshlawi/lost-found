@@ -1,5 +1,5 @@
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState } from 'react-hook-form';
 import {
   Button,
   Group,
@@ -20,6 +20,7 @@ type BasicReportInfoStepProps = {
 const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onNext }) => {
   const form = useFormContext<DocumentReportFormData>();
   const observableReportType = form.watch('type');
+
   return (
     <Stack justify="space-between" flex={1} h={'100%'}>
       <Stack>
@@ -27,7 +28,7 @@ const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onN
           control={form.control}
           name="type"
           render={({ field, fieldState }) => (
-            <Stack>
+            <Stack gap={1}>
               <SegmentedControl
                 value={field.value}
                 onChange={field.onChange}
@@ -140,7 +141,26 @@ const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onN
         <Button variant="default" radius={0} flex={1} onClick={onCancel}>
           Cancel
         </Button>
-        <Button radius={0} flex={1} onClick={onNext}>
+        <Button
+          radius={0}
+          flex={1}
+          onClick={async () => {
+            const isValid = await form.trigger(
+              [
+                'type',
+                'description',
+                'tags',
+                'lostOrFoundDate',
+                'found.handoverPreference',
+                'lost.contactPreference',
+                'lost.urgencyLevel',
+                'lost.identifyingMarks',
+              ],
+              { shouldFocus: true }
+            );
+            if (isValid) onNext?.();
+          }}
+        >
           Next
         </Button>
       </Group>

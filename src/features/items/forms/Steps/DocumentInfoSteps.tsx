@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Autocomplete, Button, Group, Stack, TextInput } from '@mantine/core';
+import { Autocomplete, Button, Group, Select, Skeleton, Stack, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { showNotification } from '@mantine/notifications';
+import { InputSkeleton } from '@/components';
+import { useDocumentTypes } from '@/features/admin/hooks';
 import { DocumentReportFormData } from '../../types';
 
 type DocumentInfoStepsProps = {
@@ -9,6 +12,16 @@ type DocumentInfoStepsProps = {
 };
 const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => {
   const form = useFormContext<DocumentReportFormData>();
+  const { documentTypes, isLoading, error } = useDocumentTypes();
+
+  useEffect(() => {
+    if (error) {
+      showNotification({
+        message: error?.message ?? 'An error ocuured while fetching document types',
+        title: 'Error loading document types',
+      });
+    }
+  }, [error]);
 
   return (
     <Stack justify="space-between" flex={1} h={'100%'}>
@@ -16,14 +29,18 @@ const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => 
         <Controller
           control={form.control}
           name="document.typeId"
-          render={({ field, fieldState }) => (
-            <Autocomplete
-              {...field}
-              data={['type 1', 'type 2']}
-              label="Document Type"
-              error={fieldState.error?.message}
-            />
-          )}
+          render={({ field, fieldState }) =>
+            !isLoading ? (
+              <Select
+                {...field}
+                data={documentTypes.map((doc) => ({ label: doc.name, value: doc.id }))}
+                label="Document Type"
+                error={fieldState.error?.message}
+              />
+            ) : (
+              <InputSkeleton />
+            )
+          }
         />
         <Controller
           control={form.control}

@@ -26,18 +26,16 @@ export const DocumentSchema = z.object({
 
 export const LostDocumentReportSchema = z.object({
   reportId: z.string().min(1, 'Report required').uuid(),
-  identifyingMarks: z.string().optional().nullable(),
-  contactPreference: z.enum(['APP', 'EMAIL', 'PHONE', 'ANY']).default('APP'),
-  urgencyLevel: z.enum(['LOW', 'NORMAL', 'HIGH', 'CRITICAL']).default('NORMAL'),
+  identifyingMarks: z.string().optional().optional(),
+  contactPreference: z.enum(['APP', 'EMAIL', 'PHONE', 'ANY']),
+  urgencyLevel: z.enum(['LOW', 'NORMAL', 'HIGH', 'CRITICAL']),
 });
 
 export const FoundDocumentReportSchema = z.object({
   reportId: z.string().min(1, 'Report required').uuid(),
-  handoverPreference: z
-    .enum(['IN_PERSON', 'THROUGH_AUTHORITY', 'THIRD_PARTY', 'MAIL'])
-    .default('IN_PERSON'),
-  securityQuestion: z.string().optional().nullable(),
-  securityAnswer: z.string().optional().nullable(),
+  handoverPreference: z.enum(['IN_PERSON', 'THROUGH_AUTHORITY', 'THIRD_PARTY', 'MAIL']),
+  securityQuestion: z.string().optional().optional(),
+  securityAnswer: z.string().optional().optional(),
 });
 
 export const DocumentReportSchema = z.object({

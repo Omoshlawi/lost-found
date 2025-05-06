@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -58,13 +58,45 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
       // status: 'ACTIVE',
       // subCountyCode: '',
       // tags: [],
-      // type: 'FOUND',
+      type: 'FOUND',
       // wardCode: '',
     },
     resolver: zodResolver(ReportLostOrFoundDocumentSchema) as any,
   });
   const isMobile = useMediaQuery('(max-width: 48em)');
   const [activeTab, setActiveTab] = useState<'basic' | 'document' | 'address' | null>('basic');
+  useEffect(() => {
+    if (form.formState.errors) {
+      const fieldSteps = {
+        basic: [
+          'type',
+          'description',
+          'tags',
+          'lostOrFoundDate',
+          'found.handoverPreference',
+          'lost.contactPreference',
+          'lost.urgencyLevel',
+          'lost.identifyingMarks',
+        ],
+        address: ['countyCode', 'subCountyCode', 'wardCode', 'landMark'],
+        document: [
+          'document.typeId',
+          'document.expiryDate',
+          'document.images',
+          'document.issuanceDate',
+          'document.issuer',
+          'document.ownerName',
+          'document.serialNumber',
+        ],
+      };
+      for (const [step, fields] of Object.entries(fieldSteps)) {
+        if (fields.some((field) => form.getFieldState(field as any).invalid)) {
+          setActiveTab(step as 'basic' | 'document' | 'address');
+          break;
+        }
+      }
+    }
+  }, [form.formState.errors, setActiveTab]);
 
   const handleSubmit: SubmitHandler<DocumentReportFormData> = async (data) => {};
   return (
