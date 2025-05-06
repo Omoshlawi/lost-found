@@ -12,6 +12,7 @@ import { DocumentReport } from '../types';
 const LostItemspage = () => {
   const { isLoading, error, reports } = useDocumentReports({
     v: 'custom:include(lostReport,document:include(type),county:select(name),subCounty:select(name),ward:select(name))',
+    reportType: 'LOST',
   });
   const { deleteDocumentReport, mutateDocumentReport } = useDocumentReportApi();
   const handleDelete = (report: DocumentReport) => {
@@ -51,7 +52,7 @@ const LostItemspage = () => {
   };
   const tableData = useMemo<TableData>(
     () => ({
-      caption: 'Found documents',
+      caption: 'Lost documents',
       head: [
         '# No',
         'Owner name',

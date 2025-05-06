@@ -12,6 +12,7 @@ import { DocumentReport } from '../types';
 const FoundItemsPage = () => {
   const { isLoading, error, reports } = useDocumentReports({
     v: 'custom:include(foundReport,document:include(type),county:select(name),subCounty:select(name),ward:select(name))',
+    reportType: 'FOUND',
   });
   const { deleteDocumentReport, mutateDocumentReport } = useDocumentReportApi();
   const handleDelete = (report: DocumentReport) => {
@@ -121,6 +122,8 @@ const FoundItemsPage = () => {
       }
     );
   };
+
+  console.log(error);
 
   const title = 'Found Documents';
   if (isLoading) return <TableSkeleton />;

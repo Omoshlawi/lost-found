@@ -1,5 +1,6 @@
 import React from 'react';
 import { Stack, Text } from '@mantine/core';
+import { handleApiErrors } from '@/lib/api';
 import { TableContainer } from '../TableContainer';
 import { TablerIcon } from '../TablerIcon';
 
@@ -14,7 +15,7 @@ const ErrorState: React.FunctionComponent<ErrorStateProps> = ({ headerTitle, err
     <TableContainer title={headerTitle}>
       <Stack align="center">
         <TablerIcon name="exclamationCircle" size={100} color="red" />
-        <Text c={'dimmed'}>{error?.message ?? message}</Text>
+        <Text c={'dimmed'}>{error ? handleApiErrors(error).detail : message}</Text>
       </Stack>
     </TableContainer>
   );
