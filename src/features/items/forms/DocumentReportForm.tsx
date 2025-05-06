@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { Box, Tabs } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
+import { parseDate } from '@/lib/utils';
 import { useDocumentReportApi } from '../hooks';
 import { DocumentReport, DocumentReportFormData } from '../types';
 import { ReportLostOrFoundDocumentSchema } from '../utils';
@@ -23,36 +24,46 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
   report,
   closeWorkspace,
 }) => {
+  const defaultType = useMemo(() => {
+    if (report && report.foundReport) return 'FOUND';
+    if (report && report.lostReport) return 'LOST';
+    return 'FOUND';
+  }, [report]);
   const form = useForm<DocumentReportFormData>({
     defaultValues: {
-      // countyCode: '',
-      // description: '',
-      // document: {
-      //   expiryDate: new Date(),
-      //   images: [],
-      //   issuanceDate: new Date(),
-      //   issuer: '',
-      //   ownerName: '',
-      //   serialNumber: '',
-      //   typeId: '',
-      // },
-      // found: {
-      //   handoverPreference: 'IN_PERSON',
-      //   securityAnswer: '',
-      //   securityQuestion: '',
-      // },
-      // landMark: '',
-      // lost: {
-      //   contactPreference: 'ANY' as const,
-      //   identifyingMarks: '',
-      //   urgencyLevel: 'CRITICAL' as const,
-      // },
-      // lostOrFoundDate: new Date(),
-      // status: 'ACTIVE',
-      // subCountyCode: '',
-      // tags: [],
-      type: 'FOUND',
-      // wardCode: '',
+      countyCode: report?.countyCode ?? '',
+      subCountyCode: report?.subCountyCode ?? '',
+      wardCode: report?.wardCode ?? '',
+      description: report?.description ?? '',
+      landMark: report?.landMark ?? '',
+      document: {
+        expiryDate: parseDate(report?.document?.expiryDate),
+        images: [],
+        issuanceDate: parseDate(report?.document?.issuanceDate),
+        issuer: report?.document?.issuer ?? '',
+        ownerName: report?.document?.ownerName ?? '',
+        serialNumber: report?.document?.serialNumber ?? '',
+        typeId: report?.document?.typeId ?? '',
+      },
+      found:
+        defaultType === 'FOUND'
+          ? {
+              handoverPreference: (report?.foundReport?.handoverPreference as any) ?? 'IN_PERSON',
+              securityAnswer: report?.foundReport?.securityAnswer ?? '',
+              securityQuestion: report?.foundReport?.securityQuestion ?? '',
+            }
+          : undefined,
+      lost:
+        defaultType === 'FOUND'
+          ? {
+              contactPreference: (report?.lostReport?.contactPreference as any) ?? 'ANY',
+              identifyingMarks: (report?.lostReport?.identifyingMarks as any) ?? '',
+              urgencyLevel: (report?.lostReport?.urgencyLevel as any) ?? 'CRITICAL',
+            }
+          : undefined,
+      lostOrFoundDate: parseDate(report?.lostOrFoundDate, true),
+      tags: report?.tags ?? [],
+      type: defaultType,
     },
     resolver: zodResolver(ReportLostOrFoundDocumentSchema) as any,
   });
