@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, Stack, Text } from '@mantine/core';
+import { Stack, Text } from '@mantine/core';
+import { TableContainer } from '../TableContainer';
 import { TablerIcon } from '../TablerIcon';
 
 type ErrorStateProps = {
@@ -10,17 +11,12 @@ type ErrorStateProps = {
 
 const ErrorState: React.FunctionComponent<ErrorStateProps> = ({ headerTitle, error, message }) => {
   return (
-    <Card>
-      <Card.Section withBorder p={'xs'}>
-        {headerTitle}
-      </Card.Section>
-      <Card.Section withBorder p={'xs'} flex={1}>
-        <Stack align="center">
-          <TablerIcon name="exclamationCircle" size={100} color="red" />
-          <Text>{error?.message ?? message}</Text>
-        </Stack>
-      </Card.Section>
-    </Card>
+    <TableContainer title={headerTitle}>
+      <Stack align="center">
+        <TablerIcon name="exclamationCircle" size={100} color="red" />
+        <Text c={'dimmed'}>{error?.message ?? message}</Text>
+      </Stack>
+    </TableContainer>
   );
 };
 

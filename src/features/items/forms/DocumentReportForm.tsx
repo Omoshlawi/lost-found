@@ -15,13 +15,13 @@ import DocumentInfoSteps from './Steps/DocumentInfoSteps';
 type DocumentReportFormProps = {
   report?: DocumentReport;
   onSuccess?: (report: DocumentReport) => void;
-  closeWorkspase?: () => void;
+  closeWorkspace?: () => void;
 };
 
 const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
   onSuccess,
   report,
-  closeWorkspase,
+  closeWorkspace,
 }) => {
   const form = useForm<DocumentReportFormData>({
     defaultValues: {
@@ -105,7 +105,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
         message: `Document report ${report ? 'updated' : 'created'} succesfully`,
       });
       mutateDocumentReport();
-      closeWorkspase?.();
+      closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<DocumentReportFormData>(error);
       if (e.detail) {
@@ -147,7 +147,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
 
             <Tabs.Panel value="basic" p={'sm'}>
               <BasicReportInfoStep
-                onCancel={closeWorkspase}
+                onCancel={closeWorkspace}
                 onNext={() => setActiveTab('address')}
               />
             </Tabs.Panel>

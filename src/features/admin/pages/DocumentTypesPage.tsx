@@ -7,15 +7,16 @@ import {
   EmptyState,
   ErrorState,
   launchWorkspace,
+  TableContainer,
   TablerIcon,
   TablerIconName,
   TableSkeleton,
 } from '@/components';
 import CardHeader from '@/components/CardHeader/CardHeader';
+import { handleApiErrors } from '@/lib/api';
 import { DocumentTypeForm } from '../forms';
 import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
 import { DocumentType } from '../types';
-import { handleApiErrors } from '@/lib/api';
 
 const DocumentTypesPage = () => {
   const { documentTypes, isLoading, error } = useDocumentTypes();
@@ -68,16 +69,7 @@ const DocumentTypesPage = () => {
   const tableData = useMemo<TableData>(
     () => ({
       caption: 'document types',
-      foot: [
-        'Icon',
-        'Name',
-        'Created at',
-        'Updated at',
-        'Average Replacement Cost',
-        'Required Verification',
-        'Voided',
-        'Actions',
-      ],
+
       head: [
         'Icon',
         'Name',
@@ -133,20 +125,22 @@ const DocumentTypesPage = () => {
   if (documentTypes.length === 0)
     return <EmptyState headerTitle="Document types" message="No document types" onAdd={() => {}} />;
   return (
-    <Card>
-      <CardHeader title="Document types">
-        <Button
-          leftSection={<TablerIcon name="plus" size={16} />}
-          variant="transparent"
-          onClick={() => handleLaunchFormWorkspace()}
-        >
-          Add document type
-        </Button>
-      </CardHeader>
-      <Card.Section>
-        <Table striped withTableBorder data={tableData} />
-      </Card.Section>
-    </Card>
+    <TableContainer
+      title="Document types"
+      actions={
+        <>
+          <Button
+            leftSection={<TablerIcon name="plus" size={16} />}
+            variant="transparent"
+            onClick={() => handleLaunchFormWorkspace()}
+          >
+            Add document type
+          </Button>
+        </>
+      }
+    >
+      <Table striped data={tableData} />
+    </TableContainer>
   );
 };
 
