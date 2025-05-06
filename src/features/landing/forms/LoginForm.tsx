@@ -1,13 +1,12 @@
-import { useEffect } from 'react';
+import { authClient, handleApiErrors } from '@/lib/api';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
-import { authClient } from '@/lib/api';
-import handleAPIErrors from '@/lib/api/handleApiErrors';
 import { LoginFormData } from '../types';
 import { LoginValidationSchema } from '../utils/validation';
-import { showNotification } from '@mantine/notifications';
 
 const LoginForm = () => {
   const [searchParams] = useSearchParams();
@@ -38,7 +37,7 @@ const LoginForm = () => {
       if (callbackUrl) navigate(callbackUrl, { replace: true });
       else navigate('/dashboard');
     } catch (error) {
-      const e = handleAPIErrors<LoginFormData>(error);
+      const e = handleApiErrors<LoginFormData>(error);
       if (e.detail) {
         showNotification({
           title: 'Login Failed',

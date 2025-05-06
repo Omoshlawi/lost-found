@@ -12,10 +12,10 @@ import {
   TableSkeleton,
 } from '@/components';
 import CardHeader from '@/components/CardHeader/CardHeader';
-import handleAPIErrors from '@/lib/api/handleApiErrors';
 import { DocumentTypeForm } from '../forms';
 import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
 import { DocumentType } from '../types';
+import { handleApiErrors } from '@/lib/api';
 
 const DocumentTypesPage = () => {
   const { documentTypes, isLoading, error } = useDocumentTypes();
@@ -42,7 +42,7 @@ const DocumentTypesPage = () => {
           });
           mutateDocumentTypes();
         } catch (error) {
-          const e = handleAPIErrors<{}>(error);
+          const e = handleApiErrors<{}>(error);
           if (e.detail) {
             showNotification({
               title: 'Error deleting document type',

@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import {
-  Autocomplete,
-  Box,
-  ScrollArea,
-  SegmentedControl,
-  Stack,
-  Tabs,
-  TagsInput,
-  Text,
-  Textarea,
-} from '@mantine/core';
+import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { Box, Tabs } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import { handleApiErrors } from '@/lib/api';
+import { useDocumentReportApi } from '../hooks';
 import { DocumentReport, DocumentReportFormData } from '../types';
 import { ReportLostOrFoundDocumentSchema } from '../utils';
 import AddressInfoStep from './Steps/AddressInfoStep';
@@ -65,6 +58,8 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
   });
   const isMobile = useMediaQuery('(max-width: 48em)');
   const [activeTab, setActiveTab] = useState<'basic' | 'document' | 'address' | null>('basic');
+  const { createDocumentReport, updateDocumentReport, mutateDocumentReport } =
+    useDocumentReportApi();
   useEffect(() => {
     if (form.formState.errors) {
       const fieldSteps = {
@@ -98,7 +93,35 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
     }
   }, [form.formState.errors, setActiveTab]);
 
-  const handleSubmit: SubmitHandler<DocumentReportFormData> = async (data) => {};
+  const handleSubmit: SubmitHandler<DocumentReportFormData> = async (data) => {
+    try {
+      const doc = report
+        ? await updateDocumentReport(report.id, data)
+        : await createDocumentReport(data);
+      onSuccess?.(doc);
+      showNotification({
+        title: 'success',
+        color: 'green',
+        message: `Document report ${report ? 'updated' : 'created'} succesfully`,
+      });
+      mutateDocumentReport();
+      closeWorkspase?.();
+    } catch (error) {
+      const e = handleApiErrors<DocumentReportFormData>(error);
+      if (e.detail) {
+        showNotification({
+          title: `Error ${report ? 'updating' : 'creating'} document report`,
+          message: e.detail,
+          color: 'red',
+          position: 'top-right',
+        });
+      } else {
+        Object.entries(e).forEach(([key, val]) =>
+          form.setError(key as keyof DocumentReportFormData, { message: val })
+        );
+      }
+    }
+  };
   return (
     <FormProvider {...form}>
       <form style={{ height: '100%' }} onSubmit={form.handleSubmit(handleSubmit)}>

@@ -1,10 +1,10 @@
 import { EmptyState, ErrorState, TableSkeleton } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import { DocumentReportForm } from '../forms';
-import { useDocumentReport } from '../hooks';
+import { useDocumentReports } from '../hooks';
 
 const FoundItemsPage = () => {
-  const { isLoading, error, reports } = useDocumentReport();
+  const { isLoading, error, reports } = useDocumentReports();
 
   const handleLaunchReportForm = () => {
     const close = launchWorkspace(<DocumentReportForm closeWorkspase={() => close()} />, {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Autocomplete, Button, Group, Select, Skeleton, Stack, TextInput } from '@mantine/core';
+import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton } from '@/components';
@@ -86,7 +86,7 @@ const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => 
         <Button variant="default" radius={0} flex={1} onClick={onPrevious}>
           Previous
         </Button>
-        <Button radius={0} flex={1} type="submit">
+        <Button radius={0} flex={1} type="submit" loading={form.formState.isSubmitting}>
           Submit
         </Button>
       </Group>

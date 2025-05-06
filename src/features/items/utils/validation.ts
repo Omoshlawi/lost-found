@@ -60,6 +60,7 @@ export const DocumentReportSchema = z.object({
 
 const _ReportLostOrFoundDocumentSchema = DocumentReportSchema.omit({
   documentId: true,
+  status: true,
 }).merge(
   z.object({
     type: z.enum(['LOST', 'FOUND']),

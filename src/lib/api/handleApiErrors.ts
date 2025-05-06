@@ -1,6 +1,6 @@
 import { isAxiosError } from "axios";
 
-const handleAPIErrors = <T extends Record<string, unknown>>(
+const handleApiErrors = <T extends Record<string, unknown>>(
   error: any
 ): { [field in keyof T]?: string } & { detail?: string } => {
   if (isAxiosError(error)) {
@@ -28,4 +28,4 @@ const handleAPIErrors = <T extends Record<string, unknown>>(
     detail: error?.message ?? "Unknown error occured",
   };
 };
-export default handleAPIErrors;
+export default handleApiErrors;

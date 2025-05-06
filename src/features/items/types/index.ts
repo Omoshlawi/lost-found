@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import { DocumentReportSchema, ReportLostOrFoundDocumentSchema } from '../utils';
 
-export interface DocumentReport {}
+export interface DocumentReport {
+  id: string;
+}
 
 export interface County {
   code: string;

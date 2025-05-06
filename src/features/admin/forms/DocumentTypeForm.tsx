@@ -16,7 +16,7 @@ import {
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon, TablerIconName, TablerIconPicker } from '@/components';
-import handleAPIErrors from '@/lib/api/handleApiErrors';
+import { handleApiErrors } from '@/lib/api';
 import { useDocumentTypesApi } from '../hooks';
 import { DocumentType, DocumentTypeFormData } from '../types';
 import { DocumentTypeSchema } from '../utils';
@@ -61,10 +61,10 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
       mutateDocumentTypes();
       closeWorkspace?.();
     } catch (error) {
-      const e = handleAPIErrors<DocumentTypeFormData>(error);
+      const e = handleApiErrors<DocumentTypeFormData>(error);
       if (e.detail) {
         showNotification({
-          title: 'Login Failed',
+          title: `Error ${documentType ? 'updating' : 'creating'} document type`,
           message: e.detail,
           color: 'red',
           position: 'top-right',
