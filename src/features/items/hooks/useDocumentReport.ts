@@ -1,8 +1,8 @@
 import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
 import { DocumentReport, DocumentReportFormData } from '../types';
 
-export const useDocumentReports = (params: Record<string, any>={}) => {
-  const url = constructUrl(`/documents/reports`);
+export const useDocumentReports = (params: Record<string, any> = {}) => {
+  const url = constructUrl(`/documents/reports`, params);
   const { data, error, mutate, isLoading } =
     useApi<APIFetchResponse<{ results: Array<DocumentReport> }>>(url);
   return {

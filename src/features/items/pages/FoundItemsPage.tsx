@@ -11,19 +11,9 @@ import { DocumentReport } from '../types';
 
 const FoundItemsPage = () => {
   const { isLoading, error, reports } = useDocumentReports({
-    // v: 'custom:include(lostReport, foundReport, document:include(type),)',
+    v: 'custom:include(foundReport,document:include(type),county:select(name),subCounty:select(name),ward:select(name))',
   });
   const { deleteDocumentReport, mutateDocumentReport } = useDocumentReportApi();
-  const handleLaunchFormWorkspace = (report?: DocumentReport) => {
-    const closeWorkspace = launchWorkspace(
-      <DocumentReportForm closeWorkspace={() => closeWorkspace()} report={report} />,
-      {
-        width: 'wide',
-        expandable: true,
-        title: 'Document type form',
-      }
-    );
-  };
   const handleDelete = (report: DocumentReport) => {
     modals.openConfirmModal({
       title: 'Delete your profile',
@@ -65,6 +55,7 @@ const FoundItemsPage = () => {
       head: [
         '# No',
         'Owner name',
+        'Document Type',
         'Found date',
         'County',
         'Subcounty',
@@ -79,6 +70,7 @@ const FoundItemsPage = () => {
       body: reports.map((docType, i) => [
         i + 1,
         docType.document?.ownerName ?? '--',
+        docType.document?.type?.name ?? '--',
         new Date(docType.lostOrFoundDate).toDateString(),
         docType.county?.name ?? '--',
         docType.subCounty?.name ?? '--',
@@ -102,7 +94,7 @@ const FoundItemsPage = () => {
             <Menu.Item
               leftSection={<TablerIcon name="edit" size={14} />}
               color="green"
-              onClick={() => handleLaunchFormWorkspace(docType)}
+              onClick={() => handleLaunchReportForm(docType)}
             >
               Edit
             </Menu.Item>
@@ -119,34 +111,42 @@ const FoundItemsPage = () => {
     }),
     [reports]
   );
-  const handleLaunchReportForm = () => {
-    const close = launchWorkspace(<DocumentReportForm closeWorkspace={() => close()} />, {
-      expandable: true,
-      width: 'wide',
-      title: 'Document report form',
-    });
+  const handleLaunchReportForm = (report?: DocumentReport) => {
+    const close = launchWorkspace(
+      <DocumentReportForm report={report} closeWorkspace={() => close()} />,
+      {
+        expandable: true,
+        width: 'wide',
+        title: 'Document report form',
+      }
+    );
   };
 
+  const title = 'Found Documents';
   if (isLoading) return <TableSkeleton />;
-  if (error) return <ErrorState headerTitle="Found Items" error={error} />;
+  if (error) return <ErrorState headerTitle={title} error={error} />;
   if (!reports?.length)
     return (
       <EmptyState
-        headerTitle="Found Items"
+        headerTitle={title}
         message="No found items report"
-        onAdd={handleLaunchReportForm}
+        onAdd={() => handleLaunchReportForm()}
       />
     );
   return (
     <TableContainer
-      title="Found Items"
+      title={title}
       actions={
         <>
-          <Button>Add</Button>
+          <Button leftSection={<TablerIcon name="plus" />} onClick={() => handleLaunchReportForm()}>
+            Add
+          </Button>
         </>
       }
     >
-      <Table striped data={tableData} />
+      <Table.ScrollContainer minWidth={500}>
+        <Table striped data={tableData} highlightOnHover />
+      </Table.ScrollContainer>
     </TableContainer>
   );
 };

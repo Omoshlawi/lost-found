@@ -139,7 +139,9 @@ const DocumentTypesPage = () => {
         </>
       }
     >
-      <Table striped data={tableData} />
+      <Table.ScrollContainer minWidth={500}>
+        <Table striped data={tableData} highlightOnHover />
+      </Table.ScrollContainer>
     </TableContainer>
   );
 };

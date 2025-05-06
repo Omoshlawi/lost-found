@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
   Button,
@@ -20,7 +20,14 @@ type BasicReportInfoStepProps = {
 const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onNext }) => {
   const form = useFormContext<DocumentReportFormData>();
   const observableReportType = form.watch('type');
-
+  useEffect(() => {
+    if (observableReportType === 'FOUND') {
+      form.setValue('lost', undefined);
+    }
+    if (observableReportType === 'LOST') {
+      form.setValue('found', undefined);
+    }
+  }, [observableReportType, form.setValue]);
   return (
     <Stack justify="space-between" flex={1} h={'100%'}>
       <Stack>
@@ -151,10 +158,10 @@ const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onN
                 'description',
                 'tags',
                 'lostOrFoundDate',
-                'found.handoverPreference',
-                'lost.contactPreference',
-                'lost.urgencyLevel',
-                'lost.identifyingMarks',
+                ...((observableReportType === 'FOUND' ? ['found.handoverPreference'] : []) as any),
+                ...(observableReportType === 'LOST'
+                  ? ['lost.contactPreference', 'lost.urgencyLevel', 'lost.identifyingMarks']
+                  : []),
               ],
               { shouldFocus: true }
             );

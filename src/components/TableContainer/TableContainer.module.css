@@ -1,10 +1,10 @@
 .tableContainer {
     border: 1px solid light-dark(
-        var(--mantine-color-gray-1),
+        var(--mantine-color-gray-2),
         var(--mantine-color-gray-9)
       );
       background-color: light-dark(
-        var(--mantine-color-gray-1),
+        var(--mantine-color-gray-2),
         var(--mantine-color-gray-9)
       );
 }
@@ -12,6 +12,6 @@
 .tableContainerTitle {
     background-color: light-dark(
         var(--mantine-color-white),
-        var(--mantine-color-gray-8)
+        var(--mantine-color-gray-7)
       );
 }

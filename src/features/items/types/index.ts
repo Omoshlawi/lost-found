@@ -25,6 +25,14 @@ export interface DocumentReport {
 
 export interface LostReport {
   id: string;
+  reportId: string;
+  identifyingMarks: string;
+  createdAt: string;
+  updatedAt: string;
+  contactPreference: string;
+  urgencyLevel: string;
+  additionalContacts: any;
+  voided: boolean;
 }
 export interface FoundReport {
   id: string;
