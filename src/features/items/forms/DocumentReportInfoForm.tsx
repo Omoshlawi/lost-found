@@ -1,7 +1,6 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button, Group, Select, Stack, TagsInput, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
@@ -9,7 +8,7 @@ import { handleApiErrors } from '@/lib/api';
 import { parseDate } from '@/lib/utils';
 import { useDocumentReportApi } from '../hooks';
 import { DocumentReport, DocumentReportFormData, ReportType } from '../types';
-import { DocumentReportSchema, ReportLostOrFoundDocumentSchema } from '../utils';
+import { ReportLostOrFoundDocumentPartialSchema } from '../utils';
 import AddressFormInputs from './Steps/AddressFormInputs';
 
 type DocumentReportInfoFormProps = {
@@ -27,7 +26,7 @@ const DocumentReportInfoForm: React.FC<DocumentReportInfoFormProps> = ({
   const isFoundReport = report.foundReport !== null;
   const reportType: ReportType = isLostReport ? 'Lost' : isFoundReport ? 'Found' : 'Unknown';
   const { updateDocumentReport, mutateDocumentReport } = useDocumentReportApi();
-  const form = useForm<DocumentReportFormData>({
+  const form = useForm<Partial<DocumentReportFormData>>({
     defaultValues: {
       tags: report.tags,
       description: report.description,
@@ -53,10 +52,10 @@ const DocumentReportInfoForm: React.FC<DocumentReportInfoFormProps> = ({
             }
           : undefined,
     },
-    resolver: zodResolver(ReportLostOrFoundDocumentSchema),
+    resolver: zodResolver(ReportLostOrFoundDocumentPartialSchema),
   });
 
-  const handleSubmit: SubmitHandler<DocumentReportFormData> = async (data) => {
+  const handleSubmit: SubmitHandler<Partial<DocumentReportFormData>> = async (data) => {
     try {
       const doc = await updateDocumentReport(report.id, data);
       onSuccess?.(doc);

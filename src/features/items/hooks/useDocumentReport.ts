@@ -37,7 +37,7 @@ export const useDocumentReportApi = () => {
   };
   const updateDocumentReport = async (
     reportId: string,
-    payload: DocumentReportFormData,
+    payload: Partial<DocumentReportFormData>,
     method: 'PUT' | 'PATCH' = 'PATCH'
   ) => {
     const report = await apiFetch<DocumentReport>(`/documents/reports/${reportId}`, {

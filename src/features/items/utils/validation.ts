@@ -91,3 +91,25 @@ export const ReportLostOrFoundDocumentSchema = _ReportLostOrFoundDocumentSchema
       path: ['found'],
     }
   );
+export const ReportLostOrFoundDocumentPartialSchema = _ReportLostOrFoundDocumentSchema
+  .partial()
+  .refine(
+    (data) => {
+      if (data.type === 'LOST') return data.lost !== undefined;
+      return true;
+    },
+    {
+      message: 'Lost details are required when type is LOST',
+      path: ['lost'],
+    }
+  )
+  .refine(
+    (data) => {
+      if (data.type === 'FOUND') return data.found !== undefined;
+      return true;
+    },
+    {
+      message: 'Found details are required when type is FOUND',
+      path: ['found'],
+    }
+  );
