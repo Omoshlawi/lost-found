@@ -117,7 +117,7 @@ const DocumentReportInfoForm: React.FC<DocumentReportInfoFormProps> = ({
             render={({ field, fieldState }) => (
               <DateInput
                 {...field}
-                label={'Date lost or found'}
+                label={reportType === 'Lost' ? 'Date lost' : 'Date found'}
                 error={fieldState.error?.message}
               />
             )}
