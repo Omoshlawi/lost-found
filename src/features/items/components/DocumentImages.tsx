@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
-import { IconEye, IconMapPin, IconTrash } from '@tabler/icons-react';
 import { Carousel } from '@mantine/carousel';
 import {
   ActionIcon,
-  Avatar,
-  Box,
   Button,
-  Card,
   Collapse,
-  Flex,
-  Grid,
   Group,
   Image,
   Paper,
-  ScrollArea,
   Text,
   ThemeIcon,
   Title,
@@ -21,15 +14,16 @@ import {
   useComputedColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { TablerIcon, TablerIconName } from '@/components';
+import { TablerIcon } from '@/components';
 import { DocumentImage } from '../types';
 import { getBackgroundColor } from '../utils';
 
 type Prop = {
   images?: Array<DocumentImage>;
+  onUploadImage?: () => void;
 };
 
-const DocumentImages: React.FC<Prop> = ({ images = [] }) => {
+const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage }) => {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
   const [imagesOpen, setImagesOpen] = useState(true);
@@ -55,6 +49,7 @@ const DocumentImages: React.FC<Prop> = ({ images = [] }) => {
                 color="green"
                 size="sm"
                 leftSection={<TablerIcon name="upload" size={16} />}
+                onClick={onUploadImage}
               >
                 Upload Image
               </Button>
@@ -86,6 +81,7 @@ const DocumentImages: React.FC<Prop> = ({ images = [] }) => {
               color="green"
               size="sm"
               leftSection={<TablerIcon name="upload" size={16} />}
+              onClick={onUploadImage}
             >
               Upload Image
             </Button>

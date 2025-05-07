@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TablerIcon } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
 import { Card, Divider, Loader } from '@mantine/core';
-import { ErrorState } from '@/components';
+import { ErrorState, launchWorkspace } from '@/components';
 import {
   AdditionalDetails,
   ContactFooter,
@@ -12,15 +12,17 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
+import { DocumentReportInfoForm, ReportDocumentInfoForm } from '../forms';
 import { useDocumentReport } from '../hooks';
 import { ReportType } from '../types';
+import DocumentReportDetailSkeleton from './DocumentReportDetailSkeleton';
 
 const DocumentReportDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentReport(reportId || '');
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  if (isLoading) return <Loader size="md" />;
+  if (isLoading) return <DocumentReportDetailSkeleton />;
   if (error || !reportData)
     return (
       <ErrorState headerTitle="Report Detail" error={error} message="No report data available" />
@@ -36,6 +38,19 @@ const DocumentReportDetail = () => {
   const isLostReport = reportData.lostReport !== null;
   const isFoundReport = reportData.foundReport !== null;
   const reportType: ReportType = isLostReport ? 'Lost' : isFoundReport ? 'Found' : 'Unknown';
+  const launchDocumentReportInfoForm = () => {
+    const dispose = launchWorkspace(
+      <DocumentReportInfoForm report={reportData} closeWorkspace={() => dispose()} />,
+      { title: 'Update Report Infomation' }
+    );
+  };
+  const launchDocumentImageForm = () => {};
+  const launchDocumentInfoForm = () => {
+    const dispose = launchWorkspace(
+      <ReportDocumentInfoForm report={reportData} closeWorkspace={() => dispose()} />,
+      { title: 'Update report document infomation' }
+    );
+  };
 
   return (
     <Card shadow="sm" padding="xl" radius="md" withBorder>
@@ -46,6 +61,7 @@ const DocumentReportDetail = () => {
         urgencyLevel={urgencyLevel}
         docTypeIcon={docTypeIcon}
         reportType={reportType}
+        onUpdateReportDetails={launchDocumentReportInfoForm}
       />
 
       <Divider my="md" />
@@ -53,8 +69,12 @@ const DocumentReportDetail = () => {
       <DocumentImages
         // images={[{ url: 'https://picsum.photos/200/300' }, { url: 'https://picsum.photos/200' }]}
         images={reportData?.document?.images}
+        onUploadImage={launchDocumentImageForm}
       />
-      <DocumentInformation document={reportData.document} />
+      <DocumentInformation
+        document={reportData.document}
+        onUpdateReportDocument={launchDocumentInfoForm}
+      />
 
       <LocationInformation
         county={reportData.county}

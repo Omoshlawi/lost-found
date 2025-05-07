@@ -17,9 +17,10 @@ import { formatDate, getBackgroundColor } from '../utils/reportUtils';
 
 interface DocumentProps {
   document?: Document;
+  onUpdateReportDocument?: () => void;
 }
 
-const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
+const DocumentInformation: React.FC<DocumentProps> = ({ document, onUpdateReportDocument }) => {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
 
@@ -43,6 +44,7 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
               color="blue"
               size="sm"
               leftSection={<TablerIcon name="pencil" size={16} />}
+              onClick={onUpdateReportDocument}
             >
               Edit Document
             </Button>

@@ -65,7 +65,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
       tags: report?.tags ?? [],
       type: defaultType,
     },
-    resolver: zodResolver(ReportLostOrFoundDocumentSchema) as any,
+    resolver: zodResolver(ReportLostOrFoundDocumentSchema),
   });
   const isMobile = useMediaQuery('(max-width: 48em)');
   const [activeTab, setActiveTab] = useState<'basic' | 'document' | 'address' | null>('basic');

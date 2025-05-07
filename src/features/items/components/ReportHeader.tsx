@@ -21,6 +21,7 @@ interface ReportHeaderProps {
   urgencyLevel?: string;
   docTypeIcon: string;
   reportType: ReportType;
+  onUpdateReportDetails?: () => void;
 }
 
 const ReportHeader: React.FC<ReportHeaderProps> = ({
@@ -30,6 +31,7 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
   urgencyLevel,
   docTypeIcon,
   reportType,
+  onUpdateReportDetails,
 }) => {
   const colorScheme = useComputedColorScheme();
 
@@ -66,7 +68,12 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
         )}
         <Flex flex={1} />
         <Tooltip label="Update Report Information">
-          <Button variant="outline" color="blue" leftSection={<TablerIcon name="edit" size={16} />}>
+          <Button
+            variant="outline"
+            color="blue"
+            leftSection={<TablerIcon name="edit" size={16} />}
+            onClick={onUpdateReportDetails}
+          >
             Update Report
           </Button>
         </Tooltip>
