@@ -78,12 +78,12 @@ const data: Array<{ icon: TablerIconName; label: string; href: string; descripti
   {
     icon: 'fingerprint',
     label: 'Lost items',
-    href: 'items/lost',
+    href: 'lost-documents',
   },
   {
     icon: 'activity',
     label: 'Found items',
-    href: 'items/found',
+    href: 'found-documents',
   },
   {
     icon: 'settings',

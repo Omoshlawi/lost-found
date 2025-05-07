@@ -12,6 +12,20 @@ export const useDocumentReports = (params: Record<string, any> = {}) => {
     mutate,
   };
 };
+export const useDocumentReport = (reportId?: string) => {
+  const url = constructUrl(`/documents/reports/${reportId}`, {
+    v: 'custom:include(foundReport,lostReport,document:include(type, images),county:select(name),subCounty:select(name),ward:select(name))',
+  });
+  const { data, error, mutate, isLoading } = useApi<APIFetchResponse<DocumentReport>>(
+    reportId ? url : null
+  );
+  return {
+    report: data?.data,
+    isLoading,
+    error,
+    mutate,
+  };
+};
 
 export const useDocumentReportApi = () => {
   const createDocumentReport = async (payload: DocumentReportFormData) => {

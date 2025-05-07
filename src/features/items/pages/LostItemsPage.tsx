@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { ActionIcon, Button, Menu, Table, TableData, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
@@ -95,6 +96,13 @@ const LostItemspage = () => {
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item
+              leftSection={<TablerIcon name="eye" size={14} />}
+              component={Link}
+              to={`${docType.id}`}
+            >
+              View Details
+            </Menu.Item>
+            <Menu.Item
               leftSection={<TablerIcon name="edit" size={14} />}
               color="green"
               onClick={() => handleLaunchReportForm(docType)}
@@ -142,7 +150,11 @@ const LostItemspage = () => {
       title={title}
       actions={
         <>
-          <Button leftSection={<TablerIcon name="plus" />} onClick={() => handleLaunchReportForm()}>
+          <Button
+            leftSection={<TablerIcon name="plus" />}
+            onClick={() => handleLaunchReportForm()}
+            variant="subtle"
+          >
             Add
           </Button>
         </>

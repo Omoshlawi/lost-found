@@ -54,7 +54,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
             }
           : undefined,
       lost:
-        defaultType === 'FOUND'
+        defaultType === 'LOST'
           ? {
               contactPreference: (report?.lostReport?.contactPreference as any) ?? 'ANY',
               identifyingMarks: (report?.lostReport?.identifyingMarks as any) ?? '',

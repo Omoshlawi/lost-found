@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { ActionIcon, Button, Menu, Table, TableData, Text } from '@mantine/core';
+import { Link } from 'react-router-dom';
+import { ActionIcon, Button, Card, Group, Menu, Table, TableData, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { EmptyState, ErrorState, TableContainer, TablerIcon, TableSkeleton } from '@/components';
@@ -93,6 +94,13 @@ const FoundItemsPage = () => {
           </Menu.Target>
           <Menu.Dropdown>
             <Menu.Item
+              leftSection={<TablerIcon name="eye" size={14} />}
+              component={Link}
+              to={`${docType.id}`}
+            >
+              View Details
+            </Menu.Item>
+            <Menu.Item
               leftSection={<TablerIcon name="edit" size={14} />}
               color="green"
               onClick={() => handleLaunchReportForm(docType)}
@@ -123,8 +131,6 @@ const FoundItemsPage = () => {
     );
   };
 
-  console.log(error);
-
   const title = 'Found Documents';
   if (isLoading) return <TableSkeleton />;
   if (error) return <ErrorState headerTitle={title} error={error} />;
@@ -141,7 +147,11 @@ const FoundItemsPage = () => {
       title={title}
       actions={
         <>
-          <Button leftSection={<TablerIcon name="plus" />} onClick={() => handleLaunchReportForm()}>
+          <Button
+            leftSection={<TablerIcon name="plus" />}
+            onClick={() => handleLaunchReportForm()}
+            variant="subtle"
+          >
             Add
           </Button>
         </>

@@ -13,7 +13,7 @@ type ErrorStateProps = {
 const ErrorState: React.FunctionComponent<ErrorStateProps> = ({ headerTitle, error, message }) => {
   return (
     <TableContainer title={headerTitle}>
-      <Stack align="center">
+      <Stack align="center" mb={'xl'}>
         <TablerIcon name="exclamationCircle" size={100} color="red" />
         <Text c={'dimmed'}>{error ? handleApiErrors(error).detail : message}</Text>
       </Stack>

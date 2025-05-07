@@ -57,6 +57,11 @@ export interface Document {
   createdAt: string;
   voided: boolean;
   type: Type;
+  images: Array<DocumentImage>;
+}
+
+export interface DocumentImage {
+  url: string;
 }
 
 export interface Type {
