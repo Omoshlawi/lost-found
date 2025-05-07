@@ -1,108 +1,93 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { TablerIcon } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
-import { Card, Grid, Group, Pill, Stack, Table, Text } from '@mantine/core';
+import { Card, Divider, Loader } from '@mantine/core';
 import { ErrorState } from '@/components';
-import { parseDate } from '@/lib/utils';
+import {
+  AdditionalDetails,
+  ContactFooter,
+  DocumentImages,
+  DocumentInformation,
+  LocationInformation,
+  ReportDetails,
+  ReportHeader,
+} from '../components';
 import { useDocumentReport } from '../hooks';
+import { ReportType } from '../types';
 
 const DocumentReportDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
-  const { error, isLoading, report } = useDocumentReport(reportId!);
+  const { error, isLoading, report: reportData } = useDocumentReport(reportId || '');
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
-  if (error) return <ErrorState headerTitle="Report Detail" error={error} />;
+  if (isLoading) return <Loader size="md" />;
+  if (error || !reportData)
+    return (
+      <ErrorState headerTitle="Report Detail" error={error} message="No report data available" />
+    );
+
+  // Extract common data
+  const docType = reportData.document?.type?.name || 'Unknown';
+  const docTypeIcon = reportData.document?.type?.icon || 'id';
+  const docId = reportData.id ? reportData.id.substring(0, 8) + '...' : 'Unknown';
+  const status = reportData.status || 'PENDING';
+  const urgencyLevel = reportData.lostReport?.urgencyLevel || 'MEDIUM';
+  const contactPreference = reportData.lostReport?.contactPreference || 'EMAIL';
+  const isLostReport = reportData.lostReport !== null;
+  const isFoundReport = reportData.foundReport !== null;
+  const reportType: ReportType = isLostReport ? 'Lost' : isFoundReport ? 'Found' : 'Unknown';
 
   return (
-    <Stack>
-      <Text fw={'bold'}>Document report detail</Text> {/* Breadcramb */}
-      <Grid grow gutter="sm">
-        <Grid.Col span={4}>
-          <Card>
-            <Card.Section p={'sm'} fw={'bold'}>
-              Reporting Details
-            </Card.Section>
-            <Card.Section p={'sm'}>
-              <Table
-                data={{
-                  head: ['Property', 'Value'],
-                  body: [
-                    [
-                      'Date lost or found',
-                      parseDate(report?.lostOrFoundDate)?.toLocaleDateString(),
-                    ],
-                    ['Date Reported', parseDate(report?.createdAt)?.toLocaleDateString()],
-                    ['Status', report?.status],
-                    ['County', report?.county?.name],
-                    ['Sub county', report?.subCounty?.name],
-                    ['Ward', report?.ward?.name],
-                  ],
-                }}
-                highlightOnHover
-              />
-            </Card.Section>
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <Card>
-            <Card.Section p={'sm'} fw={'bold'}>
-              Document Details
-            </Card.Section>
-            <Card.Section p={'sm'}>
-              <Table
-                data={{
-                  head: ['Property', 'Value'],
-                  body: [
-                    ['Owner', report?.document?.ownerName],
-                    ['Document number', report?.document?.serialNumber],
-                    ['Issuer', report?.document?.issuer],
-                    ['Expiry date', parseDate(report?.document?.expiryDate)?.toLocaleDateString()],
-                    [
-                      'Date of Issue',
-                      parseDate(report?.document?.issuanceDate)?.toLocaleDateString(),
-                    ],
-                    ['Type', report?.document?.type.name],
-                  ],
-                }}
-                highlightOnHover
-              />
-            </Card.Section>
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <Card>
-            <Card.Section p={'sm'} fw={'bold'}>
-              Extra info
-            </Card.Section>
-            <Card.Section p={'sm'}>
-              <Table
-                data={{
-                  head: ['Property', 'Value'],
-                  body: [
-                    [
-                      'Tags',
-                      report?.tags?.map((tag, i) => (
-                        <Pill key={i} m={1}>
-                          {tag}
-                        </Pill>
-                      )),
-                    ],
-                  ],
-                }}
-                highlightOnHover
-              />
-            </Card.Section>
-          </Card>
-        </Grid.Col>
+    <Card shadow="sm" padding="xl" radius="md" withBorder>
+      <ReportHeader
+        docType={docType}
+        docId={docId}
+        status={status}
+        urgencyLevel={urgencyLevel}
+        docTypeIcon={docTypeIcon}
+        reportType={reportType}
+      />
 
-        <Grid.Col span={4}>
-          <Card>
-            <Card.Section p={'sm'} fw={'bold'}>
-              Images
-            </Card.Section>
-            <Card.Section p={'sm'}>{JSON.stringify(report)}</Card.Section>
-          </Card>
-        </Grid.Col>
-      </Grid>
-    </Stack>
+      <Divider my="md" />
+
+      <DocumentImages
+        images={[{ url: 'https://picsum.photos/200/300' }, { url: 'https://picsum.photos/200' }]}
+        // images={reportData?.document?.images}
+      />
+      <DocumentInformation document={reportData.document} />
+
+      <LocationInformation
+        county={reportData.county}
+        subCounty={reportData.subCounty}
+        ward={reportData.ward}
+        landMark={reportData.landMark}
+      />
+
+      <ReportDetails
+        lostOrFoundDate={reportData.lostOrFoundDate}
+        createdAt={reportData.createdAt}
+        description={reportData.description}
+        tags={reportData.tags}
+        lostReport={reportData?.lostReport}
+        foundReport={reportData?.foundReport}
+      />
+
+      <AdditionalDetails
+        isOpen={detailsOpen}
+        toggleOpen={() => setDetailsOpen(!detailsOpen)}
+        createdAt={reportData.createdAt}
+        updatedAt={reportData.updatedAt}
+        status={status}
+        document={reportData.document}
+      />
+
+      <ContactFooter
+        contactPreference={contactPreference}
+        urgencyLevel={urgencyLevel}
+        reportType={reportType}
+        handoverPreference={reportData?.foundReport?.handoverPreference}
+      />
+    </Card>
   );
 };
 

@@ -2,6 +2,7 @@ import '@mantine/core/styles.css';
 import '@mantine/spotlight/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
+import '@mantine/carousel/styles.css';
 
 import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';

@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
+    "@mantine/carousel": "^8.0.0",
     "@mantine/core": "7.17.2",
     "@mantine/dates": "^7.17.7",
     "@mantine/hooks": "7.17.2",
@@ -31,6 +32,8 @@
     "axios": "^1.8.4",
     "better-auth": "^1.2.7",
     "dayjs": "^1.11.13",
+    "embla-carousel": "^8.5.2",
+    "embla-carousel-react": "^8.5.2",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",
     "react": "^19.0.0",

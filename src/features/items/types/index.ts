@@ -99,3 +99,6 @@ export interface Ward {
 }
 
 export type DocumentReportFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
+
+
+export type ReportType = 'Lost' | 'Found' |"Unknown"
