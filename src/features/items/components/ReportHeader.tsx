@@ -1,5 +1,15 @@
 import React from 'react';
-import { Badge, Group, Text, ThemeIcon, Title, useComputedColorScheme } from '@mantine/core';
+import {
+  Badge,
+  Button,
+  Flex,
+  Group,
+  Text,
+  ThemeIcon,
+  Title,
+  Tooltip,
+  useComputedColorScheme,
+} from '@mantine/core';
 import { TablerIcon, TablerIconName } from '@/components';
 import { ReportType } from '../types';
 import { getStatusColor, getUrgencyColor } from '../utils/reportUtils';
@@ -36,7 +46,7 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
           </Text>
         </div>
       </Group>
-      <Group>
+      <Group w={'100%'}>
         <Badge size="lg" color={getStatusColor(status, colorScheme)} variant="filled">
           {status}
         </Badge>
@@ -54,6 +64,12 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
             Ready for Handover
           </Badge>
         )}
+        <Flex flex={1} />
+        <Tooltip label="Update Report Information">
+          <Button variant="outline" color="blue" leftSection={<TablerIcon name="edit" size={16} />}>
+            Update Report
+          </Button>
+        </Tooltip>
       </Group>
     </Group>
   );

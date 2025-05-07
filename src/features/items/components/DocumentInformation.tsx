@@ -1,11 +1,13 @@
 import React from 'react';
 import {
   Avatar,
+  Button,
   Grid,
   Group,
   Paper,
   Text,
   Title,
+  Tooltip,
   useComputedColorScheme,
   useMantineTheme,
 } from '@mantine/core';
@@ -31,9 +33,21 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
     >
       <Group mb="xs">
         <Title order={4}>Document Information</Title>
-        <Avatar size="md" radius="xl" color="blue">
-          <TablerIcon name={document?.type?.icon as any} size={24} />
-        </Avatar>
+        <Group flex={1} justify="space-between">
+          <Avatar size="md" radius="xl" color="blue">
+            <TablerIcon name={document?.type?.icon as any} size={24} />
+          </Avatar>
+          <Tooltip label="Update Document Information">
+            <Button
+              variant="outline"
+              color="blue"
+              size="sm"
+              leftSection={<TablerIcon name="pencil" size={16} />}
+            >
+              Edit Document
+            </Button>
+          </Tooltip>
+        </Group>
       </Group>
 
       <Grid>
