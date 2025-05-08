@@ -1,16 +1,18 @@
 import { FC, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { ActionIcon, AppShell, Box, Modal, Stack } from '@mantine/core';
+import { ActionIcon, AppShell, Box, Burger, Group, Modal, Stack } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { TablerIcon } from '@/components';
+import { ColorSchemeToggle, Logo, TablerIcon } from '@/components';
 import { useWorkspace } from '@/components/Workspace';
 import SideNav from './SideNav';
-import TopNavBar from './TopNavBar';
+import UserActionsMenu from './UserActionsMenu';
 
 const DashboardLayout: FC = () => {
   const [opened, { toggle }] = useDisclosure();
+  const [drawerOpened, { toggle: toggleOpenDrawer }] = useDisclosure();
+
   const { workspace, width } = useWorkspace();
-  const isMobile = useMediaQuery('(max-width: 48em)');
+  const isMobile = useMediaQuery('(max-width: 50em)');
   const [modalOpened, { open: modalOpen, close: modalClose }] = useDisclosure(
     isMobile && Boolean(workspace?.component)
   );
@@ -30,7 +32,7 @@ const DashboardLayout: FC = () => {
         navbar={{
           width: 300,
           breakpoint: '50em',
-          collapsed: { mobile: !opened },
+          collapsed: { mobile: !drawerOpened },
         }}
         aside={{ collapsed: { mobile: !opened }, breakpoint: '50em', width: width ?? 50 }}
         styles={{
@@ -40,9 +42,18 @@ const DashboardLayout: FC = () => {
         }}
         padding="md"
       >
-        <TopNavBar />
-        <AppShell.Navbar>
-          <SideNav />
+        <AppShell.Header>
+          <Group justify={'space-between'} align={'center'} flex={1} px={'xs'} h={'100%'}>
+            {isMobile && <Burger opened={drawerOpened} onClick={toggleOpenDrawer} size="sm" />}
+            <Logo />
+            <Group>
+              <ColorSchemeToggle />
+              <UserActionsMenu />
+            </Group>
+          </Group>
+        </AppShell.Header>
+        <AppShell.Navbar p={'md'}>
+          <SideNav onClose={isMobile ? toggleOpenDrawer : undefined} />
         </AppShell.Navbar>
         <AppShell.Aside>
           {!workspace && (
@@ -83,7 +94,6 @@ const DashboardLayout: FC = () => {
         transitionProps={{ transition: 'slide-up', duration: 300 }}
         p={0}
         m={0}
-        
         styles={{
           body: { padding: 0, width: '100%', height: '100%', flex: 1 },
         }}

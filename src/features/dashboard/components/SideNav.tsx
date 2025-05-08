@@ -1,15 +1,25 @@
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AppShell, Avatar, Flex, NavLink, ScrollArea, Text, Title } from '@mantine/core';
 import {
-  getAllTablerIconNames,
-  getTablerIconCategories,
-  TablerIcon,
-  TablerIconName,
-} from '@/components/TablerIcon';
+  AppShell,
+  Avatar,
+  Flex,
+  Group,
+  NavLink,
+  ScrollArea,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
+import { TablerIcon, TablerIconName } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import { getNameInitials } from '@/lib/utils';
 
-const SideNav = () => {
+type SideNavProps = {
+  onClose?: () => void;
+};
+
+const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
   const location = useLocation();
   const { data: user } = authClient.useSession();
   const items = data.map((item, index) => {
@@ -30,6 +40,7 @@ const SideNav = () => {
         description={item.description}
         rightSection={<TablerIcon name={'chevronRight'} size={16} stroke={1.5} />}
         leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
+        onClick={onClose}
       />
     );
   });
@@ -37,14 +48,17 @@ const SideNav = () => {
   return (
     <>
       <AppShell.Section>
-        <Flex align={'baseline'} gap={'sm'} p={'sm'}>
-          {user?.user && <Avatar size={'md'}>{getNameInitials(user?.user?.name)}</Avatar>}
-          <Title order={4}>
-            <Text variant="gradient" fw={'bold'}>
-              {user?.user.name}
-            </Text>
-          </Title>
-        </Flex>
+        <Group align={'center'} gap={'sm'} p={'sm'}>
+          {user?.user && <Avatar size={'lg'}>{getNameInitials(user?.user?.name)}</Avatar>}
+          <Stack gap={0}>
+            <Title order={4}>
+              <Text variant="gradient" fw={'bold'}>
+                {user?.user.name}
+              </Text>
+            </Title>
+            <Text c="dimmed">{user?.user.email}</Text>
+          </Stack>
+        </Group>
       </AppShell.Section>
       <AppShell.Section grow component={ScrollArea}>
         {items}
@@ -57,6 +71,7 @@ const SideNav = () => {
           pb={'lg'}
           rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
           onClick={async () => {
+            onClose?.();
             await authClient.signOut();
           }}
         />
