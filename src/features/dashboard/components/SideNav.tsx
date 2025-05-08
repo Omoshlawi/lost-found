@@ -11,6 +11,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { TablerIcon, TablerIconName } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import { getNameInitials } from '@/lib/utils';
@@ -100,13 +101,22 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
       <AppShell.Section>
         <NavLink
           label="Logout"
-          variant="filled"
-          leftSection={<TablerIcon name="logout" size={16} stroke={1.5} color="red" />}
+          variant="light"
+          leftSection={<TablerIcon name="logout" size={18} stroke={1.5} />}
+          color="red"
           pb={'lg'}
+          active
           rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
-          onClick={async () => {
-            onClose?.();
-            await authClient.signOut();
+          onClick={() => {
+            modals.openConfirmModal({
+              title: 'Confirm logout',
+              children: <Text size="sm">are you sure you want to logout?</Text>,
+              labels: { confirm: 'Logout', cancel: 'Cancel' },
+              onConfirm: () => {
+                onClose?.();
+                authClient.signOut();
+              },
+            });
           }}
         />
       </AppShell.Section>

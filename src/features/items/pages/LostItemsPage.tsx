@@ -161,7 +161,18 @@ const LostItemspage = () => {
       }
     >
       <Table.ScrollContainer minWidth={500}>
-        <Table striped data={tableData} highlightOnHover />
+        <Table
+          striped
+          data={tableData}
+          highlightOnHover
+          styles={{
+            td: {
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            },
+          }}
+        />
       </Table.ScrollContainer>
     </TableContainer>
   );
