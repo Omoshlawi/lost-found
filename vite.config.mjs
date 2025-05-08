@@ -20,6 +20,9 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    allowedHosts: ["*"]
+  },
   test: {
     globals: true,
     environment: 'jsdom',
