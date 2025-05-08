@@ -101,17 +101,22 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage }) => {
             align: 'center',
           }}
         >
-          {images.map((image, index) => (
-            <Carousel.Slide key={index}>
-              <Image
-                src={image.url || '/placeholder.svg'}
-                height={250}
-                fit="contain"
-                radius="md"
-                fallbackSrc="https://placehold.co/600x400?text=Placeholder"
-              />
-            </Carousel.Slide>
-          ))}
+          {images.map((image, index) => {
+            console.log(image.url);
+
+            return (
+              <Carousel.Slide key={index}>
+                <Image
+                  src={`/media/${image.url}`}
+                  height={250}
+                  fit="contain"
+                  radius="md"
+                  // fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+                  // src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-7.png"
+                />
+              </Carousel.Slide>
+            );
+          })}
         </Carousel>
       </Collapse>
     </Paper>

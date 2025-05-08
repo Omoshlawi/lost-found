@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { TablerIcon } from '@tabler/icons-react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Divider, Loader } from '@mantine/core';
+import { Card, Divider } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { ErrorState, launchWorkspace } from '@/components';
 import {
   AdditionalDetails,
@@ -12,7 +12,11 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
-import { DocumentReportForm, ReportDocumentInfoForm } from '../forms';
+import {
+  DocumentReportForm,
+  ReportDocumentImageUploadForm,
+  ReportDocumentInfoForm,
+} from '../forms';
 import { useDocumentReport } from '../hooks';
 import { ReportType } from '../types';
 import DocumentReportDetailSkeleton from './DocumentReportDetailSkeleton';
@@ -44,7 +48,14 @@ const DocumentReportDetail = () => {
       { title: 'Update Report', expandable: true, width: 'extra-wide' }
     );
   };
-  const launchDocumentImageForm = () => {};
+  const launchDocumentImageForm = () => {
+    const modalId = modals.open({
+      title: 'Upload Document Images',
+      children: (
+        <ReportDocumentImageUploadForm report={reportData} onClose={() => modals.close(modalId)} />
+      ),
+    });
+  };
   const launchDocumentInfoForm = () => {
     const dispose = launchWorkspace(
       <ReportDocumentInfoForm report={reportData} closeWorkspace={() => dispose()} />,

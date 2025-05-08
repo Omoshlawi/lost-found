@@ -10,3 +10,4 @@ export * from './delay';
 export * from './types';
 export { default as useAuthClent, authClient } from './useAuthClent';
 export * from './constatnts';
+export * from './uploadFile';

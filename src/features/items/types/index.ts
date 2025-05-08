@@ -61,7 +61,9 @@ export interface Document {
 }
 
 export interface DocumentImage {
+  id: string;
   url: string;
+  documentId: string;
 }
 
 export interface Type {
@@ -100,5 +102,4 @@ export interface Ward {
 
 export type DocumentReportFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
 
-
-export type ReportType = 'Lost' | 'Found' |"Unknown"
+export type ReportType = 'Lost' | 'Found' | 'Unknown';

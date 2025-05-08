@@ -1,5 +1,5 @@
 import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
-import { DocumentReport, DocumentReportFormData } from '../types';
+import { DocumentImage, DocumentReport, DocumentReportFormData } from '../types';
 
 export const useDocumentReports = (params: Record<string, any> = {}) => {
   const url = constructUrl(`/documents/reports`, params);
@@ -53,6 +53,18 @@ export const useDocumentReportApi = () => {
     return report.data;
   };
 
+  const uploadDocumentImage = async (
+    reportId: string,
+    reportDocumentId: string,
+    data: Array<{ url: string }>
+  ) => {
+    const images = await apiFetch<{ results: Array<DocumentImage> }>(
+      `/documents/reports/${reportId}/document/${reportDocumentId}/images`,
+      { method: 'POST', data }
+    );
+    return images.data.results ?? [];
+  };
+
   const mutateDocumentReport = () => {
     mutate('/documents/reports');
   };
@@ -61,5 +73,6 @@ export const useDocumentReportApi = () => {
     updateDocumentReport,
     deleteDocumentReport,
     mutateDocumentReport,
+    uploadDocumentImage,
   };
 };

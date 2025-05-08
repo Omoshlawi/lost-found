@@ -24,6 +24,7 @@
     "@mantine/carousel": "^8.0.0",
     "@mantine/core": "7.17.2",
     "@mantine/dates": "^7.17.7",
+    "@mantine/dropzone": "^8.0.0",
     "@mantine/hooks": "7.17.2",
     "@mantine/modals": "^7.17.5",
     "@mantine/notifications": "^7.17.5",
