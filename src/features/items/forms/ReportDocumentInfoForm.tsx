@@ -1,13 +1,16 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { Button, Group, Stack } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
 import { parseDate } from '@/lib/utils';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button, Group, Stack } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import React from 'react';
+import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { useDocumentReportApi } from '../hooks';
 import { DocumentReport, DocumentReportFormData } from '../types';
-import { DocumentSchema, ReportLostOrFoundDocumentPartialSchema } from '../utils';
+import {
+  _ReportLostOrFoundDocumentSchema
+} from '../utils';
 import DocumentFormInputs from './Steps/DocumentFormInputs';
 
 type ReportDocumentInfoFormProps = {
@@ -16,12 +19,17 @@ type ReportDocumentInfoFormProps = {
   closeWorkspace?: () => void;
 };
 
+const ReportDocumentInfoFormSchema = _ReportLostOrFoundDocumentSchema.pick({
+  document: true,
+});
+type ReportDocumentInfoFormData = z.infer<typeof ReportDocumentInfoFormSchema>;
+
 const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
   report,
   onSuccess,
   closeWorkspace,
 }) => {
-  const form = useForm<Partial<DocumentReportFormData>>({
+  const form = useForm<ReportDocumentInfoFormData>({
     defaultValues: {
       document: {
         typeId: report.document?.typeId,
@@ -32,11 +40,11 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
         serialNumber: report.document?.serialNumber,
       },
     },
-    resolver: zodResolver(ReportLostOrFoundDocumentPartialSchema),
+    resolver: zodResolver(ReportDocumentInfoFormSchema),
   });
   const { updateDocumentReport, mutateDocumentReport } = useDocumentReportApi();
 
-  const handleSubmit: SubmitHandler<Partial<DocumentReportFormData>> = async (data) => {
+  const handleSubmit: SubmitHandler<ReportDocumentInfoFormData> = async (data) => {
     try {
       const doc = await updateDocumentReport(report.id, data);
       onSuccess?.(doc);
@@ -58,7 +66,7 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof DocumentReportFormData, { message: val })
+          form.setError(key as keyof ReportDocumentInfoFormData, { message: val })
         );
       }
     }
@@ -66,15 +74,12 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
 
   return (
     <FormProvider {...form}>
-      <form
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: 8,
-        }}
+      <Stack
+        component={'form'}
         onSubmit={form.handleSubmit(handleSubmit)}
+        justify="space-between"
+        p={'sm'}
+        flex={1}
       >
         <Stack>
           <DocumentFormInputs />
@@ -87,7 +92,7 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
             Submit
           </Button>
         </Group>
-      </form>
+      </Stack>
     </FormProvider>
   );
 };

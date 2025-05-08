@@ -58,7 +58,7 @@ export const DocumentReportSchema = z.object({
   ]),
 });
 
-const _ReportLostOrFoundDocumentSchema = DocumentReportSchema.omit({
+export const _ReportLostOrFoundDocumentSchema = DocumentReportSchema.omit({
   documentId: true,
   status: true,
 }).merge(

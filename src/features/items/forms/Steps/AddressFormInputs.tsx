@@ -1,39 +1,55 @@
 import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Select, TextInput } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import { InputSkeleton } from '@/components';
 import { useLocations } from '../../hooks';
 import { DocumentReportFormData } from '../../types';
-import { showNotification } from '@mantine/notifications';
 
 const AddressFormInputs = () => {
   const form = useFormContext<DocumentReportFormData>();
+  const { watch, setValue } = form;
 
-  const observableCounty = form.watch('countyCode');
-  const observableSubCounty = form.watch('subCountyCode');
+  const countyCode = watch('countyCode');
+  const subCountyCode = watch('subCountyCode');
+  const wardCode = watch('wardCode');
+
   const { locations, error, isLoading } = useLocations();
+
   const subCounties = useMemo(
-    () => locations.find((l) => l.code === observableCounty)?.subCounties ?? [],
-    [observableCounty, locations]
+    () => locations.find((l) => l.code === countyCode)?.subCounties ?? [],
+    [countyCode, locations]
   );
+
   const wards = useMemo(
-    () => subCounties.find((l) => l.code === observableSubCounty)?.wards ?? [],
-    [observableSubCounty, subCounties]
+    () => subCounties.find((l) => l.code === subCountyCode)?.wards ?? [],
+    [subCountyCode, subCounties]
   );
 
+  // Only reset subCounty if county changes AND locations are loaded AND the current subCounty doesn't belong to the new county
   useEffect(() => {
-    form.setValue('subCountyCode', '');
-    form.setValue('wardCode', '');
-  }, [observableCounty, form.setValue]);
+    if (countyCode && subCountyCode && locations.length > 0) {
+      const isValidSubCounty = subCounties.some((sc) => sc.code === subCountyCode);
+      if (!isValidSubCounty) {
+        setValue('subCountyCode', '');
+      }
+    }
+  }, [countyCode, subCountyCode, subCounties, setValue, locations]);
 
+  // Similar logic for ward, ensuring locations and subCounties are loaded
   useEffect(() => {
-    form.setValue('wardCode', '');
-  }, [observableSubCounty, form.setValue]);
+    if (subCountyCode && wardCode && subCounties.length > 0) {
+      const isValidWard = wards.some((w) => w.code === wardCode);
+      if (!isValidWard) {
+        setValue('wardCode', '');
+      }
+    }
+  }, [subCountyCode, wardCode, wards, setValue, subCounties]);
 
   useEffect(() => {
     if (error) {
       showNotification({
-        message: error?.message ?? 'An error ocuured while fetching locations',
+        message: error?.message ?? 'An error occurred while fetching locations',
         title: 'Error loading locations',
       });
     }
@@ -50,9 +66,12 @@ const AddressFormInputs = () => {
           ) : (
             <Select
               {...field}
+              value={field.value || null}
               data={locations.map((l) => ({ value: l.code, label: l.name }))}
               label="County"
               error={fieldState.error?.message}
+              nothingFoundMessage="Nothing found..."
+              searchable
             />
           )
         }
@@ -66,9 +85,13 @@ const AddressFormInputs = () => {
           ) : (
             <Select
               {...field}
+              value={field.value || null}
               data={subCounties.map((l) => ({ value: l.code, label: l.name }))}
               label="Sub county"
               error={fieldState.error?.message}
+              searchable
+              nothingFoundMessage="Nothing found..."
+              disabled={!countyCode}
             />
           )
         }
@@ -82,9 +105,13 @@ const AddressFormInputs = () => {
           ) : (
             <Select
               {...field}
+              value={field.value || null}
               data={wards.map((l) => ({ value: l.code, label: l.name }))}
               label="Ward"
               error={fieldState.error?.message}
+              searchable
+              nothingFoundMessage="Nothing found..."
+              disabled={!subCountyCode}
             />
           )
         }

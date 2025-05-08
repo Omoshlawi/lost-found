@@ -12,7 +12,7 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
-import { DocumentReportInfoForm, ReportDocumentInfoForm } from '../forms';
+import { DocumentReportForm, ReportDocumentInfoForm } from '../forms';
 import { useDocumentReport } from '../hooks';
 import { ReportType } from '../types';
 import DocumentReportDetailSkeleton from './DocumentReportDetailSkeleton';
@@ -40,8 +40,8 @@ const DocumentReportDetail = () => {
   const reportType: ReportType = isLostReport ? 'Lost' : isFoundReport ? 'Found' : 'Unknown';
   const launchDocumentReportInfoForm = () => {
     const dispose = launchWorkspace(
-      <DocumentReportInfoForm report={reportData} closeWorkspace={() => dispose()} />,
-      { title: 'Update Report Infomation' }
+      <DocumentReportForm report={reportData} closeWorkspace={() => dispose()} />,
+      { title: 'Update Report', expandable: true, width: 'extra-wide' }
     );
   };
   const launchDocumentImageForm = () => {};
