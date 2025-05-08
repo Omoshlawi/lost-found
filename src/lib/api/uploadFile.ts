@@ -21,3 +21,7 @@ export const uploadFile = async (files: Array<File>, uploadTo: string) => {
   });
   return res.data;
 };
+
+export const cleanFiles = async (payload: string[] = []) => {
+  await apiFetch('/files', { method: 'DELETE', data: { paths: payload } });
+};

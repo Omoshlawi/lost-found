@@ -1,4 +1,12 @@
-import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
+import {
+  apiFetch,
+  APIFetchResponse,
+  cleanFiles,
+  constructUrl,
+  delay,
+  mutate,
+  useApi,
+} from '@/lib/api';
 import { DocumentImage, DocumentReport, DocumentReportFormData } from '../types';
 
 export const useDocumentReports = (params: Record<string, any> = {}) => {
@@ -64,6 +72,13 @@ export const useDocumentReportApi = () => {
     );
     return images.data.results ?? [];
   };
+  const deleteDocumentImage = async (reportId: string, image: DocumentImage) => {
+    await apiFetch<{ results: Array<DocumentImage> }>(
+      `/documents/reports/${reportId}/document/${image.documentId}/images/${image.id}`,
+      { method: 'DELETE' }
+    );
+    await cleanFiles([image.url]);
+  };
 
   const mutateDocumentReport = () => {
     mutate('/documents/reports');
@@ -74,5 +89,6 @@ export const useDocumentReportApi = () => {
     deleteDocumentReport,
     mutateDocumentReport,
     uploadDocumentImage,
+    deleteDocumentImage,
   };
 };

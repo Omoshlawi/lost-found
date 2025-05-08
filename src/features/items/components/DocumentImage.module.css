@@ -1,0 +1,25 @@
+/* CarouselSlide.module.css */
+.slideContainer {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .actionButtonsGroup {
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Darkened overlay */
+    transition: opacity 0.3s ease;
+    z-index: 1;
+  }
+  
+  .slideContainer:hover .actionButtonsGroup {
+    opacity: 1;
+  }
+  
+  .actionButton {
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+  }
+  
+  .slideContainer:hover .actionButton {
+    transform: scale(1);
+  }

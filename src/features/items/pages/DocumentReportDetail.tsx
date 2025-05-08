@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, Divider } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { ErrorState, launchWorkspace } from '@/components';
+import { showNotification, updateNotification } from '@mantine/notifications';
+import { ErrorState, launchWorkspace, TablerIcon } from '@/components';
+import { handleApiErrors } from '@/lib/api';
 import {
   AdditionalDetails,
   ContactFooter,
@@ -17,14 +19,16 @@ import {
   ReportDocumentImageUploadForm,
   ReportDocumentInfoForm,
 } from '../forms';
-import { useDocumentReport } from '../hooks';
-import { ReportType } from '../types';
+import { useDocumentReport, useDocumentReportApi } from '../hooks';
+import { DocumentImage, ReportType } from '../types';
 import DocumentReportDetailSkeleton from './DocumentReportDetailSkeleton';
 
 const DocumentReportDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
-  const { error, isLoading, report: reportData } = useDocumentReport(reportId || '');
+  const { error, isLoading, report: reportData } = useDocumentReport(reportId);
+  const { mutateDocumentReport, deleteDocumentImage } = useDocumentReportApi();
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   if (isLoading) return <DocumentReportDetailSkeleton />;
   if (error || !reportData)
@@ -63,6 +67,43 @@ const DocumentReportDetail = () => {
     );
   };
 
+  const handleDeleteDocumentImage = async (image: DocumentImage) => {
+    try {
+      setDeleting(true);
+      const id = showNotification({
+        loading: true,
+        title: 'Deleting Image',
+        message: 'please wait ...',
+        autoClose: false,
+        withCloseButton: false,
+      });
+      await deleteDocumentImage(reportData.id, image);
+
+      updateNotification({
+        id,
+        color: 'green',
+        title: 'Success',
+        message: 'Image deleted succesfully',
+        icon: <TablerIcon name="check" size={18} />,
+        loading: false,
+        autoClose: 2000,
+      });
+      mutateDocumentReport();
+    } catch (error) {
+      const e = handleApiErrors(error);
+      if (e.detail) {
+        showNotification({
+          title: `Error Uploading document image`,
+          message: e.detail,
+          color: 'red',
+          position: 'top-right',
+        });
+      }
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <Card shadow="sm" padding="xl" radius="md" withBorder>
       <ReportHeader
@@ -81,6 +122,7 @@ const DocumentReportDetail = () => {
         // images={[{ url: 'https://picsum.photos/200/300' }, { url: 'https://picsum.photos/200' }]}
         images={reportData?.document?.images}
         onUploadImage={launchDocumentImageForm}
+        onDeleteImage={handleDeleteDocumentImage}
       />
       <DocumentInformation
         document={reportData.document}
