@@ -1,16 +1,14 @@
-import { handleApiErrors } from '@/lib/api';
-import { parseDate } from '@/lib/utils';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, Group, Stack } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { Button, Group, Stack } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { handleApiErrors } from '@/lib/api';
+import { parseDate } from '@/lib/utils';
 import { useDocumentReportApi } from '../hooks';
 import { DocumentReport, DocumentReportFormData } from '../types';
-import {
-  _ReportLostOrFoundDocumentSchema
-} from '../utils';
+import { _ReportLostOrFoundDocumentSchema } from '../utils';
 import DocumentFormInputs from './Steps/DocumentFormInputs';
 
 type ReportDocumentInfoFormProps = {
@@ -35,9 +33,19 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
         typeId: report.document?.typeId,
         expiryDate: parseDate(report.document?.expiryDate),
         issuanceDate: parseDate(report.document?.issuanceDate),
-        issuer: report.document?.issuer,
-        ownerName: report.document?.ownerName,
-        serialNumber: report.document?.serialNumber,
+        issuer: report.document?.issuer ?? undefined,
+        ownerName: report.document?.ownerName ?? undefined,
+        serialNumber: report.document?.serialNumber ?? undefined,
+        placeOfIssue: report.document?.placeOfIssue ?? undefined,
+        placeOfBirth: report.document?.placeOfBirth ?? undefined,
+        batchNumber: report.document?.batchNumber ?? undefined,
+        bloodGroup: report.document?.bloodGroup ?? undefined,
+        documentNumber: report.document?.documentNumber ?? undefined,
+        gender: (report.document?.gender as any) ?? undefined,
+        dateOfBirth: parseDate(report.document?.dateOfBirth) ?? undefined,
+        nationality: report.document?.nationality ?? undefined,
+        note: report.document?.note ?? undefined,
+        additionalFields: report.document?.additionalFields ?? undefined,
       },
     },
     resolver: zodResolver(ReportDocumentInfoFormSchema),

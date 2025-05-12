@@ -26,12 +26,9 @@ export interface DocumentReport {
 export interface LostReport {
   id: string;
   reportId: string;
-  identifyingMarks: string;
   createdAt: string;
   updatedAt: string;
   contactPreference: string;
-  urgencyLevel: string;
-  additionalContacts: any;
   voided: boolean;
 }
 export interface FoundReport {
@@ -45,9 +42,28 @@ export interface FoundReport {
   voided: boolean;
 }
 
+export interface DocumentField {
+  id: string;
+  documentId: string;
+  document?: Document;
+  fieldName: string;
+  fieldValue: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Document {
   id: string;
-  serialNumber: string;
+  serialNumber?: string;
+  documentNumber?: string;
+  batchNumber?: string;
+  dateOfBirth?: string;
+  placeOfBirth?: string;
+  gender?: string;
+  nationality?: string;
+  bloodGroup?: string;
+  placeOfIssue?: string;
+  note?: string;
   issuer: string;
   ownerName: string;
   typeId: string;
@@ -58,6 +74,7 @@ export interface Document {
   voided: boolean;
   type: Type;
   images: Array<DocumentImage>;
+  additionalFields?: Array<DocumentField>;
 }
 
 export interface DocumentImage {

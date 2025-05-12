@@ -91,35 +91,6 @@ const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onN
                 />
               )}
             />
-            <Controller
-              control={form.control}
-              name="lost.urgencyLevel"
-              render={({ field, fieldState }) => (
-                <Select
-                  {...field}
-                  label="Ugency level"
-                  data={[
-                    { label: 'Low', value: 'LOW' },
-                    { label: 'Normal', value: 'NORMAL' },
-                    { label: 'High', value: 'HIGH' },
-                    { label: 'Critical', value: 'CRITICAL' },
-                  ]}
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="lost.identifyingMarks"
-              render={({ field, fieldState }) => (
-                <Textarea
-                  {...field}
-                  value={field.value as string}
-                  label="Identifying marks"
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
           </>
         )}
         {observableReportType === 'FOUND' && (

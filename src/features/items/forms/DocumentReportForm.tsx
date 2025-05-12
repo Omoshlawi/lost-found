@@ -38,12 +38,22 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
       landMark: report?.landMark ?? '',
       document: {
         expiryDate: parseDate(report?.document?.expiryDate),
-        images: [],
         issuanceDate: parseDate(report?.document?.issuanceDate),
         issuer: report?.document?.issuer ?? '',
         ownerName: report?.document?.ownerName ?? '',
         serialNumber: report?.document?.serialNumber ?? '',
         typeId: report?.document?.typeId ?? '',
+        additionalFields: report?.document?.additionalFields ?? undefined,
+        batchNumber: report?.document?.batchNumber ?? undefined,
+        bloodGroup: report?.document?.bloodGroup ?? undefined,
+        documentNumber: report?.document?.documentNumber ?? undefined,
+        placeOfIssue: report?.document?.placeOfIssue ?? undefined,
+        placeOfBirth: report?.document?.placeOfBirth ?? undefined,
+        note: report?.document?.note ?? undefined,
+        nationality: report?.document?.nationality ?? undefined,
+        gender: (report?.document?.gender as any) ?? undefined,
+        dateOfBirth: parseDate(report?.document?.dateOfBirth),
+        images: report?.document?.images ?? undefined,
       },
       found:
         defaultType === 'FOUND'
@@ -57,8 +67,6 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
         defaultType === 'LOST'
           ? {
               contactPreference: (report?.lostReport?.contactPreference as any) ?? 'ANY',
-              identifyingMarks: (report?.lostReport?.identifyingMarks as any) ?? '',
-              urgencyLevel: (report?.lostReport?.urgencyLevel as any) ?? 'CRITICAL',
             }
           : undefined,
       lostOrFoundDate: parseDate(report?.lostOrFoundDate, true),

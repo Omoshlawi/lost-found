@@ -1,34 +1,42 @@
 import { z } from 'zod';
 
-export const DocumentTypeSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().nullable().optional(),
-  icon: z.string().min(1, 'Icon required').optional(),
-  isActive: z.boolean().optional(),
-  replacementInstructions: z.string().optional(),
-  averageReplacementCost: z.number({ coerce: true }).optional(),
-  requiredVerification: z.enum(['LOW', 'STANDARD', 'HIGH', 'INSTITUTIONAL']),
-});
+export const DocumentImageSchema = z
+  .object({
+    url: z.string().min(1, 'Required'),
+    imageType: z.enum(['FRONT', 'BACK', 'FULL']).optional(),
+    ocrText: z.string().optional(),
+  })
+  .array();
 
-export const DocumentImageSchema = z.object({
-  url: z.string().min(1, 'Required'),
+export const DocumentFieldSchema = z.object({
+  documentId: z.string().uuid(),
+  fieldName: z.string().min(1, 'Required'),
+  fieldValue: z.string().min(1, 'Required'),
 });
 
 export const DocumentSchema = z.object({
   serialNumber: z.string().optional(),
+  documentNumber: z.string().optional(),
+  batchNumber: z.string().optional(),
   issuer: z.string().optional(),
   ownerName: z.string().min(1, 'Owner name required'),
+  dateOfBirth: z.date({ coerce: true }).optional(),
+  placeOfBirth: z.string().optional(),
+  placeOfIssue: z.string().optional(),
+  gender: z.enum(['Male', 'Female']).optional(),
+  nationality: z.string().optional(),
+  bloodGroup: z.string().optional(),
+  note: z.string().optional(),
   typeId: z.string().min(1, 'Type required'),
   issuanceDate: z.date({ coerce: true }).optional(),
   expiryDate: z.date({ coerce: true }).optional(),
-  images: DocumentImageSchema.array().optional(),
+  images: DocumentImageSchema.optional(),
+  additionalFields: DocumentFieldSchema.omit({ documentId: true }).array().optional(),
 });
 
 export const LostDocumentReportSchema = z.object({
   reportId: z.string().min(1, 'Report required').uuid(),
-  identifyingMarks: z.string().optional().optional(),
-  contactPreference: z.enum(['APP', 'EMAIL', 'PHONE', 'ANY']),
-  urgencyLevel: z.enum(['LOW', 'NORMAL', 'HIGH', 'CRITICAL']),
+  contactPreference: z.enum(['APP', 'EMAIL', 'PHONE', 'ANY']).optional(),
 });
 
 export const FoundDocumentReportSchema = z.object({
