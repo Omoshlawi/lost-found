@@ -40,7 +40,11 @@ export const getStatusColor = (status: string | undefined, colorScheme: 'dark' |
   }
 };
 
-export const getBackgroundColor = (color: string, theme: MantineTheme, colorScheme: 'dark' | 'light') => {
+export const getBackgroundColor = (
+  color: string,
+  theme: MantineTheme,
+  colorScheme: 'dark' | 'light'
+) => {
   if (colorScheme === 'dark') {
     switch (color) {
       case 'blue':

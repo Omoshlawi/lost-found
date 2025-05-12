@@ -91,10 +91,7 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
             <Text fw={700}>Date Lost:</Text>
             <Text>{formatDate(lostOrFoundDate)}</Text>
           </Grid.Col>
-          <Grid.Col span={12}>
-            <Text fw={700}>Identifying Marks:</Text>
-            <Text> {lostReport?.identifyingMarks || 'None specified'}</Text>
-          </Grid.Col>
+
           <Common />
         </Grid>
       </Paper>

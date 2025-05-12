@@ -12,13 +12,13 @@ import {
 } from '@mantine/core';
 import { TablerIcon, TablerIconName } from '@/components';
 import { ReportType } from '../types';
-import { getStatusColor, getUrgencyColor } from '../utils/reportUtils';
+import { getStatusColor } from '../utils/reportUtils';
 
 interface ReportHeaderProps {
   docType: string;
   docId: string;
   status: string;
-  urgencyLevel?: string;
+  pointAwarded?: number;
   docTypeIcon: string;
   reportType: ReportType;
   onUpdateReportDetails?: () => void;
@@ -28,7 +28,7 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
   docType,
   docId,
   status,
-  urgencyLevel,
+  pointAwarded,
   docTypeIcon,
   reportType,
   onUpdateReportDetails,
@@ -52,19 +52,17 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
         <Badge size="lg" color={getStatusColor(status, colorScheme)} variant="filled">
           {status}
         </Badge>
-        {reportType === 'Lost' && (
-          <Badge
-            size="lg"
-            color={getUrgencyColor(urgencyLevel, colorScheme) as any}
-            variant="outline"
-          >
-            {urgencyLevel} Urgency
+        {/* {reportType === 'Lost' && (
+          <Badge size="lg" color={colorScheme === 'dark' ? 'green.7' : 'green'} variant="outline">
+            {pointAwarded} Points
           </Badge>
-        )}
+        )} */}
         {reportType === 'Found' && (
-          <Badge size="lg" color="green" variant="outline">
-            Ready for Handover
-          </Badge>
+          <Tooltip label="Points are awarded when document is reunited with owner succesfully">
+            <Badge size="lg" color={colorScheme === 'dark' ? 'green.7' : 'green'} variant="outline">
+              {pointAwarded} Points
+            </Badge>
+          </Tooltip>
         )}
         <Flex flex={1} />
         <Tooltip label="Update Report Information">

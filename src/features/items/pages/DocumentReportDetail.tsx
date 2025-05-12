@@ -41,7 +41,6 @@ const DocumentReportDetail = () => {
   const docTypeIcon = reportData.document?.type?.icon || 'id';
   const docId = reportData.id ? reportData.id.substring(0, 8) + '...' : 'Unknown';
   const status = reportData.status || 'PENDING';
-  const urgencyLevel = reportData.lostReport?.urgencyLevel || 'MEDIUM';
   const contactPreference = reportData.lostReport?.contactPreference || 'EMAIL';
   const isLostReport = reportData.lostReport !== null;
   const isFoundReport = reportData.foundReport !== null;
@@ -110,7 +109,7 @@ const DocumentReportDetail = () => {
         docType={docType}
         docId={docId}
         status={status}
-        urgencyLevel={urgencyLevel}
+        pointAwarded={reportData.foundReport?.pointAwarded ?? 0}
         docTypeIcon={docTypeIcon}
         reportType={reportType}
         onUpdateReportDetails={launchDocumentReportInfoForm}
@@ -156,7 +155,7 @@ const DocumentReportDetail = () => {
 
       <ContactFooter
         contactPreference={contactPreference}
-        urgencyLevel={urgencyLevel}
+        urgencyLevel={'MEDIUM'}
         reportType={reportType}
         handoverPreference={reportData?.foundReport?.handoverPreference}
       />

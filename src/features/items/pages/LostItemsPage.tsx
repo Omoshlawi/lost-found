@@ -65,7 +65,6 @@ const LostItemspage = () => {
         'Landmark',
         'Status',
         'Contact preference',
-        'Urgency',
         'Created at',
         'Updated at',
         'Actions',
@@ -81,7 +80,6 @@ const LostItemspage = () => {
         docType.landMark ?? '--',
         docType.status ?? '--',
         docType?.lostReport?.contactPreference ?? '--',
-        docType?.lostReport?.urgencyLevel ?? '--',
         new Date(docType.createdAt).toDateString(),
         new Date(docType.updatedAt).toDateString(),
         <Menu shadow="md" width={200}>

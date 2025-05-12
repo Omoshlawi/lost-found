@@ -37,6 +37,7 @@ export interface FoundReport {
   createdAt: string;
   updatedAt: string;
   handoverPreference: string;
+  pointAwarded: number;
   securityQuestion: any;
   securityAnswer: any;
   voided: boolean;
