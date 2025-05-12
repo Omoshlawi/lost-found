@@ -60,7 +60,7 @@ export interface Document {
   batchNumber?: string;
   dateOfBirth?: string;
   placeOfBirth?: string;
-  gender?: string;
+  gender?: 'Male' | 'Female' | 'Unknown';
   nationality?: string;
   bloodGroup?: string;
   placeOfIssue?: string;

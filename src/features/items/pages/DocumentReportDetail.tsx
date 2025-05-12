@@ -155,7 +155,6 @@ const DocumentReportDetail = () => {
 
       <ContactFooter
         contactPreference={contactPreference}
-        urgencyLevel={'MEDIUM'}
         reportType={reportType}
         handoverPreference={reportData?.foundReport?.handoverPreference}
       />

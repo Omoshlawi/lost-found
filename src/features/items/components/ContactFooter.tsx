@@ -14,14 +14,13 @@ import { getUrgencyColor } from '../utils/reportUtils';
 
 interface ContactFooterProps {
   contactPreference: string;
-  urgencyLevel: string;
   handoverPreference?: string;
   reportType: ReportType;
 }
 
 const ContactFooter: React.FC<ContactFooterProps> = ({
   contactPreference,
-  urgencyLevel,
+
   reportType,
   handoverPreference,
 }) => {
@@ -50,13 +49,13 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
               <Text fw={700}>{contactPreference}</Text>
             </div>
           </Group>
-          <Badge
+          {/* <Badge
             size="lg"
             variant="outline"
             color={getUrgencyColor(urgencyLevel, colorScheme) as any}
           >
             {urgencyLevel} Priority
-          </Badge>
+          </Badge> */}
         </Group>
       </Paper>
     );

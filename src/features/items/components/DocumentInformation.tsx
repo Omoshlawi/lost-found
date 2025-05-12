@@ -53,29 +53,69 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, onUpdateReport
       </Group>
 
       <Grid>
-        <Grid.Col span={6}>
+        <Grid.Col span={4}>
           <Text fw={700}>Owner:</Text>
           <Text>{document?.ownerName || 'Not specified'}</Text>
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={4}>
           <Text fw={700}>Document Type:</Text>
           <Text>{document?.type?.name || 'Unknown'}</Text>
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={4}>
           <Text fw={700}>Serial Number:</Text>
           <Text>{document?.serialNumber || 'Not available'}</Text>
         </Grid.Col>
-        <Grid.Col span={6}>
-          <Text fw={700}>Issuer:</Text>
-          <Text>{document?.issuer || 'Not specified'}</Text>
+        <Grid.Col span={4}>
+          <Text fw={700}>Document Number:</Text>
+          <Text>{document?.documentNumber || 'Not available'}</Text>
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={4}>
+          <Text fw={700}>Batch Number:</Text>
+          <Text>{document?.batchNumber || 'Not available'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Gender:</Text>
+          <Text>{document?.gender || 'Unknown'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Place of birth:</Text>
+          <Text>{document?.placeOfBirth || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Date of birth:</Text>
+          <Text>{formatDate(document?.dateOfBirth)}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Issuer:</Text>
+          <Text>{document?.issuer || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Place of issue:</Text>
+          <Text>{document?.placeOfIssue || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Nationality:</Text>
+          <Text>{document?.nationality || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Blood Group:</Text>
+          <Text>{document?.bloodGroup || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
           <Text fw={700}>Issuance Date:</Text>
           <Text>{formatDate(document?.issuanceDate)}</Text>
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={4}>
           <Text fw={700}>Expiry Date:</Text>
           <Text>{formatDate(document?.expiryDate)}</Text>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Text fw={700}>Expiry Date:</Text>
+          <Text>{formatDate(document?.expiryDate)}</Text>
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <Text fw={700}>Additional notes:</Text>
+          <Text>{document?.note ?? 'Not available'}</Text>
         </Grid.Col>
       </Grid>
     </Paper>

@@ -23,7 +23,7 @@ export const DocumentSchema = z.object({
   dateOfBirth: z.date({ coerce: true }).optional(),
   placeOfBirth: z.string().optional(),
   placeOfIssue: z.string().optional(),
-  gender: z.enum(['Male', 'Female']).optional(),
+  gender: z.enum(['Male', 'Female', "Unknown"]).optional(),
   nationality: z.string().optional(),
   bloodGroup: z.string().optional(),
   note: z.string().optional(),
