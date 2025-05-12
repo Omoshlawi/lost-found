@@ -36,11 +36,11 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
     defaultValues: {
       name: documentType?.name ?? '',
       averageReplacementCost: documentType?.averageReplacementCost ?? 0,
-      isActive: documentType?.isActive ?? true,
       description: documentType?.description ?? '',
       icon: documentType?.icon ?? '',
       replacementInstructions: documentType?.replacementInstructions ?? '',
-      requiredVerification: documentType?.requiredVerification ?? 'STANDARD',
+      category: documentType?.category,
+      loyaltyPoints: documentType?.loyaltyPoints ?? 0,
     },
     resolver: zodResolver(DocumentTypeSchema),
   });
@@ -102,6 +102,31 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
           />
           <Controller
             control={form.control}
+            name="category"
+            render={({ field, fieldState }) => (
+              <Select
+                data={[
+                  { value: 'IDENTITY', label: 'Identity' },
+                  { value: 'ACADEMIC', label: 'Academic' },
+                  { value: 'PROFESSIONAL', label: 'Professional' },
+                  { value: 'VEHICLE', label: 'Vehicle' },
+                  { value: 'FINANCIAL', label: 'Financial' },
+                  { value: 'MEDICAL', label: 'Medical' },
+                  { value: 'LEGAL', label: 'Legal' },
+                  { value: 'OTHER', label: 'Other' },
+                ]}
+                label="Category"
+                value={field.value}
+                placeholder="Document type category"
+                onChange={(_value, option) => field.onChange(_value)}
+                error={fieldState.error?.message}
+                ref={field.ref}
+                clearable
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
             name="averageReplacementCost"
             render={({ field, fieldState }) => (
               <NumberInput
@@ -109,6 +134,18 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
                 label="Average replacement cost"
                 error={fieldState.error?.message}
                 placeholder=""
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="loyaltyPoints"
+            render={({ field, fieldState }) => (
+              <NumberInput
+                {...field}
+                label="Loyalty points"
+                error={fieldState.error?.message}
+                placeholder="Loyalty points awarded"
               />
             )}
           />
@@ -138,26 +175,7 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
               />
             )}
           />
-          <Controller
-            control={form.control}
-            name="requiredVerification"
-            render={({ field, fieldState }) => (
-              <Select
-                data={[
-                  { value: 'LOW', label: 'Low' },
-                  { value: 'STANDARD', label: 'Standard' },
-                  { value: 'HIGH', label: 'High' },
-                  { value: 'INSTITUTIONAL', label: 'Institutional' },
-                ]}
-                label="Required verification"
-                value={field.value}
-                onChange={(_value, option) => field.onChange(_value)}
-                error={fieldState.error?.message}
-                ref={field.ref}
-                clearable
-              />
-            )}
-          />
+
           <Controller
             control={form.control}
             name="icon"
@@ -182,21 +200,6 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
                     )}
                   </Group>
                 )}
-              />
-            )}
-          />
-
-          <Controller
-            control={form.control}
-            name="isActive"
-            render={({ field, fieldState }) => (
-              <Checkbox
-                ref={field.ref}
-                checked={field.value}
-                onToggle={(e) => field.onChange(e.currentTarget.checked)}
-                title="Is active"
-                label="Is active"
-                error={fieldState.error?.message}
               />
             )}
           />

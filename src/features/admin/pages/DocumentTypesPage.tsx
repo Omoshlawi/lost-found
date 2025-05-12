@@ -76,7 +76,6 @@ const DocumentTypesPage = () => {
         'Created at',
         'Updated at',
         'Average Replacement Cost',
-        'Required Verification',
         'Voided',
         'Actions',
       ],
@@ -86,8 +85,10 @@ const DocumentTypesPage = () => {
         new Date(docType.createdAt).toDateString(),
         new Date(docType.updatedAt).toDateString(),
         docType.averageReplacementCost,
-        docType.requiredVerification,
-        docType.voided,
+        <TablerIcon
+          name={docType.voided ? 'circleDashedCheck' : 'circleDashedX'}
+          color={docType.voided ? 'green' : 'red'}
+        />,
         <Menu shadow="md" width={200}>
           <Menu.Target>
             <ActionIcon variant="outline" aria-label="Settings">
@@ -123,7 +124,13 @@ const DocumentTypesPage = () => {
   if (isLoading) return <TableSkeleton />;
   if (error) return <ErrorState headerTitle="Document types" error={error} />;
   if (documentTypes.length === 0)
-    return <EmptyState headerTitle="Document types" message="No document types" onAdd={() => {}} />;
+    return (
+      <EmptyState
+        headerTitle="Document types"
+        message="No document types"
+        onAdd={() => handleLaunchFormWorkspace()}
+      />
+    );
   return (
     <TableContainer
       title="Document types"
