@@ -1,6 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import {
+  FieldArrayPath,
+  FieldName,
+  FieldPath,
+  FormProvider,
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
 import { Box, Tabs } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
@@ -18,6 +25,8 @@ type DocumentReportFormProps = {
   onSuccess?: (report: DocumentReport) => void;
   closeWorkspace?: () => void;
 };
+
+type FormSteps = 'basic' | 'document' | 'address';
 
 const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
   onSuccess,
@@ -76,12 +85,12 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
     resolver: zodResolver(ReportLostOrFoundDocumentSchema),
   });
   const isMobile = useMediaQuery('(max-width: 48em)');
-  const [activeTab, setActiveTab] = useState<'basic' | 'document' | 'address' | null>('basic');
+  const [activeTab, setActiveTab] = useState<FormSteps | null>('basic');
   const { createDocumentReport, updateDocumentReport, mutateDocumentReport } =
     useDocumentReportApi();
   useEffect(() => {
     if (form.formState.errors) {
-      const fieldSteps = {
+      const fieldSteps: Record<FormSteps, Array<FieldPath<DocumentReportFormData>>> = {
         basic: [
           'type',
           'description',
@@ -89,8 +98,6 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
           'lostOrFoundDate',
           'found.handoverPreference',
           'lost.contactPreference',
-          'lost.urgencyLevel',
-          'lost.identifyingMarks',
         ],
         address: ['countyCode', 'subCountyCode', 'wardCode', 'landMark'],
         document: [
@@ -101,6 +108,16 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
           'document.issuer',
           'document.ownerName',
           'document.serialNumber',
+          'document.documentNumber',
+          'document.additionalFields',
+          'document.batchNumber',
+          'document.bloodGroup',
+          'document.dateOfBirth',
+          'document.placeOfBirth',
+          'document.placeOfIssue',
+          'document.gender',
+          'document.nationality',
+          'document.note',
         ],
       };
       for (const [step, fields] of Object.entries(fieldSteps)) {

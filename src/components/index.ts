@@ -5,3 +5,4 @@ export * from './ComponentSkeletons';
 export * from './StateWidgets';
 export * from './Workspace';
 export * from './TableContainer';
+export * from './ImagePicker';
