@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { TokenPair, useSessionStore } from '@/lib/global-store';
-import { useSecureStorage } from '@/lib/storage';
+import { useLocalStorage } from '@/lib/storage';
 import { decodeJWTtoken, SESSION_TOKEN_KEY } from '../utils';
 import { useAuthAPi } from './useAuthApi';
 
 const useLoadInitialAuthState = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [token, setToken] = useSecureStorage<TokenPair>(SESSION_TOKEN_KEY);
+  const [token, setToken] = useLocalStorage<TokenPair>(SESSION_TOKEN_KEY);
   const updateSessionStore = useSessionStore((state) => state.update);
   const updateSessionToken = useSessionStore((state) => state.setSessionToken);
   const { getSessionUserByToken } = useAuthAPi();

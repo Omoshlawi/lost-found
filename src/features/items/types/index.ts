@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DocumentReportSchema, ReportLostOrFoundDocumentSchema } from '../utils';
+import { DocumentReportSchema, ImageProcessOptionsSchema, ReportLostOrFoundDocumentSchema } from '../utils';
 
 export interface DocumentReport {
   id: string;
@@ -119,5 +119,5 @@ export interface Ward {
 }
 
 export type DocumentReportFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
-
+export type ImageProcessFormValues = z.infer<typeof ImageProcessOptionsSchema>;
 export type ReportType = 'Lost' | 'Found' | 'Unknown';

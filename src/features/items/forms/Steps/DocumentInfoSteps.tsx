@@ -1,7 +1,10 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Button, Group, Stack } from '@mantine/core';
+import { ActionIcon, Button, Card, Group, Stack, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { TablerIcon } from '@/components';
 import { DocumentReportFormData } from '../../types';
+import DocumentScanForm from '../DocumentScanForm';
 import DocumentFormInputs from './DocumentFormInputs';
 
 type DocumentInfoStepsProps = {
@@ -13,6 +16,30 @@ const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => 
   return (
     <Stack justify="space-between" flex={1} h={'100%'}>
       <Stack>
+        <Card p={0}>
+          <Stack gap={0} justify="center">
+            <ActionIcon
+              size="xxl"
+              aria-label="Custom xxl size"
+              variant="light"
+              component={Stack}
+              gap={'md'}
+              onClick={() => {
+                modals.open({
+                  fullScreen: true,
+                  title: 'Scan document',
+                  children: <DocumentScanForm />,
+                });
+              }}
+            >
+              <TablerIcon name="scan" size={80} />
+              <br />
+            </ActionIcon>
+            <Text style={{ textAlign: 'center' }} p={'sm'}>
+              Scan Document
+            </Text>
+          </Stack>
+        </Card>
         <DocumentFormInputs />
       </Stack>
       <Group gap={1}>

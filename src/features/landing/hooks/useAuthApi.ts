@@ -1,16 +1,14 @@
-import { TokenPair, useSessionStore } from "@/lib/global-store";
-import { LoginFormData, RegistrationFormData, User } from "../types";
-import { decodeJWTtoken, SESSION_TOKEN_KEY } from "../utils";
-import { apiFetch } from "@/lib/api";
-import { useSecureStorage } from "@/lib/storage";
+import { apiFetch } from '@/lib/api';
+import { TokenPair, useSessionStore } from '@/lib/global-store';
+import { useLocalStorage } from '@/lib/storage';
+import { LoginFormData, RegistrationFormData, User } from '../types';
+import { decodeJWTtoken, SESSION_TOKEN_KEY } from '../utils';
+
 const loginUser = async (data: LoginFormData) => {
-  const resp = await apiFetch<{ user: User; token: TokenPair }>(
-    "/auth/signin/credentials",
-    {
-      data: data,
-      method: "POST",
-    }
-  );
+  const resp = await apiFetch<{ user: User; token: TokenPair }>('/auth/signin/credentials', {
+    data: data,
+    method: 'POST',
+  });
   const responseData = resp.data;
 
   useSessionStore.setState((state) => ({
@@ -26,10 +24,10 @@ const loginUser = async (data: LoginFormData) => {
   return responseData;
 };
 const registerUser = async (data: RegistrationFormData) => {
-  const resp = await apiFetch<{ user: User; token: TokenPair }>(
-    "/auth/signup",
-    { data: data, method: "POST" }
-  );
+  const resp = await apiFetch<{ user: User; token: TokenPair }>('/auth/signup', {
+    data: data,
+    method: 'POST',
+  });
   const responseData = resp.data;
   useSessionStore.setState((state) => ({
     ...state,
@@ -44,10 +42,10 @@ const registerUser = async (data: RegistrationFormData) => {
 };
 
 const getSessionUserByToken = async (token: string) => {
-  const v = "custom:include(person,accounts)";
-  const resp = await apiFetch<User>("/users/profile", {
+  const v = 'custom:include(person,accounts)';
+  const resp = await apiFetch<User>('/users/profile', {
     params: { v },
-    headers: { "x-access-token": token },
+    headers: { 'x-access-token': token },
   });
   const responseData = resp.data;
   useSessionStore.setState((state) => ({
@@ -73,7 +71,7 @@ const logoutUser = () => {
 };
 
 export const useAuthAPi = () => {
-  const [, setToken] = useSecureStorage<TokenPair>(SESSION_TOKEN_KEY);
+  const [, setToken] = useLocalStorage<TokenPair>(SESSION_TOKEN_KEY);
 
   return {
     loginUser: async (data: LoginFormData) => {

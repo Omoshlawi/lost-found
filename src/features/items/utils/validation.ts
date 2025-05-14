@@ -23,7 +23,7 @@ export const DocumentSchema = z.object({
   dateOfBirth: z.date({ coerce: true }).optional(),
   placeOfBirth: z.string().optional(),
   placeOfIssue: z.string().optional(),
-  gender: z.enum(['Male', 'Female', "Unknown"]).optional(),
+  gender: z.enum(['Male', 'Female', 'Unknown']).optional(),
   nationality: z.string().optional(),
   bloodGroup: z.string().optional(),
   note: z.string().optional(),
@@ -121,3 +121,54 @@ export const ReportLostOrFoundDocumentPartialSchema = _ReportLostOrFoundDocument
       path: ['found'],
     }
   );
+
+export const ImageProcessOptionsSchema = z.object({
+  width: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  height: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  fit: z.enum(['cover', 'contain', 'fill', 'inside', 'outside']).optional(),
+  grayScale: z.boolean().optional(),
+  contrast: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  brightness: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  hue: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  saturation: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  lightness: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  sharpness: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  blur: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+  normalize: z.boolean().optional(),
+  threshold: z
+    .number({ coerce: true })
+    .refine((n) => n !== 0, 'Cannot be zero')
+    .optional(),
+});
+
+export const OCRImageProcessingOptions = ImageProcessOptionsSchema.extend({
+  path: z.string().min(1, 'Required').startsWith('uploads', 'Invalid file path').optional(),
+  mode: z.enum(['preview', 'scanned']).optional().optional(),
+});
