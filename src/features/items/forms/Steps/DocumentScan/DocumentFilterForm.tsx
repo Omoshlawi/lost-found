@@ -47,8 +47,6 @@ const DocumentFilterForm: React.FC<DocumentFilterFormProps> = ({ onSubmit }) => 
   return (
     <form onSubmit={onSubmit ? handleSubmit(onSubmit) : undefined}>
       <Stack>
-        <pre>{JSON.stringify({ values: watch(), errors,  }, null, 2)}</pre>
-
         <Title order={4} c={theme.primaryColor}>
           Dimensions
         </Title>

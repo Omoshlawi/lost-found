@@ -1,9 +1,8 @@
+import { apiFetch, constructUrl, useApi } from '@/lib/api';
 import { useEffect } from 'react';
-import useSWR from 'swr';
-import { apiFetch, constructUrl } from '@/lib/api';
 import { ImageProcessFormValues } from '../types';
 
-const useFilteredImage = (file?: File, filters: Partial<ImageProcessFormValues> = {}) => {
+const useFilteredImage = (file?: File, filters: ImageProcessFormValues = {}) => {
   const url = constructUrl('/files/ocr', {
     ...Object.fromEntries(
       Object.entries(filters).filter(([key, val]) => {
@@ -24,7 +23,7 @@ const useFilteredImage = (file?: File, filters: Partial<ImageProcessFormValues> 
     const blob = response.data;
     return { data: URL.createObjectURL(blob) };
   };
-  const { data, error, isLoading, mutate } = useSWR<{ data: string }>(
+  const { data, error, isLoading, mutate } = useApi<{ data: string }>(
     // Add file as part of the key to trigger refetch
     file ? url : null,
     fetcher

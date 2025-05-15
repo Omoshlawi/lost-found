@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { DocumentReportSchema, ImageProcessOptionsSchema, ReportLostOrFoundDocumentSchema } from '../utils';
+import {
+  DocumentReportSchema,
+  ImageProcessOptionsSchema,
+  ReportLostOrFoundDocumentSchema,
+} from '../utils';
 
 export interface DocumentReport {
   id: string;
@@ -117,7 +121,11 @@ export interface Ward {
   countyCode: string;
   subCountyCode: string;
 }
-
+export interface ImageScanResult {
+  text: string;
+  job: string;
+  info: Record<string, any>;
+}
 export type DocumentReportFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
 export type ImageProcessFormValues = z.infer<typeof ImageProcessOptionsSchema>;
 export type ReportType = 'Lost' | 'Found' | 'Unknown';

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -15,22 +15,21 @@ import {
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import useFilteredImage from '@/features/items/hooks/useFilteredImage';
+import { useFilteredImage } from '@/features/items/hooks';
 import { ImageProcessFormValues } from '@/features/items/types';
 import { handleApiErrors } from '@/lib/api';
 
 type ImageUploadAndPreviewProps = {
   filters?: Partial<ImageProcessFormValues>;
+  onScanDocument?: (file: FileWithPath) => void;
 };
-const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({ filters }) => {
+const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({
+  filters,
+  onScanDocument,
+}) => {
   const colorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
   const [files, setFiles] = useState<FileWithPath[]>([]);
-  const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState(false);
-  const [extractedText, setExtractedText] = useState('');
-  const [jsonData, setJsonData] = useState<any>(null);
-  const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [previewMode, setPreviewMode] = useState<'original' | 'filtered'>('original');
   const {
     image: filteredImage,
@@ -78,13 +77,7 @@ const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({ filters }
         </Title>
         <Dropzone
           accept={IMAGE_MIME_TYPE}
-          onDrop={(files) => {
-            setFiles(files);
-            setScanned(false);
-            setExtractedText('');
-            setJsonData(null);
-            setSelectedFields([]);
-          }}
+          onDrop={setFiles}
           maxFiles={1}
           onReject={(files) => {
             showNotification({
@@ -165,7 +158,7 @@ const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({ filters }
                 h={300}
                 w="100%"
                 radius="md"
-                // fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+                fallbackSrc="https://placehold.co/600x400?text=Placeholder"
               />
             </Box>
           </Card.Section>
@@ -174,11 +167,14 @@ const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({ filters }
             <Group justify="center">
               <Button
                 leftSection={<TablerIcon name="scan" size={20} />}
-                loading={scanning}
                 size="md"
                 fullWidth
+                onClick={async () => {
+                  onScanDocument?.(files[0]);
+                }}
+                loading={isFilteredImageLoading}
               >
-                {scanning ? 'Scanning...' : 'Scan Document'}
+                'Scan Document'
               </Button>
             </Group>
           </Card.Section>
