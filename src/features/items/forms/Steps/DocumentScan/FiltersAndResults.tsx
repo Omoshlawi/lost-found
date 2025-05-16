@@ -7,63 +7,6 @@ import { ImageProcessFormValues, ImageScanResult } from '@/features/items/types'
 import DocumentFilterForm from './DocumentFilterForm';
 import DocumentScanExtractionResults from './DocumentScanExtractionResults';
 
-// Mock data for demonstration
-const mockExtractedText = `INVOICE
-Invoice Number: INV-2023-0042
-Date: May 13, 2023
-
-Bill To:
-John Smith
-123 Main Street
-Anytown, CA 12345
-
-Description                 Quantity    Price    Amount
-Web Development Services    40 hours    $75      $3,000
-UI/UX Design                15 hours    $85      $1,275
-Server Configuration        5 hours     $95      $475
-
-Subtotal: $4,750
-Tax (8%): $380
-Total: $5,130
-
-Payment due within 30 days.
-Thank you for your business!`;
-
-const mockJsonData = {
-  invoiceNumber: 'INV-2023-0042',
-  date: 'May 13, 2023',
-  billTo: {
-    name: 'John Smith',
-    address: '123 Main Street',
-    city: 'Anytown',
-    state: 'CA',
-    zip: '12345',
-  },
-  items: [
-    {
-      description: 'Web Development Services',
-      quantity: '40 hours',
-      price: '$75',
-      amount: '$3,000',
-    },
-    {
-      description: 'UI/UX Design',
-      quantity: '15 hours',
-      price: '$85',
-      amount: '$1,275',
-    },
-    {
-      description: 'Server Configuration',
-      quantity: '5 hours',
-      price: '$95',
-      amount: '$475',
-    },
-  ],
-  subtotal: '$4,750',
-  tax: '$380',
-  total: '$5,130',
-};
-
 type FiltersAndResultsProps = {
   onExtractionDone?: (extractionResults: ImageScanResult) => void;
   onApplyFilters?: (filters: ImageProcessFormValues) => void;
@@ -117,7 +60,7 @@ const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
           <Tabs.Panel value="results" pt="md">
             <DocumentScanExtractionResults
               extractedText={data.text}
-              extractedinfo={{ data: data.info }}
+              extractedinfo={data.info}
             />
           </Tabs.Panel>
         )}

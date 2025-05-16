@@ -6,6 +6,7 @@ import {
   Button,
   Divider,
   NumberInput,
+  ScrollArea,
   Select,
   SimpleGrid,
   Slider,
@@ -45,6 +46,7 @@ const DocumentFilterForm: React.FC<DocumentFilterFormProps> = ({ onSubmit }) => 
   });
 
   return (
+    // <ScrollArea h={450}>
     <form onSubmit={onSubmit ? handleSubmit(onSubmit) : undefined}>
       <Stack>
         <Title order={4} c={theme.primaryColor}>
@@ -358,6 +360,7 @@ const DocumentFilterForm: React.FC<DocumentFilterFormProps> = ({ onSubmit }) => 
         </Button>
       </Stack>
     </form>
+    // </ScrollArea>
   );
 };
 
