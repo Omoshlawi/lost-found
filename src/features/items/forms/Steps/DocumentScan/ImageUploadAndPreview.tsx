@@ -6,6 +6,7 @@ import {
   Group,
   Image,
   SegmentedControl,
+  Skeleton,
   Stack,
   Text,
   Title,
@@ -151,15 +152,19 @@ const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({
               bg={colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0]}
               style={{ borderRadius: theme.radius.md }}
             >
-              <Image
-                src={previewMode === 'original' ? originalImageUrl : filteredImage}
-                alt="Document preview"
-                fit="contain"
-                h={300}
-                w="100%"
-                radius="md"
-                fallbackSrc="https://placehold.co/600x400?text=Placeholder"
-              />
+              {isFilteredImageLoading ? (
+                <Skeleton height={'100%'} w={'100%'} radius={'xs'} />
+              ) : (
+                <Image
+                  src={previewMode === 'original' ? originalImageUrl : filteredImage}
+                  alt="Document preview"
+                  fit="contain"
+                  h={300}
+                  w="100%"
+                  radius="md"
+                  fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+                />
+              )}
             </Box>
           </Card.Section>
 

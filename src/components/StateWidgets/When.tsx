@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 // Type for SWR-like async states
 interface AsyncState<TData, TError = Error> {
@@ -12,6 +12,7 @@ interface WhenProps<TData, TError = Error> {
   error?: (error: TError) => React.ReactElement;
   success?: (data: TData) => React.ReactElement;
   asyncState: AsyncState<TData, TError>;
+  elseRender?: () => React.ReactElement;
 }
 
 /**
@@ -22,6 +23,7 @@ const When = <TData, TError = Error>({
   loading,
   error,
   success,
+  elseRender,
   asyncState: { isLoading, error: errorState, data },
 }: WhenProps<TData, TError>): React.ReactElement | null => {
   // Loading state
@@ -39,6 +41,7 @@ const When = <TData, TError = Error>({
     return <>{success(data)}</>;
   }
 
+  if (typeof elseRender === 'function') return elseRender!();
   return null;
 };
 

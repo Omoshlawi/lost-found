@@ -58,7 +58,7 @@ const DocumentScanExtractionResults: React.FC<DocumentScanExtractionResultsProps
           JSON
         </Tabs.Tab>
         <Tabs.Tab value="fields" leftSection={<TablerIcon name="listCheck" size={16} />}>
-          Important Fields
+          Import Fields
         </Tabs.Tab>
       </Tabs.List>
 
@@ -95,7 +95,7 @@ const DocumentScanExtractionResults: React.FC<DocumentScanExtractionResultsProps
         {/* <ScrollArea h={450}> */}
         <Stack>
           <Title order={4} c={theme.primaryColor}>
-            Select Important Fields
+            Select Fields To Import
           </Title>
           {flattentedInfo.map(([key, value]) => (
             <Checkbox
