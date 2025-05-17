@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { FieldPath, Path } from './path';
+
 export const getNameInitials = (name: string) => {
   const nameParts = name.split(' ');
   if (nameParts.length === 1) {
