@@ -82,7 +82,7 @@ export function unflattenArray(arr: FlattenedArray): UnflattenedObject {
   return result;
 }
 
-type KeyValuePairs = [string, string][];
+type KeyValuePairs = [string, any][]; // Values now preserve their original types
 
 export function flattenObjectToPairs(obj: NestedObject, parentKey: string = ''): KeyValuePairs {
   const result: KeyValuePairs = [];
@@ -94,16 +94,36 @@ export function flattenObjectToPairs(obj: NestedObject, parentKey: string = ''):
       result.push(...flattenObjectToPairs(value, accessor));
     } else if (Array.isArray(value)) {
       value.forEach((item, index) => {
-        const arrayAccessor = `${accessor}.${index}`;
+        const arrayAccessor = `${accessor}.${index}`; // Keeps original ".index" format
         if (typeof item === 'object' && item !== null) {
           result.push(...flattenObjectToPairs(item, arrayAccessor));
         } else {
-          result.push([arrayAccessor, JSON.stringify(item)]);
+          result.push([arrayAccessor, item]); // Stores raw value (no stringification)
         }
       });
     } else {
-      result.push([accessor, JSON.stringify(value)]);
+      result.push([accessor, value]); // Stores raw value (no stringification)
     }
+  });
+
+  return result;
+}
+
+export function unflattenPairsToObject(pairs: KeyValuePairs): UnflattenedObject {
+  const result: UnflattenedObject = {};
+
+  pairs.forEach(([accessor, value]) => {
+    const keys = accessor.split('.');
+    let current = result;
+
+    keys.forEach((key, index) => {
+      if (index === keys.length - 1) {
+        current[key] = value; // Uses raw value directly
+      } else {
+        current[key] = current[key] || (isNaN(parseInt(keys[index + 1] || '')) ? {} : []);
+        current = current[key];
+      }
+    });
   });
 
   return result;

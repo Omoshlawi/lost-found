@@ -8,17 +8,17 @@ import DocumentFilterForm from './DocumentFilterForm';
 import DocumentScanExtractionResults from './DocumentScanExtractionResults';
 
 type FiltersAndResultsProps = {
-  onExtractionDone?: (extractionResults: ImageScanResult) => void;
   onApplyFilters?: (filters: ImageProcessFormValues) => void;
   file?: FileWithPath;
   currentFilters?: ImageProcessFormValues;
+  onImport?: (data: ImageScanResult['info']) => void;
 };
 
 const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
-  onExtractionDone,
   onApplyFilters,
   file,
   currentFilters,
+  onImport,
 }) => {
   const colorScheme = useComputedColorScheme();
   const theme = useMantineTheme();
@@ -61,6 +61,7 @@ const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
             <DocumentScanExtractionResults
               extractedText={data.text}
               extractedinfo={data.info}
+              onImport={onImport}
             />
           </Tabs.Panel>
         )}

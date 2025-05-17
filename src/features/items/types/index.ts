@@ -124,8 +124,14 @@ export interface Ward {
 export interface ImageScanResult {
   text: string;
   job: string;
-  info: Record<string, any>;
+  info: Partial<DocumentReportFormData['document']>;
 }
+
+export interface AdditionalField {
+  fieldName: string;
+  fieldValue: string;
+}
+
 export type DocumentReportFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
 export type ImageProcessFormValues = z.infer<typeof ImageProcessOptionsSchema>;
 export type ReportType = 'Lost' | 'Found' | 'Unknown';

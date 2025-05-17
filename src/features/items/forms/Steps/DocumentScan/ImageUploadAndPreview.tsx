@@ -174,7 +174,7 @@ const ImageUploadAndPreview: React.FC<ImageUploadAndPreviewProps> = ({
                 }}
                 loading={isFilteredImageLoading}
               >
-                'Scan Document'
+                Scan Document
               </Button>
             </Group>
           </Card.Section>

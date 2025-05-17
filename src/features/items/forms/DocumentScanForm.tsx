@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Grid,
   Group,
@@ -9,11 +9,14 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { type FileWithPath } from '@mantine/dropzone';
-import { ImageProcessFormValues } from '../types';
+import { ImageProcessFormValues, ImageScanResult } from '../types';
 import FiltersAndResults from './Steps/DocumentScan/FiltersAndResults';
 import ImageUploadAndPreview from './Steps/DocumentScan/ImageUploadAndPreview';
 
-const DocumentScanForm = () => {
+type DocumentScanFormProps = {
+  onImport?: (data: ImageScanResult['info']) => void;
+};
+const DocumentScanForm: React.FC<DocumentScanFormProps> = ({ onImport }) => {
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
   const isDark = colorScheme === 'dark';
@@ -48,6 +51,7 @@ const DocumentScanForm = () => {
             }}
             file={file}
             currentFilters={imageFilters}
+            onImport={onImport}
           />
         </Grid.Col>
       </Grid>

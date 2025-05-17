@@ -3,6 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import { ActionIcon, Button, Card, Group, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
+import { flattenObjectToPairs, unflattenPairsToObject } from '@/lib/utils';
 import { DocumentReportFormData } from '../../types';
 import DocumentScanForm from '../DocumentScanForm';
 import DocumentFormInputs from './DocumentFormInputs';
@@ -25,10 +26,20 @@ const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => 
               component={Stack}
               gap={'md'}
               onClick={() => {
-                modals.open({
+                const id = modals.open({
                   fullScreen: true,
                   title: 'Scan document',
-                  children: <DocumentScanForm />,
+                  children: (
+                    <DocumentScanForm
+                      onImport={(data) => {
+                        flattenObjectToPairs(data).forEach(([field, value]) => {
+                          if (field !== 'typeId' && value)
+                            form.setValue(`document.${field}` as any, value);
+                        });
+                        modals.close(id);
+                      }}
+                    />
+                  ),
                 });
               }}
             >
