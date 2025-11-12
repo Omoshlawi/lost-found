@@ -1,7 +1,7 @@
 .logoContainer {
   display: flex;
   align-items: center;
-    width: fit-content;
-    justify-content: center;
-    gap: 2px;
+  width: fit-content;
+  justify-content: center;
+  gap: 2px;
 }
