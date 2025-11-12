@@ -2,6 +2,7 @@ import { Link, Outlet } from 'react-router-dom';
 import { AppShell, Box, Burger, Button, Flex, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle, Logo } from '@/components';
+import { FooterCentered } from '@/components/Footer/Footer';
 
 const LandingLayout = () => {
   const [opened, { toggle, close }] = useDisclosure();
@@ -56,6 +57,8 @@ const LandingLayout = () => {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+      {/* TODO: Add footer */}
+      {/* <FooterCentered /> */}
     </AppShell>
   );
 };
