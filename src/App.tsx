@@ -14,13 +14,13 @@ import { theme } from '@/theme';
 
 export default function App() {
   return (
-    <MantineProvider theme={theme}>
-      <ModalsProvider>
-        <Notifications />
-        <ApiConfigProvider>
+    <ApiConfigProvider>
+      <MantineProvider theme={theme}>
+        <ModalsProvider>
+          <Notifications />
           <Router />
-        </ApiConfigProvider>
-      </ModalsProvider>
-    </MantineProvider>
+        </ModalsProvider>
+      </MantineProvider>
+    </ApiConfigProvider>
   );
 }

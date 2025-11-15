@@ -1,6 +1,6 @@
 import { FC, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { ActionIcon, AppShell, Box, Burger, Group, Modal, Stack } from '@mantine/core';
+import { ActionIcon, AppShell, Burger, Group, Modal, Stack } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { ColorSchemeToggle, Logo, TablerIcon } from '@/components';
 import { useWorkspace } from '@/components/Workspace';
@@ -8,7 +8,7 @@ import SideNav from './SideNav';
 import UserActionsMenu from './UserActionsMenu';
 
 const DashboardLayout: FC = () => {
-  const [opened, { toggle }] = useDisclosure();
+  const [opened] = useDisclosure();
   const [drawerOpened, { toggle: toggleOpenDrawer }] = useDisclosure();
 
   const { workspace, width } = useWorkspace();
@@ -43,7 +43,7 @@ const DashboardLayout: FC = () => {
         padding="md"
       >
         <AppShell.Header>
-          <Group justify={'space-between'} align={'center'} flex={1} px={'xs'} h={'100%'}>
+          <Group justify="space-between" align="center" flex={1} px="xs" h="100%">
             {isMobile && <Burger opened={drawerOpened} onClick={toggleOpenDrawer} size="sm" />}
             <Logo />
             <Group>
@@ -52,15 +52,15 @@ const DashboardLayout: FC = () => {
             </Group>
           </Group>
         </AppShell.Header>
-        <AppShell.Navbar p={'md'}>
+        <AppShell.Navbar p="md">
           <SideNav onClose={isMobile ? toggleOpenDrawer : undefined} />
         </AppShell.Navbar>
         <AppShell.Aside>
           {!workspace && (
-            <Stack align="center" py={'sm'}>
+            <Stack align="center" py="sm">
               <ActionIcon
                 size={35}
-                radius={'50%'}
+                radius="50%"
                 variant="outline"
                 aria-label="ActionIcon with size as a number"
               >
@@ -68,7 +68,7 @@ const DashboardLayout: FC = () => {
               </ActionIcon>
               <ActionIcon
                 size={35}
-                radius={'50%'}
+                radius="50%"
                 variant="outline"
                 aria-label="ActionIcon with size as a number"
               >

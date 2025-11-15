@@ -1,16 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  AppShell,
-  Avatar,
-  Flex,
-  Group,
-  NavLink,
-  ScrollArea,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core';
+import { AppShell, Avatar, Group, NavLink, ScrollArea, Stack, Text, Title } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon, TablerIconName } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
@@ -52,12 +42,9 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
             label={item.label}
             description={item.description}
             leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
-            rightSection={<TablerIcon name={'chevronRight'} size={16} stroke={1.5} />}
+            rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
             childrenOffset={28}
-            defaultOpened={
-              // isActive
-              true
-            }
+            defaultOpened
           >
             {renderNavItems(item.children, fullPath)}
           </NavLink>
@@ -83,11 +70,11 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
   return (
     <>
       <AppShell.Section>
-        <Group align={'center'} gap={4} p={'sm'}>
-          {user?.user && <Avatar size={'lg'}>{getNameInitials(user?.user?.name)}</Avatar>}
+        <Group align="center" gap={4} p="sm">
+          {user?.user && <Avatar size="lg">{getNameInitials(user?.user?.name)}</Avatar>}
           <Stack gap={0}>
             <Title order={4}>
-              <Text variant="gradient" fw={'bold'}>
+              <Text variant="gradient" fw="bold">
                 {user?.user.name}
               </Text>
             </Title>
@@ -104,7 +91,7 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
           variant="light"
           leftSection={<TablerIcon name="logout" size={18} stroke={1.5} />}
           color="red"
-          pb={'lg'}
+          pb="lg"
           active
           rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
           onClick={() => {
