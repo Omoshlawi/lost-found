@@ -144,7 +144,7 @@ export const Authorized = ({
   // Render authorized content
   return <>{children}</>;
 };
-
+``
 // ============================================
 // HIGHER ORDER COMPONENT
 // ============================================

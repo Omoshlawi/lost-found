@@ -1,3 +1,4 @@
+import { ColumnDef } from '@tanstack/react-table';
 import { ActionIcon, Box, Menu, Paper, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
@@ -81,6 +82,20 @@ const DocumentTypesPage = () => {
         <StateFullDataTable
           {...documentTypesAsync}
           data={documentTypesAsync.documentTypes}
+          renderExpandedRow={({ original: docType }) => {
+            return (
+              <Paper p="xs">
+                <Text size="sm">{docType.name}</Text>
+                <Text size="sm">{docType.description}</Text>
+                <Text size="sm">{docType.createdAt}</Text>
+                <Text size="sm">{docType.updatedAt}</Text>
+                <Text size="sm">{docType.averageReplacementCost}</Text>
+                <Text size="sm">{docType.replacementInstructions}</Text>
+                <Text size="sm">{docType.description}</Text>
+                <Text size="sm">{docType.voided}</Text>
+              </Paper>
+            );
+          }}
           columns={[
             ...columns,
             {
@@ -138,7 +153,42 @@ const DocumentTypesPage = () => {
 
 export default DocumentTypesPage;
 
-const columns = [
+const columns: ColumnDef<DocumentType>[] = [
+  {
+    id: 'expand',
+    header: ({ table }) => {
+      const allRowsExpanded = table.getIsAllRowsExpanded();
+      //   const someRowsExpanded = table.getIsSomeRowsExpanded();
+      return (
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          onClick={() => table.toggleAllRowsExpanded(!allRowsExpanded)}
+          style={{ cursor: 'pointer' }}
+          aria-label="Expand all"
+        >
+          <TablerIcon name={allRowsExpanded ? 'chevronUp' : 'chevronDown'} size={16} />
+        </ActionIcon>
+      );
+    },
+    cell: ({ row }) => {
+      const rowExpanded = row.getIsExpanded();
+      return (
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          onClick={() => row.toggleExpanded(!rowExpanded)}
+          style={{ cursor: 'pointer' }}
+          aria-label="Expand Row"
+        >
+          <TablerIcon name={rowExpanded ? 'chevronUp' : 'chevronDown'} size={16} />
+        </ActionIcon>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+    size: 0,
+  },
   {
     header: 'Icon',
     accessorKey: 'icon',
