@@ -1,3 +1,4 @@
+/* eslint-disable no-lonely-if */
 /**
  * Converts a nested object into FormData, handling Files and arrays.
  *
@@ -43,23 +44,19 @@ export const objectToFormData = (
           value.forEach((val, index) => {
             const nestedFormKey = `${formKey}[${index}]`;
 
-            if (typeof val === "object" && !(val instanceof File)) {
+            if (typeof val === 'object' && !(val instanceof File)) {
               // Recursively handle nested objects in arrays
               objectToFormData(val, options, formData, nestedFormKey);
             } else {
               // Handle File instances in arrays
               if (val instanceof File) {
-                formData.append(
-                  options.useIndexOnFiles ? nestedFormKey : formKey,
-                  val,
-                  val.name
-                );
+                formData.append(options.useIndexOnFiles ? nestedFormKey : formKey, val, val.name);
               } else {
                 formData.append(nestedFormKey, val);
               }
             }
           });
-        } else if (typeof value === "object" && !(value instanceof File)) {
+        } else if (typeof value === 'object' && !(value instanceof File)) {
           // Recursively handle nested objects
           objectToFormData(value, options, formData, formKey);
         } else if (value instanceof File) {

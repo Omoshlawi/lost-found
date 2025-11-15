@@ -1,10 +1,6 @@
 import { createAuthClient } from 'better-auth/react';
-import { BASE_URL, restBaseUrl } from '@/constants';
 
-export const authClient = createAuthClient({
-  /** The base URL of the server (optional if you're using the same domain) */
-  // baseURL: `${BASE_URL}`,
-});
+export const authClient = createAuthClient({});
 const useAuthClent = () => {
   return authClient;
 };
