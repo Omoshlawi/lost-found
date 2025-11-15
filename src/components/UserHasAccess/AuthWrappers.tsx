@@ -5,12 +5,7 @@ import {
   HOCAuthSessionConfig,
   withAuthentication,
 } from './Authenticated';
-import {
-  Authorized,
-  AuthorizedProps,
-  HOCAuthConfig,
-  withAuthorization,
-} from './SystemAndOrganizationAccessAcl';
+import { Authorized, AuthorizedProps, HOCAuthConfig, withAuthorization } from './SystemAccessAcl';
 
 // ============================================
 // UTILITY COMPONENTS wrappers

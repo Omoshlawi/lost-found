@@ -1,6 +1,5 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/landing/pages';
-import { DocumentTypeForm } from './features/admin/forms';
 import { DocumentTypesPage } from './features/admin/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { DocumentReportDetail, FoundItemsPage, LostItemsPage } from './features/items/pages';

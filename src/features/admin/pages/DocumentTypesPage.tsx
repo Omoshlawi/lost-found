@@ -5,10 +5,12 @@ import {
   DashboardPageHeader,
   launchWorkspace,
   StateFullDataTable,
+  SystemAuthorized,
   TablerIcon,
   TablerIconName,
 } from '@/components';
 import { useAppColors } from '@/hooks/useAppColors';
+import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { handleApiErrors } from '@/lib/api';
 import { DocumentTypeForm } from '../forms';
 import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
@@ -17,6 +19,7 @@ import { DocumentType } from '../types';
 const DocumentTypesPage = () => {
   const documentTypesAsync = useDocumentTypes();
   const { deleteDocumentType, mutateDocumentTypes } = useDocumentTypesApi();
+  const { hasAccess } = useUserHasSystemAccess({ documentType: ['create'] });
   const { bgColor } = useAppColors();
   const handleDelete = (documentType: DocumentType) => {
     modals.openConfirmModal({
@@ -95,26 +98,38 @@ const DocumentTypesPage = () => {
                     </ActionIcon>
                   </Menu.Target>
                   <Menu.Dropdown>
-                    <Menu.Item
-                      leftSection={<TablerIcon name="edit" size={14} />}
-                      color="green"
-                      onClick={() => handleLaunchFormWorkspace(docType)}
+                    <Menu.Label>Actions</Menu.Label>
+                    <Menu.Divider />
+                    <SystemAuthorized
+                      permissions={{ documentType: ['update'] }}
+                      unauthorizedAction={{ type: 'hide' }}
                     >
-                      Edit
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<TablerIcon name="trash" size={14} />}
-                      color="red"
-                      onClick={() => handleDelete(docType)}
+                      <Menu.Item
+                        leftSection={<TablerIcon name="edit" size={14} />}
+                        color="green"
+                        onClick={() => handleLaunchFormWorkspace(docType)}
+                      >
+                        Edit
+                      </Menu.Item>
+                    </SystemAuthorized>
+                    <SystemAuthorized
+                      permissions={{ documentType: ['delete'] }}
+                      unauthorizedAction={{ type: 'hide' }}
                     >
-                      Delete
-                    </Menu.Item>
+                      <Menu.Item
+                        leftSection={<TablerIcon name="trash" size={14} />}
+                        color="red"
+                        onClick={() => handleDelete(docType)}
+                      >
+                        Delete
+                      </Menu.Item>
+                    </SystemAuthorized>
                   </Menu.Dropdown>
                 </Menu>
               ),
             },
           ]}
-          onAdd={() => handleLaunchFormWorkspace()}
+          onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
         />
       </Paper>
     </Stack>
