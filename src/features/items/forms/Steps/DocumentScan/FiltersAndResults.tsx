@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Button,
-  Card,
   Paper,
   Stack,
   Tabs,
@@ -10,7 +9,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { FileWithPath } from '@mantine/dropzone';
-import { EmptyState, ErrorState, TableContainer, TablerIcon, When } from '@/components';
+import { ErrorState, TablerIcon, When } from '@/components';
 import { useImageScanResults } from '@/features/items/hooks';
 import { ImageProcessFormValues, ImageScanResult } from '@/features/items/types';
 import DocumentFilterForm from './DocumentFilterForm';
@@ -69,7 +68,7 @@ const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
         <When
           asyncState={asyncImageScanResult}
           loading={() => <ScanResultsSkeleton />}
-          error={(e) => <ErrorState headerTitle="Error scanning docs" error={e} />}
+          error={(e) => <ErrorState title="Error scanning docs" error={e} />}
           success={(data) => (
             <DocumentScanExtractionResults
               extractedText={data.text}
@@ -78,8 +77,11 @@ const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
             />
           )}
           elseRender={() => (
-            <TableContainer
-              title="Scan results"
+            <Paper
+              withBorder
+              p="xl"
+              radius="md"
+              bg={colorScheme === 'dark' ? theme.colors.dark[8] : theme.white}
               style={{ backgroundColor: 'transparent', gap: 0 }}
               // ="Scan results"
               // message="No scanned data available yet. Please select an image to scan. For better results,
@@ -92,7 +94,7 @@ const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
                   you can apply image filters
                 </Text>
                 <Button
-                  w={'fit-content'}
+                  w="fit-content"
                   variant="light"
                   onClick={() => handleTabChange('filters')}
                   leftSection={<TablerIcon name="adjustments" />}
@@ -100,7 +102,7 @@ const FiltersAndResults: React.FC<FiltersAndResultsProps> = ({
                   Filter
                 </Button>
               </Stack>
-            </TableContainer>
+            </Paper>
           )}
         />
       </Tabs.Panel>

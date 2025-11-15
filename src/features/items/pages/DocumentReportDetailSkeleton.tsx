@@ -7,7 +7,7 @@ const DocumentReportDetailSkeleton = () => {
       <Stack>
         <Stack gap={0}>
           <Group align="center">
-            <Skeleton height={90} radius={'xs'} mb="xl" width={90} />
+            <Skeleton height={90} radius="xs" mb="xl" width={90} />
             <Stack justify="center" flex={1}>
               <Skeleton height={30} radius="sm" width="20%" />
               <Skeleton height={8} mt={6} radius="sm" width="20%" />
@@ -22,10 +22,10 @@ const DocumentReportDetailSkeleton = () => {
           </Group>
         </Stack>
         <Divider my="md" />
-        <Skeleton w={'100%'} h={'240'} />
-        <Skeleton w={'100%'} h={'240'} />
-        <Skeleton w={'100%'} h={'240'} />
-        <Skeleton w={'100%'} h={'240'} />
+        <Skeleton w="100%" h="240" />
+        <Skeleton w="100%" h="240" />
+        <Skeleton w="100%" h="240" />
+        <Skeleton w="100%" h="240" />
       </Stack>
     </Card>
   );

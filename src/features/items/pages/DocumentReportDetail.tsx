@@ -28,18 +28,19 @@ const DocumentReportDetail = () => {
   const { error, isLoading, report: reportData } = useDocumentReport(reportId);
   const { mutateDocumentReport, deleteDocumentImage } = useDocumentReportApi();
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [_deleting, setDeleting] = useState(false);
 
-  if (isLoading) return <DocumentReportDetailSkeleton />;
-  if (error || !reportData)
-    return (
-      <ErrorState headerTitle="Report Detail" error={error} message="No report data available" />
-    );
+  if (isLoading) {
+    return <DocumentReportDetailSkeleton />;
+  }
+  if (error || !reportData) {
+    return <ErrorState error={error} message="No report data available" title="Report Detail" />;
+  }
 
   // Extract common data
   const docType = reportData.document?.type?.name || 'Unknown';
   const docTypeIcon = reportData.document?.type?.icon || 'id';
-  const docId = reportData.id ? reportData.id.substring(0, 8) + '...' : 'Unknown';
+  const docId = reportData.id ? `${reportData.id.substring(0, 8)}...` : 'Unknown';
   const status = reportData.status || 'PENDING';
   const contactPreference = reportData.lostReport?.contactPreference || 'EMAIL';
   const isLostReport = reportData.lostReport !== null;

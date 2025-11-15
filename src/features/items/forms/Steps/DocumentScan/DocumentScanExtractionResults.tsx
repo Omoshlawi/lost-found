@@ -6,7 +6,6 @@ import {
   Group,
   JsonInput,
   Paper,
-  ScrollArea,
   Stack,
   Tabs,
   Text,

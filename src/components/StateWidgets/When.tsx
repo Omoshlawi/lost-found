@@ -41,7 +41,9 @@ const When = <TData, TError = Error>({
     return <>{success(data)}</>;
   }
 
-  if (typeof elseRender === 'function') return elseRender!();
+  if (typeof elseRender === 'function') {
+    return elseRender!();
+  }
   return null;
 };
 

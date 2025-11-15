@@ -1,21 +1,23 @@
-import { useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Button, Menu, Table, TableData, Text } from '@mantine/core';
+import { ActionIcon, Box, Menu, Paper, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { EmptyState, ErrorState, TableContainer, TablerIcon, TableSkeleton } from '@/components';
+import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
+import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
 import { DocumentReportForm } from '../forms';
 import { useDocumentReportApi, useDocumentReports } from '../hooks';
 import { DocumentReport } from '../types';
 
 const LostItemspage = () => {
-  const { isLoading, error, reports } = useDocumentReports({
+  const documentreportAsync = useDocumentReports({
     v: 'custom:include(lostReport,document:include(type),county:select(name),subCounty:select(name),ward:select(name))',
     reportType: 'LOST',
   });
   const { deleteDocumentReport, mutateDocumentReport } = useDocumentReportApi();
+  const { bgColor } = useAppColors();
   const handleDelete = (report: DocumentReport) => {
     modals.openConfirmModal({
       title: 'Delete your profile',
@@ -51,75 +53,7 @@ const LostItemspage = () => {
       },
     });
   };
-  const tableData = useMemo<TableData>(
-    () => ({
-      caption: 'Lost documents',
-      head: [
-        '# No',
-        'Owner name',
-        'Document Type',
-        'Found date',
-        'County',
-        'Subcounty',
-        'Ward',
-        'Landmark',
-        'Status',
-        'Contact preference',
-        'Created at',
-        'Updated at',
-        'Actions',
-      ],
-      body: reports.map((docType, i) => [
-        i + 1,
-        docType.document?.ownerName ?? '--',
-        docType.document?.type?.name ?? '--',
-        new Date(docType.lostOrFoundDate).toDateString(),
-        docType.county?.name ?? '--',
-        docType.subCounty?.name ?? '--',
-        docType.ward?.name ?? '--',
-        docType.landMark ?? '--',
-        docType.status ?? '--',
-        docType?.lostReport?.contactPreference ?? '--',
-        new Date(docType.createdAt).toDateString(),
-        new Date(docType.updatedAt).toDateString(),
-        <Menu shadow="md" width={200}>
-          <Menu.Target>
-            <ActionIcon variant="outline" aria-label="Settings">
-              <TablerIcon
-                name="dotsVertical"
-                style={{ width: '70%', height: '70%' }}
-                stroke={1.5}
-              />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<TablerIcon name="eye" size={14} />}
-              component={Link}
-              to={`${docType.id}`}
-            >
-              View Details
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<TablerIcon name="edit" size={14} />}
-              color="green"
-              onClick={() => handleLaunchReportForm(docType)}
-            >
-              Edit
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<TablerIcon name="trash" size={14} />}
-              color="red"
-              onClick={() => handleDelete(docType)}
-            >
-              Delete
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>,
-      ]),
-    }),
-    [reports]
-  );
+
   const handleLaunchReportForm = (report?: DocumentReport) => {
     const close = launchWorkspace(
       <DocumentReportForm report={report} closeWorkspace={() => close()} />,
@@ -131,49 +65,130 @@ const LostItemspage = () => {
     );
   };
 
-  const title = 'Lost Documents';
-
-  if (isLoading) return <TableSkeleton />;
-  if (error) return <ErrorState headerTitle={title} error={error} />;
-  if (!reports?.length)
-    return (
-      <EmptyState
-        headerTitle={title}
-        message="No found items report"
-        onAdd={() => handleLaunchReportForm()}
-      />
-    );
   return (
-    <TableContainer
-      title={title}
-      actions={
-        <>
-          <Button
-            leftSection={<TablerIcon name="plus" />}
-            onClick={() => handleLaunchReportForm()}
-            variant="subtle"
-          >
-            Add
-          </Button>
-        </>
-      }
-    >
-      <Table.ScrollContainer minWidth={500}>
-        <Table
-          striped
-          data={tableData}
-          highlightOnHover
-          styles={{
-            td: {
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            },
-          }}
+    <Stack gap="xl">
+      <Box>
+        <DashboardPageHeader
+          title="Lost Documents"
+          subTitle={`
+          Manage lost documents`}
+          icon="listNumbers"
         />
-      </Table.ScrollContainer>
-    </TableContainer>
+      </Box>
+      <Paper p="md" radius="md" bg={bgColor}>
+        <StateFullDataTable
+          {...documentreportAsync}
+          data={documentreportAsync.reports}
+          columns={[
+            ...columns,
+            {
+              header: 'Actions',
+              id: 'actions',
+              cell: ({ row: { original: docType } }) => (
+                <Menu shadow="md" width={200}>
+                  <Menu.Target>
+                    <ActionIcon variant="outline" aria-label="Settings">
+                      <TablerIcon
+                        name="dotsVertical"
+                        style={{ width: '70%', height: '70%' }}
+                        stroke={1.5}
+                      />
+                    </ActionIcon>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      leftSection={<TablerIcon name="eye" size={14} />}
+                      component={Link}
+                      to={`${docType.id}`}
+                    >
+                      View Details
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<TablerIcon name="edit" size={14} />}
+                      color="green"
+                      onClick={() => handleLaunchReportForm(docType)}
+                    >
+                      Edit
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<TablerIcon name="trash" size={14} />}
+                      color="red"
+                      onClick={() => handleDelete(docType)}
+                    >
+                      Delete
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              ),
+            },
+          ]}
+          onAdd={() => handleLaunchReportForm()}
+        />
+      </Paper>
+    </Stack>
   );
 };
 
 export default LostItemspage;
+
+const columns: ColumnDef<DocumentReport>[] = [
+  {
+    header: 'No',
+    cell: ({ row, table }) => (table.getSortedRowModel().rows.indexOf(row) + 1).toString(),
+  },
+  {
+    header: 'Owner name',
+    accessorKey: 'document.ownerName',
+    cell: ({ row: { original: docType } }) => docType.document?.ownerName ?? '--',
+  },
+  {
+    header: 'Document Type',
+    accessorKey: 'document.type.name',
+    cell: ({ row: { original: docType } }) => docType.document?.type?.name ?? '--',
+  },
+  {
+    header: 'Lost date',
+    accessorKey: 'lostOrFoundDate',
+    cell: ({ row: { original: docType } }) => new Date(docType.lostOrFoundDate).toDateString(),
+  },
+  {
+    header: 'County',
+    accessorKey: 'county.name',
+    cell: ({ row: { original: docType } }) => docType.county?.name ?? '--',
+  },
+  {
+    header: 'Subcounty',
+    accessorKey: 'subCounty.name',
+    cell: ({ row: { original: docType } }) => docType.subCounty?.name ?? '--',
+  },
+  {
+    header: 'Ward',
+    accessorKey: 'ward.name',
+    cell: ({ row: { original: docType } }) => docType.ward?.name ?? '--',
+  },
+  {
+    header: 'Landmark',
+    accessorKey: 'landMark',
+    cell: ({ row: { original: docType } }) => docType.landMark ?? '--',
+  },
+  {
+    header: 'Status',
+    accessorKey: 'status',
+    cell: ({ row: { original: docType } }) => docType.status ?? '--',
+  },
+  {
+    header: 'Contact preference',
+    accessorKey: 'lostReport.contactPreference',
+    cell: ({ row: { original: docType } }) => docType?.lostReport?.contactPreference ?? '--',
+  },
+  {
+    header: 'Created at',
+    accessorKey: 'createdAt',
+    cell: ({ row: { original: docType } }) => new Date(docType.createdAt).toDateString(),
+  },
+  {
+    header: 'Updated at',
+    accessorKey: 'updatedAt',
+    cell: ({ row: { original: docType } }) => new Date(docType.updatedAt).toDateString(),
+  },
+];

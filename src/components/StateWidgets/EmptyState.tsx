@@ -1,50 +1,55 @@
-import { Button, Stack, Text } from '@mantine/core';
-import React from 'react';
-import { TableContainer } from '../TableContainer';
-import { TablerIcon } from '../TablerIcon';
+import {
+  Button,
+  Center,
+  CenterProps,
+  Stack,
+  Text,
+  ThemeIcon,
+} from "@mantine/core";
+import { TablerIcon, TablerIconName } from "../TablerIcon";
+import { IconPlus } from "@tabler/icons-react";
 
-type EmptyStateProps = {
-  headerTitle: string;
+interface EmptyStateProps extends CenterProps {
+  title?: string;
   message?: string;
+  icon?: TablerIconName;
   onAdd?: () => void;
-};
+}
 
-const EmptyState: React.FC<EmptyStateProps> = ({
-  headerTitle,
-  message = 'No data found',
+// Empty State Component
+function EmptyState({
+  title = "No data found",
+  message = "There are no records to display",
+  icon = "databaseOff",
   onAdd,
-}) => {
+  ...props
+}: EmptyStateProps) {
   return (
-    <TableContainer
-      title={headerTitle}
-      actions={
-        typeof onAdd === 'function' && (
+    <Center py={60} {...props}>
+      <Stack align="center" gap="md">
+        <ThemeIcon size={64} radius="xl" variant="light" color="gray">
+          <TablerIcon name={icon} size={32} />
+        </ThemeIcon>
+        <Stack align="center" gap="xs">
+          <Text size="lg" fw={500} c="dimmed">
+            {title}
+          </Text>
+          <Text size="sm" c="dimmed" ta="center" maw={400}>
+            {message}
+          </Text>
+        </Stack>
+        {onAdd && (
           <Button
-            w={'fit-content'}
-            leftSection={<TablerIcon name="plus" />}
-            variant="subtle"
-            onClick={onAdd}
-          >
-            Add
-          </Button>
-        )
-      }
-    >
-      <Stack align="center">
-        <TablerIcon name="clipboard" size={100} opacity={0.5} />
-        <Text c={'dimmed'}>{message}</Text>
-        {typeof onAdd === 'function' && (
-          <Button
-            variant="transparent"
-            leftSection={<TablerIcon name="plus" size={15} />}
+            variant="light"
+            leftSection={<IconPlus size={16} />}
             onClick={onAdd}
           >
             Add
           </Button>
         )}
       </Stack>
-    </TableContainer>
+    </Center>
   );
-};
+}
 
 export default EmptyState;
