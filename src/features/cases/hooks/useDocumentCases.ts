@@ -33,7 +33,7 @@ export const useDocumentCase = (reportId?: string) => {
 };
 
 export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData) => {
-  const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases/found', {
+  const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases', {
     method: 'POST',
     data: payload,
   });

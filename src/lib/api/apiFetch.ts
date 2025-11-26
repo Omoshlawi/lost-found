@@ -21,6 +21,7 @@ export const apiFetch = async <T = any, K = any>(
   } catch (error) {
     // Optionally log or process the error before rethrowing
     // TODO Properly handle error
+    // eslint-disable-next-line no-console
     console.log('APIFetch Error:', error);
     throw error; // Re-throw error to be handled by the caller
   }

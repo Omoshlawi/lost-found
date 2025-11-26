@@ -1,11 +1,13 @@
+import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
-import { InputSkeleton } from '@/components';
+import { InputSkeleton, TablerIcon } from '@/components';
 import { useAddresses } from '@/features/addresses/hooks';
-import { handleApiErrors } from '@/lib/api';
+import { handleApiErrors, uploadFile } from '@/lib/api';
+import { ImageUpload, ImageUploadRef } from '../components';
 import { useDocumentCaseApi } from '../hooks';
 import { DocumentCase, FoundDocumentCaseFormData } from '../types';
 import { FoundDocumentCaseSchema } from '../utils';
@@ -21,17 +23,62 @@ const FoundDocumentCaseForm = ({
   closeWorkspace,
   onSuccess,
 }: DocumentCaseFormProps) => {
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const imageUploadRef = useRef<ImageUploadRef>(null);
+
   const form = useForm<FoundDocumentCaseFormData>({
     defaultValues: {},
     resolver: zodResolver(FoundDocumentCaseSchema),
   });
   const { addresses, isLoading } = useAddresses();
   const { createFoundDocumentCase, updateFoundDocumentCase } = useDocumentCaseApi();
+
   const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
     try {
+      // First, upload all images if there are any
+      let imageUrls: string[] = [];
+      const files = imageUploadRef.current?.getFiles() || [];
+
+      if (files.length > 0) {
+        setUploadingImages(true);
+        try {
+          const urls = await Promise.all(files.map((file) => uploadFile(file)));
+          imageUrls = urls.filter((u): u is string => typeof u === 'string');
+
+          if (imageUrls.length === 0) {
+            showNotification({
+              title: 'Error',
+              message: 'Failed to upload images. Please try again.',
+              color: 'red',
+              position: 'top-right',
+            });
+            setUploadingImages(false);
+            return;
+          }
+        } catch (error) {
+          const e = handleApiErrors(error);
+          showNotification({
+            title: 'Error uploading images',
+            message: e.detail || 'Failed to upload images',
+            color: 'red',
+            position: 'top-right',
+          });
+          setUploadingImages(false);
+          return;
+        } finally {
+          setUploadingImages(false);
+        }
+      }
+
+      // Submit form with uploaded image URLs
+      const submitData = {
+        ...data,
+        images: imageUrls.length > 0 ? (imageUrls as [string, ...string[]]) : [],
+      };
+
       const doc = docCase
-        ? await updateFoundDocumentCase(docCase.id, data)
-        : await createFoundDocumentCase(data);
+        ? await updateFoundDocumentCase(docCase.id, submitData)
+        : await createFoundDocumentCase(submitData);
       onSuccess?.(doc);
       showNotification({
         title: 'Success',
@@ -62,15 +109,22 @@ const FoundDocumentCaseForm = ({
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
+        display: 'flex',
       }}
     >
-      <Stack p="md" h="100%" justify="space-between">
+      <Stack p="md" h="100%" justify="space-between" gap="lg">
         <Stack gap="md">
           <Controller
             control={form.control}
             name="eventDate"
             render={({ field, fieldState }) => (
-              <DateInput {...field} label="Date Found" error={fieldState.error?.message} />
+              <DateInput
+                {...field}
+                label="Date Found"
+                error={fieldState.error?.message}
+                placeholder="Select date"
+                leftSection={<TablerIcon name="calendar" size={18} />}
+              />
             )}
           />
           <Controller
@@ -88,6 +142,8 @@ const FoundDocumentCaseForm = ({
                   error={fieldState.error?.message}
                   nothingFoundMessage="Nothing found..."
                   searchable
+                  placeholder="Select address"
+                  leftSection={<TablerIcon name="mapPin" size={18} />}
                 />
               )
             }
@@ -99,27 +155,41 @@ const FoundDocumentCaseForm = ({
               <Textarea
                 {...field}
                 value={field.value as string}
-                placeholder="Description ..."
+                placeholder="Describe the found document..."
                 label="Description"
                 error={fieldState.error?.message}
+                minRows={3}
+                autosize
               />
             )}
           />
+
+          <ImageUpload
+            ref={imageUploadRef}
+            title="Document Images"
+            description="Select images of the found document (will be uploaded on submit)"
+            uploading={uploadingImages}
+          />
         </Stack>
-        <Group gap={1}>
-          <Button flex={1} variant="default" radius={0} onClick={closeWorkspace}>
+
+        <Group gap="sm" mt="auto">
+          <Button
+            flex={1}
+            variant="default"
+            onClick={closeWorkspace}
+            leftSection={<TablerIcon name="x" size={18} />}
+          >
             Cancel
           </Button>
           <Button
-            radius={0}
             flex={1}
-            fullWidth
             type="submit"
             variant="filled"
-            loading={form.formState.isSubmitting}
-            disabled={form.formState.isSubmitting}
+            loading={form.formState.isSubmitting || uploadingImages}
+            disabled={form.formState.isSubmitting || uploadingImages}
+            leftSection={<TablerIcon name="check" size={18} />}
           >
-            Submit
+            {docCase ? 'Update' : 'Submit'} Report
           </Button>
         </Group>
       </Stack>

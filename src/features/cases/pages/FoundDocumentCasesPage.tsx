@@ -57,7 +57,7 @@ const FoundDocumentCasesPage = () => {
       <FoundDocumentCaseForm case={report} closeWorkspace={() => close()} />,
       {
         expandable: true,
-        width: 'narrow',
+        width: 'wide',
         title: 'Found Document Case Form',
       }
     );

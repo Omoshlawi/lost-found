@@ -1,9 +1,10 @@
 import { apiFetch } from './apiFetch';
 import { constructUrl } from './constructUrl';
+import httpClient from './httpClient';
 
 export const uploadFile = async (file: File) => {
   // Step 1: Request signed URL from the API
-  const requestUrl = constructUrl('files/upload-url', {
+  const requestUrl = constructUrl('/files/upload-url', {
     fileName: file.name,
     size: file.size,
     mimeType: file.type,
@@ -13,8 +14,7 @@ export const uploadFile = async (file: File) => {
   const signedUrl = requestResp.data.url;
 
   // Step 2: Upload file directly to S3 using the signed URL
-  await apiFetch(signedUrl, {
-    method: 'PUT',
+  await httpClient.put(signedUrl, {
     data: file,
     headers: {
       'Content-Type': file.type || 'application/octet-stream',
@@ -26,7 +26,7 @@ export const uploadFile = async (file: File) => {
 
   const url = signedUrl?.split('?')?.[0];
   if (url) {
-    const fileName = signedUrl.split('/').pop();
-    return `/files/stream?fileName=${fileName}`;
+    const fileName = signedUrl?.split('/')?.pop();
+    return fileName;
   }
 };

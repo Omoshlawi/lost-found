@@ -57,14 +57,12 @@ export const DocumentCaseSchema = z.object({
   ]),
 });
 
-export const FoundDocumentCaseSchema = z
-  .object({
-    addressId: z.string().uuid(),
-    eventDate: z.coerce.date(),
-    tags: z.string().min(1).array().optional(),
-    description: z.string().optional(),
-  })
-  .extend({ document: CaseDocumentSchema });
+export const FoundDocumentCaseSchema = z.object({
+  addressId: z.string().uuid(),
+  eventDate: z.coerce.date(),
+  tags: z.string().min(1).array().optional(),
+  description: z.string().optional(),
+});
 
 export const LostDocumentCaseSchema = FoundDocumentCaseSchema.extend({
   document: CaseDocumentSchema.extend({
