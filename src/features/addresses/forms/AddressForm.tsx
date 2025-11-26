@@ -1,12 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DateInput } from '@mantine/dates';
-import { showNotification } from '@mantine/notifications';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
+  Alert,
+  Badge,
   Button,
   Divider,
   Group,
+  Loader,
   NumberInput,
+  Paper,
   Select,
   SimpleGrid,
   Stack,
@@ -15,9 +18,10 @@ import {
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { DateInput } from '@mantine/dates';
+import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
-import { useAddressesApi } from '../hooks';
+import { useAddressesApi, useAddressLocales } from '../hooks';
 import { Address, AddressFormData, AddressLevelKey } from '../types';
 import { AddressSchema } from '../utils/validation';
 
@@ -71,10 +75,144 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
   });
 
   const { createAddress, updateAddress, mutateAddresses, mutateAddress } = useAddressesApi();
+  const { locales, isLoading: isLoadingLocales } = useAddressLocales({ pageSize: 100 });
+  const localeList = Array.isArray(locales) ? locales : [];
+  const [selectedLocaleId, setSelectedLocaleId] = useState<string | null>(null);
+  const [appliedLocaleId, setAppliedLocaleId] = useState<string | null>(null);
+  const countryValue = form.watch('country');
+
+  const selectedLocale = useMemo(
+    () => localeList.find((locale) => locale.id === selectedLocaleId) ?? null,
+    [localeList, selectedLocaleId]
+  );
+
+  const localeOptions = useMemo(
+    () =>
+      localeList.map((locale) => ({
+        value: locale.id,
+        label: `${locale.code.toUpperCase()} • ${locale.regionName}`,
+        group: locale.country,
+      })),
+    [localeList]
+  );
+
+  const filteredLocaleOptions = useMemo(() => {
+    if (!countryValue || !localeOptions.length) {
+      return localeOptions;
+    }
+    const filtered = localeOptions.filter((option) => {
+      const locale = localeList.find((localeItem) => localeItem.id === option.value);
+      return locale?.country === countryValue;
+    });
+    return filtered.length ? filtered : localeOptions;
+  }, [countryValue, localeOptions, localeList]);
+
+  const preferredFieldSet = useMemo(
+    () => new Set(selectedLocale?.formatSpec.metadata?.preferredFields ?? []),
+    [selectedLocale]
+  );
+
+  const levelMeta = useMemo(() => {
+    const base = LEVEL_FIELDS.reduce<
+      Record<AddressLevelKey, { label: string; required: boolean; helperText?: string }>
+    >(
+      (acc, level) => {
+        acc[level] = {
+          label: level.toUpperCase(),
+          required: level === 'level1',
+        };
+        return acc;
+      },
+      {} as Record<AddressLevelKey, { label: string; required: boolean; helperText?: string }>
+    );
+
+    if (selectedLocale) {
+      selectedLocale.formatSpec.levels.forEach((spec) => {
+        base[spec.level] = {
+          label: spec.label,
+          required: spec.required,
+          helperText: spec.helperText ?? undefined,
+        };
+      });
+    }
+    return base;
+  }, [selectedLocale]);
+
+  const postalSpec = selectedLocale?.formatSpec.postalCode;
+  const localeInstructions = selectedLocale?.formatSpec.metadata?.instructions;
+  const preferredFieldsList = selectedLocale?.formatSpec.metadata?.preferredFields ?? [];
+  const localeTemplate = selectedLocale?.formatSpec.displayTemplate;
+
+  const handleLocaleChange = (value: string | null) => {
+    setSelectedLocaleId(value);
+    if (!value) {
+      setAppliedLocaleId(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedLocale) {
+      return;
+    }
+    if (appliedLocaleId === selectedLocale.id) {
+      return;
+    }
+    selectedLocale.formatSpec.levels.forEach((spec) => {
+      form.setValue(`localeFormat.${spec.level}`, spec.label ?? '', { shouldDirty: true });
+    });
+    setAppliedLocaleId(selectedLocale.id);
+  }, [selectedLocale, appliedLocaleId, form]);
+
+  useEffect(() => {
+    if (!selectedLocale || !countryValue) {
+      return;
+    }
+    if (selectedLocale.country !== countryValue) {
+      setSelectedLocaleId(null);
+      setAppliedLocaleId(null);
+    }
+  }, [countryValue, selectedLocale]);
+
+  useEffect(() => {
+    if (address) {
+      return;
+    }
+    if (selectedLocaleId || !countryValue) {
+      return;
+    }
+    const match = localeList.find((locale) => !locale.voided && locale.country === countryValue);
+    if (match) {
+      setSelectedLocaleId(match.id);
+    }
+  }, [address, countryValue, localeList, selectedLocaleId]);
+
+  useEffect(() => {
+    if (countryValue) {
+      return;
+    }
+    setSelectedLocaleId(null);
+    setAppliedLocaleId(null);
+  }, [countryValue]);
+
+  const makeLabel = (labelText: string, fieldKey: string) => {
+    if (!preferredFieldSet.has(fieldKey)) {
+      return labelText;
+    }
+    return (
+      <Group gap={4}>
+        <Text>{labelText}</Text>
+        <Badge size="xs" color="blue" variant="light">
+          Preferred
+        </Badge>
+      </Group>
+    );
+  };
 
   const onSubmit: SubmitHandler<AddressFormData> = async (values) => {
     try {
-      const result = address ? await updateAddress(address.id, values) : await createAddress(values);
+      const result = address
+        ? await updateAddress(address.id, values)
+        : await createAddress(values);
       showNotification({
         title: 'Success',
         message: `Address ${address ? 'updated' : 'created'} successfully`,
@@ -151,7 +289,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
               render={({ field, fieldState }) => (
                 <TextInput
                   {...field}
-                  label="Address line 1"
+                  label={makeLabel('Address line 1', 'address1')}
                   required
                   error={fieldState.error?.message}
                 />
@@ -161,14 +299,22 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
               control={form.control}
               name="address2"
               render={({ field, fieldState }) => (
-                <TextInput {...field} label="Address line 2" error={fieldState.error?.message} />
+                <TextInput
+                  {...field}
+                  label={makeLabel('Address line 2', 'address2')}
+                  error={fieldState.error?.message}
+                />
               )}
             />
             <Controller
               control={form.control}
               name="landmark"
               render={({ field, fieldState }) => (
-                <TextInput {...field} label="Landmark" error={fieldState.error?.message} />
+                <TextInput
+                  {...field}
+                  label={makeLabel('Landmark', 'landmark')}
+                  error={fieldState.error?.message}
+                />
               )}
             />
             <Controller
@@ -182,11 +328,80 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
                 />
               )}
             />
+            <Select
+              label="Address locale"
+              placeholder={
+                countryValue ? 'Select a locale for this country' : 'Set country to filter locales'
+              }
+              searchable
+              data={filteredLocaleOptions ?? []}
+              value={selectedLocaleId}
+              onChange={handleLocaleChange}
+              nothingFoundMessage={
+                countryValue ? 'No locales available for this country' : 'No locales available'
+              }
+              clearable
+              disabled={isLoadingLocales || (!filteredLocaleOptions.length && !selectedLocaleId)}
+              rightSection={isLoadingLocales ? <Loader size="xs" /> : undefined}
+            />
           </SimpleGrid>
+
+          {selectedLocale && (
+            <Paper withBorder p="md" radius="md">
+              <Stack gap="sm">
+                <Group justify="space-between" align="flex-start">
+                  <Stack gap={0}>
+                    <Text fw={600}>{selectedLocale.regionName}</Text>
+                    <Text size="sm" c="dimmed">
+                      {selectedLocale.country} • {selectedLocale.code}
+                    </Text>
+                  </Stack>
+                  {selectedLocale.tags && selectedLocale.tags.length > 0 && (
+                    <Group gap={4}>
+                      {selectedLocale?.tags?.map((tag) => (
+                        <Badge key={tag} variant="light" color="blue">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </Group>
+                  )}
+                </Group>
+                {localeInstructions && (
+                  <Alert color="blue" variant="light" title="Locale instructions">
+                    {localeInstructions}
+                  </Alert>
+                )}
+                {localeTemplate && (
+                  <Stack gap={2}>
+                    <Text size="xs" c="dimmed">
+                      Display template
+                    </Text>
+                    <Text size="sm" ff="monospace">
+                      {localeTemplate}
+                    </Text>
+                  </Stack>
+                )}
+                {preferredFieldsList.length > 0 && (
+                  <Stack gap={4}>
+                    <Text size="xs" c="dimmed">
+                      Preferred fields
+                    </Text>
+                    <Group gap={4}>
+                      {preferredFieldsList?.map((field) => (
+                        <Badge key={field} variant="outline">
+                          {field}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </Stack>
+                )}
+              </Stack>
+            </Paper>
+          )}
 
           {sectionTitle('Administrative levels')}
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-            {LEVEL_FIELDS.map((level) => (
+            {LEVEL_FIELDS?.map((level) => (
               <Controller
                 key={level}
                 control={form.control}
@@ -195,8 +410,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
                   <TextInput
                     value={field.value ?? ''}
                     onChange={(event) => field.onChange(event.currentTarget.value)}
-                    label={level.toUpperCase()}
-                    required={level === 'level1'}
+                    label={makeLabel(levelMeta[level].label, level)}
+                    required={levelMeta[level].required}
+                    description={levelMeta[level].helperText}
                     error={fieldState.error?.message}
                   />
                 )}
@@ -237,14 +453,24 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
               control={form.control}
               name="postalCode"
               render={({ field, fieldState }) => (
-                <TextInput {...field} label="Postal code" error={fieldState.error?.message} />
+                <TextInput
+                  {...field}
+                  label={makeLabel(postalSpec?.label ?? 'Postal code', 'postalCode')}
+                  required={postalSpec?.required ?? false}
+                  description={postalSpec?.description ?? undefined}
+                  error={fieldState.error?.message}
+                />
               )}
             />
             <Controller
               control={form.control}
               name="plusCode"
               render={({ field, fieldState }) => (
-                <TextInput {...field} label="Plus code" error={fieldState.error?.message} />
+                <TextInput
+                  {...field}
+                  label={makeLabel('Plus code', 'plusCode')}
+                  error={fieldState.error?.message}
+                />
               )}
             />
           </SimpleGrid>
@@ -285,7 +511,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
 
           {sectionTitle('Locale format')}
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-            {LEVEL_FIELDS.map((level) => {
+            {LEVEL_FIELDS?.map((level) => {
               const fieldName = `localeFormat.${level}` as LocaleFormatFieldPath;
               return (
                 <Controller
@@ -360,4 +586,3 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
 };
 
 export default AddressForm;
-
