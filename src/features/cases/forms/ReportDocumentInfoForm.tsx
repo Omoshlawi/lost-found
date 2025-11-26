@@ -6,14 +6,14 @@ import { Button, Group, Stack } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
 import { parseDate } from '@/lib/utils';
-import { useDocumentReportApi } from '../hooks';
-import { DocumentReport, DocumentReportFormData } from '../types';
+import { useDocumentCaseApi } from '../hooks';
+import { DocumentCase, DocumentCaseFormData } from '../types';
 import { _ReportLostOrFoundDocumentSchema } from '../utils';
 import DocumentFormInputs from './Steps/DocumentFormInputs';
 
 type ReportDocumentInfoFormProps = {
-  report: DocumentReport;
-  onSuccess?: (report: DocumentReport) => void;
+  report: DocumentCase;
+  onSuccess?: (report: DocumentCase) => void;
   closeWorkspace?: () => void;
 };
 
@@ -50,7 +50,7 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
     },
     resolver: zodResolver(ReportDocumentInfoFormSchema),
   });
-  const { updateDocumentReport, mutateDocumentReport } = useDocumentReportApi();
+  const { updateDocumentReport, mutateDocumentReport } = useDocumentCaseApi();
 
   const handleSubmit: SubmitHandler<ReportDocumentInfoFormData> = async (data) => {
     try {
@@ -64,7 +64,7 @@ const ReportDocumentInfoForm: React.FC<ReportDocumentInfoFormProps> = ({
       mutateDocumentReport();
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<DocumentReportFormData>(error);
+      const e = handleApiErrors<DocumentCaseFormData>(error);
       if (e.detail) {
         showNotification({
           title: `Error ${report ? 'updating' : 'creating'} document report`,

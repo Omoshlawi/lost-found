@@ -5,13 +5,13 @@ import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton } from '@/components';
 import { useDocumentTypes } from '@/features/admin/hooks';
-import { DocumentReportFormData } from '../../types';
+import { DocumentCaseFormData } from '../../types';
 
 type DocumentFormInputsProps = {
-  enabledFields?: Array<FieldPath<DocumentReportFormData['document']>>;
+  enabledFields?: Array<FieldPath<DocumentCaseFormData['document']>>;
 };
 const DocumentFormInputs: React.FC<DocumentFormInputsProps> = ({ enabledFields = [] }) => {
-  const form = useFormContext<DocumentReportFormData>();
+  const form = useFormContext<DocumentCaseFormData>();
   const { documentTypes, isLoading, error } = useDocumentTypes();
 
   useEffect(() => {

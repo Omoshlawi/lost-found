@@ -13,16 +13,16 @@ import { useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
 import { parseDate } from '@/lib/utils';
-import { useDocumentReportApi } from '../hooks';
-import { DocumentReport, DocumentReportFormData } from '../types';
+import { useDocumentCaseApi } from '../hooks';
+import { DocumentCase, DocumentCaseFormData } from '../types';
 import { ReportLostOrFoundDocumentSchema } from '../utils';
 import AddressInfoStep from './Steps/AddressInfoStep';
 import BasicReportInfoStep from './Steps/BasicReportInfoStep';
 import DocumentInfoSteps from './Steps/DocumentInfoSteps';
 
 type DocumentReportFormProps = {
-  report?: DocumentReport;
-  onSuccess?: (report: DocumentReport) => void;
+  report?: DocumentCase;
+  onSuccess?: (report: DocumentCase) => void;
   closeWorkspace?: () => void;
 };
 
@@ -38,7 +38,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
     if (report && report.lostReport) return 'LOST';
     return 'FOUND';
   }, [report]);
-  const form = useForm<DocumentReportFormData>({
+  const form = useForm<DocumentCaseFormData>({
     defaultValues: {
       countyCode: report?.countyCode ?? '',
       subCountyCode: report?.subCountyCode ?? '',
@@ -86,11 +86,10 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
   });
   const isMobile = useMediaQuery('(max-width: 48em)');
   const [activeTab, setActiveTab] = useState<FormSteps | null>('basic');
-  const { createDocumentReport, updateDocumentReport, mutateDocumentReport } =
-    useDocumentReportApi();
+  const { createDocumentReport, updateDocumentReport, mutateDocumentReport } = useDocumentCaseApi();
   useEffect(() => {
     if (form.formState.errors) {
-      const fieldSteps: Record<FormSteps, Array<FieldPath<DocumentReportFormData>>> = {
+      const fieldSteps: Record<FormSteps, Array<FieldPath<DocumentCaseFormData>>> = {
         basic: [
           'type',
           'description',
@@ -129,7 +128,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
     }
   }, [form.formState.errors, setActiveTab]);
 
-  const handleSubmit: SubmitHandler<DocumentReportFormData> = async (data) => {
+  const handleSubmit: SubmitHandler<DocumentCaseFormData> = async (data) => {
     try {
       const doc = report
         ? await updateDocumentReport(report.id, data)
@@ -143,7 +142,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
       mutateDocumentReport();
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<DocumentReportFormData>(error);
+      const e = handleApiErrors<DocumentCaseFormData>(error);
       if (e.detail) {
         showNotification({
           title: `Error ${report ? 'updating' : 'creating'} document report`,
@@ -153,7 +152,7 @@ const DocumentReportForm: React.FC<DocumentReportFormProps> = ({
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof DocumentReportFormData, { message: val })
+          form.setError(key as keyof DocumentCaseFormData, { message: val })
         );
       }
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Button, Group, Stack } from '@mantine/core';
-import { DocumentReportFormData } from '../../types';
+import { DocumentCaseFormData } from '../../types';
 import AddressFormInputs from './AddressFormInputs';
 
 type AddressInfoStepProps = {
@@ -9,7 +9,7 @@ type AddressInfoStepProps = {
   onNext?: () => void;
 };
 const AddressInfoStep: React.FC<AddressInfoStepProps> = ({ onPrevious, onNext }) => {
-  const form = useFormContext<DocumentReportFormData>();
+  const form = useFormContext<DocumentCaseFormData>();
 
   return (
     <Stack justify="space-between" flex={1} h={'100%'}>

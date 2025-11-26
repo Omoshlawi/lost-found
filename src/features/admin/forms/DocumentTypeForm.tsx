@@ -1,11 +1,9 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import {
   ActionIcon,
   Button,
-  Checkbox,
   Group,
   NumberInput,
   Select,
@@ -46,7 +44,6 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
   });
   const { createDocumentType, updateDocumentType, mutateDocumentTypes } = useDocumentTypesApi();
 
-  const navigate = useNavigate();
   const handleSubmit: SubmitHandler<DocumentTypeFormData> = async (data) => {
     try {
       const doc = documentType
@@ -86,8 +83,8 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
         justifyContent: 'space-between',
       }}
     >
-      <Stack p={'md'} h={'100%'} justify="space-between">
-        <Stack gap={'md'}>
+      <Stack p="md" h="100%" justify="space-between">
+        <Stack gap="md">
           <Controller
             control={form.control}
             name="name"
@@ -118,7 +115,7 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
                 label="Category"
                 value={field.value}
                 placeholder="Document type category"
-                onChange={(_value, option) => field.onChange(_value)}
+                onChange={(_value, _option) => field.onChange(_value)}
                 error={fieldState.error?.message}
                 ref={field.ref}
                 clearable
@@ -195,9 +192,7 @@ const DocumentTypeForm: React.FC<DocumentTypeFormProps> = ({
                       />
                     </ActionIcon>
                     {!field.value && <Text>Search icon</Text>}
-                    {fieldState.error?.message && (
-                      <Text c={'red'}>{fieldState.error?.message}</Text>
-                    )}
+                    {fieldState.error?.message && <Text c="red">{fieldState.error?.message}</Text>}
                   </Group>
                 )}
               />

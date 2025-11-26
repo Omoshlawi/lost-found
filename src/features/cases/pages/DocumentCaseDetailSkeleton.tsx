@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Divider, Group, Skeleton, Stack } from '@mantine/core';
 
-const DocumentReportDetailSkeleton = () => {
+const DocumentCaseDetailSkeleton = () => {
   return (
     <Card shadow="sm" padding="xl" radius="md" withBorder>
       <Stack>
@@ -31,4 +31,4 @@ const DocumentReportDetailSkeleton = () => {
   );
 };
 
-export default DocumentReportDetailSkeleton;
+export default DocumentCaseDetailSkeleton;

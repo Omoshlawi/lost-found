@@ -14,7 +14,7 @@ import {
 import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
 import { flattenObjectToPairs } from '@/lib/utils';
-import { DocumentReportFormData } from '../../types';
+import { DocumentCaseFormData } from '../../types';
 import { DocumentSchema } from '../../utils';
 import DocumentScanForm from '../DocumentScanForm';
 import DocumentFormInputs from './DocumentFormInputs';
@@ -23,12 +23,12 @@ type DocumentInfoStepsProps = {
   onPrevious?: () => void;
 };
 const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => {
-  const form = useFormContext<DocumentReportFormData>();
+  const form = useFormContext<DocumentCaseFormData>();
   const fields = useMemo(() => DocumentSchema.keyof().options, []);
   const [enabledFields, setEnabledFields] = useState<
-    Array<FieldPath<DocumentReportFormData['document']>>
+    Array<FieldPath<DocumentCaseFormData['document']>>
   >([]);
-  const handleFieldToggle = (field: FieldPath<DocumentReportFormData['document']>) => {
+  const handleFieldToggle = (field: FieldPath<DocumentCaseFormData['document']>) => {
     setEnabledFields((prev) =>
       prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
     );
@@ -91,7 +91,7 @@ const DocumentInfoSteps: React.FC<DocumentInfoStepsProps> = ({ onPrevious }) => 
           clearable
           hidePickedOptions
           onChange={(value) =>
-            setEnabledFields(value as Array<FieldPath<DocumentReportFormData['document']>>)
+            setEnabledFields(value as Array<FieldPath<DocumentCaseFormData['document']>>)
           }
         />
         <DocumentFormInputs enabledFields={enabledFields} />

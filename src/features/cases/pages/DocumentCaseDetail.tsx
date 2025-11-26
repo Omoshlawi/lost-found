@@ -19,19 +19,19 @@ import {
   ReportDocumentImageUploadForm,
   ReportDocumentInfoForm,
 } from '../forms';
-import { useDocumentReport, useDocumentReportApi } from '../hooks';
+import { useDocumentCase, useDocumentCaseApi } from '../hooks';
 import { DocumentImage, ReportType } from '../types';
-import DocumentReportDetailSkeleton from './DocumentReportDetailSkeleton';
+import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
-const DocumentReportDetail = () => {
+const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
-  const { error, isLoading, report: reportData } = useDocumentReport(reportId);
-  const { mutateDocumentReport, deleteDocumentImage } = useDocumentReportApi();
+  const { error, isLoading, report: reportData } = useDocumentCase(reportId);
+  const { mutateDocumentReport, deleteDocumentImage } = useDocumentCaseApi();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [_deleting, setDeleting] = useState(false);
 
   if (isLoading) {
-    return <DocumentReportDetailSkeleton />;
+    return <DocumentCaseDetailSkeleton />;
   }
   if (error || !reportData) {
     return <ErrorState error={error} message="No report data available" title="Report Detail" />;
@@ -163,4 +163,4 @@ const DocumentReportDetail = () => {
   );
 };
 
-export default DocumentReportDetail;
+export default DocumentCaseDetail;

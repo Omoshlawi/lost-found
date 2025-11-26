@@ -1,7 +1,7 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/landing/pages';
 import { DocumentTypesPage } from './features/admin/pages';
-import { DocumentReportDetail, FoundItemsPage, LostItemsPage } from './features/cases/pages';
+import { DocumentCaseDetail, FoundDocumentCasesPage, LostItemsPage } from './features/cases/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
@@ -38,15 +38,15 @@ const router = createBrowserRouter([
         element: <Outlet />,
         children: [
           { index: true, element: <LostItemsPage /> },
-          { path: ':reportId', element: <DocumentReportDetail /> },
+          { path: ':reportId', element: <DocumentCaseDetail /> },
         ],
       },
       {
         path: 'found-documents',
         element: <Outlet />,
         children: [
-          { index: true, element: <FoundItemsPage /> },
-          { path: ':reportId', element: <DocumentReportDetail /> },
+          { index: true, element: <FoundDocumentCasesPage /> },
+          { path: ':reportId', element: <DocumentCaseDetail /> },
         ],
       },
       { path: 'settings', element: <div>Account settings</div> },

@@ -36,23 +36,17 @@ export const useDocumentTypesApi = () => {
     });
     return doctype.data;
   };
-  const updateDocumentType = async (
-    documentTypeId: string,
-    payload: DocumentTypeFormData,
-    method: 'PUT' | 'PATCH' = 'PATCH'
-  ) => {
+  const updateDocumentType = async (documentTypeId: string, payload: DocumentTypeFormData) => {
     const doctype = await apiFetch<DocumentType>(`/documents/types/${documentTypeId}`, {
-      method: method,
+      method: 'PATCH',
       data: payload,
     });
     return doctype.data;
   };
-  const deleteDocumentType = async (
-    documentTypeId: string,
-    method: 'DELETE' | 'PURGE' = 'DELETE'
-  ) => {
+  const deleteDocumentType = async (documentTypeId: string, purge: boolean = false) => {
     const doctype = await apiFetch<DocumentType>(`/documents/types/${documentTypeId}`, {
-      method: method,
+      method: 'DELETE',
+      params: { purge },
     });
     return doctype.data;
   };

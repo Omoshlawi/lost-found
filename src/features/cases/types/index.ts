@@ -5,7 +5,7 @@ import {
   ReportLostOrFoundDocumentSchema,
 } from '../utils';
 
-export interface DocumentReport {
+export interface DocumentCase {
   id: string;
   userId: string;
   lostOrFoundDate: string;
@@ -124,7 +124,7 @@ export interface Ward {
 export interface ImageScanResult {
   text: string;
   job: string;
-  info: Partial<DocumentReportFormData['document']>;
+  info: Partial<DocumentCaseFormData['document']>;
 }
 
 export interface AdditionalField {
@@ -132,6 +132,6 @@ export interface AdditionalField {
   fieldValue: string;
 }
 
-export type DocumentReportFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
+export type DocumentCaseFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
 export type ImageProcessFormValues = z.infer<typeof ImageProcessOptionsSchema>;
 export type ReportType = 'Lost' | 'Found' | 'Unknown';

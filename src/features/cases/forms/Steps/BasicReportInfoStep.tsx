@@ -11,14 +11,14 @@ import {
   Textarea,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { DocumentReportFormData } from '../../types';
+import { DocumentCaseFormData } from '../../types';
 
 type BasicReportInfoStepProps = {
   onCancel?: () => void;
   onNext?: () => void;
 };
 const BasicReportInfoStep: React.FC<BasicReportInfoStepProps> = ({ onCancel, onNext }) => {
-  const form = useFormContext<DocumentReportFormData>();
+  const form = useFormContext<DocumentCaseFormData>();
   const observableReportType = form.watch('type');
   useEffect(() => {
     if (observableReportType === 'FOUND') {

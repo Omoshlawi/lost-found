@@ -3,11 +3,11 @@ import { Button, Group, Image, SimpleGrid, Stack, Text } from '@mantine/core';
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { handleApiErrors, uploadFile } from '@/lib/api';
-import { useDocumentReportApi } from '../hooks';
-import { DocumentImage, DocumentReport } from '../types';
+import { useDocumentCaseApi } from '../hooks';
+import { DocumentCase, DocumentImage } from '../types';
 
 type ReportDocumentImageUploadFormProps = {
-  report: DocumentReport;
+  report: DocumentCase;
   onClose?: () => void;
   onSuccess?: (docs: Array<DocumentImage>) => void;
 };
@@ -19,7 +19,7 @@ const ReportDocumentImageUploadForm: React.FC<ReportDocumentImageUploadFormProps
 }) => {
   const [files, setFiles] = useState<FileWithPath[]>([]);
   const [loading, setLoading] = useState(false);
-  const { mutateDocumentReport, uploadDocumentImage } = useDocumentReportApi();
+  const { mutateDocumentReport, uploadDocumentImage } = useDocumentCaseApi();
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return <Image key={index} src={imageUrl} onLoad={() => URL.revokeObjectURL(imageUrl)} />;

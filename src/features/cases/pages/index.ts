@@ -1,4 +1,4 @@
-export { default as FoundItemsPage } from './FoundItemsPage';
-export { default as LostItemsPage } from './LostItemsPage';
-export { default as DocumentReportDetail } from './DocumentReportDetail';
-export { default as DocumentReportDetailSkeleton } from './DocumentReportDetailSkeleton';
+export { default as FoundDocumentCasesPage } from './FoundDocumentCasesPage';
+export { default as LostItemsPage } from './LostDocumentCasesPage';
+export { default as DocumentCaseDetail } from './DocumentCaseDetail';
+export { default as DocumentCaseDetailSkeleton } from './DocumentCaseDetailSkeleton';

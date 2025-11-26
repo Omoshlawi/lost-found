@@ -4,10 +4,10 @@ import { Select, TextInput } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton } from '@/components';
 import { useLocations } from '../../hooks';
-import { DocumentReportFormData } from '../../types';
+import { DocumentCaseFormData } from '../../types';
 
 const AddressFormInputs = () => {
-  const form = useFormContext<DocumentReportFormData>();
+  const form = useFormContext<DocumentCaseFormData>();
   const { watch, setValue } = form;
 
   const countyCode = watch('countyCode');

@@ -8,17 +8,17 @@ import { launchWorkspace } from '@/components/Workspace';
 import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
 import { DocumentReportForm } from '../forms';
-import { useDocumentReportApi, useDocumentReports } from '../hooks';
-import { DocumentReport } from '../types';
+import { useDocumentCaseApi, useDocumentCases } from '../hooks';
+import { DocumentCase } from '../types';
 
-const LostItemspage = () => {
-  const documentreportAsync = useDocumentReports({
-    v: 'custom:include(lostReport,document:include(type),county:select(name),subCounty:select(name),ward:select(name))',
+const LostDocumentCasesPage = () => {
+  const documentreportAsync = useDocumentCases({
+    v: 'custom:include(lostDocumentCase,document:include(type),address)',
     reportType: 'LOST',
   });
-  const { deleteDocumentReport, mutateDocumentReport } = useDocumentReportApi();
+  const { deleteDocumentReport, mutateDocumentReport } = useDocumentCaseApi();
   const { bgColor } = useAppColors();
-  const handleDelete = (report: DocumentReport) => {
+  const handleDelete = (report: DocumentCase) => {
     modals.openConfirmModal({
       title: 'Delete your profile',
       centered: true,
@@ -54,7 +54,7 @@ const LostItemspage = () => {
     });
   };
 
-  const handleLaunchReportForm = (report?: DocumentReport) => {
+  const handleLaunchReportForm = (report?: DocumentCase) => {
     const close = launchWorkspace(
       <DocumentReportForm report={report} closeWorkspace={() => close()} />,
       {
@@ -129,9 +129,9 @@ const LostItemspage = () => {
   );
 };
 
-export default LostItemspage;
+export default LostDocumentCasesPage;
 
-const columns: ColumnDef<DocumentReport>[] = [
+const columns: ColumnDef<DocumentCase>[] = [
   {
     header: 'No',
     cell: ({ row, table }) => (table.getSortedRowModel().rows.indexOf(row) + 1).toString(),
