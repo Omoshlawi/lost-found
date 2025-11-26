@@ -81,3 +81,98 @@ export const AddressSchema = z.object({
 
 export type AddressSchemaType = typeof AddressSchema;
 
+const optionalLongString = z
+  .string()
+  .trim()
+  .max(2000, 'Too long')
+  .optional()
+  .or(z.literal(''))
+  .transform((value) => value || undefined);
+
+const localeLevelSchema = z.object({
+  label: z.string().trim().min(1, 'Label is required').max(255),
+  level: z.enum(levelKeys, {
+    errorMap: () => ({ message: 'Level must be level1-level5' }),
+  }),
+  required: z.boolean().default(true),
+  aliases: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1, 'Alias cannot be empty')
+        .max(100, 'Alias too long')
+    )
+    .optional(),
+  helperText: optionalLongString,
+});
+
+const validationRuleSchema = z.object({
+  field: z.string().trim().min(1, 'Field key is required').max(64),
+  rule: z.string().trim().min(1, 'Validation rule is required').max(512),
+});
+
+const metadataSchema = z
+  .object({
+    instructions: optionalLongString,
+    preferredFields: z
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1, 'Preferred field cannot be empty')
+          .max(64, 'Preferred field too long')
+      )
+      .optional(),
+    validationRules: z.array(validationRuleSchema).optional(),
+  })
+  .partial();
+
+const postalCodeSchema = z.object({
+  label: z.string().trim().min(1, 'Label is required').max(64),
+  required: z.boolean().default(true),
+  description: optionalLongString,
+});
+
+const exampleAddressEntrySchema = z.object({
+  field: z.string().trim().min(1, 'Field name is required').max(64),
+  value: z.string().trim().min(1, 'Value is required').max(255),
+});
+
+const exampleSchema = z.object({
+  label: z.string().trim().min(1, 'Label is required').max(255),
+  notes: optionalLongString,
+  addressEntries: z
+    .array(exampleAddressEntrySchema)
+    .min(1, 'Add at least one address field'),
+});
+
+export const AddressLocaleFormSchema = z.object({
+  code: z.string().trim().min(1, 'Code is required').max(64),
+  country: z
+    .string()
+    .trim()
+    .length(2, 'Use ISO 3166-1 alpha-2')
+    .transform((value) => value.toUpperCase()),
+  regionName: z.string().trim().min(1, 'Region name is required').max(255),
+  description: optionalLongString,
+  tags: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(1, 'Tag cannot be empty')
+        .max(64, 'Tag too long')
+    )
+    .optional(),
+  formatSpec: z.object({
+    displayTemplate: optionalLongString,
+    levels: z.array(localeLevelSchema).min(1, 'Add at least one level'),
+    metadata: metadataSchema.optional(),
+    postalCode: postalCodeSchema.partial().optional(),
+  }),
+  examples: z.array(exampleSchema).optional(),
+});
+
+export type AddressLocaleFormSchemaType = typeof AddressLocaleFormSchema;
+

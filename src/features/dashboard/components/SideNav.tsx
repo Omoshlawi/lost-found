@@ -135,6 +135,12 @@ const data: Array<NavItem> = [
     children: [],
   },
   {
+    icon: 'worldPin',
+    label: 'Address locales',
+    href: 'address-locales',
+    children: [],
+  },
+  {
     icon: 'mapPin',
     label: 'Addresses',
     href: 'addresses',

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { DocumentCase } from '@/features/cases/types';
-import { AddressSchema } from './utils/validation';
+import { AddressLocaleFormSchema, AddressSchema } from './utils/validation';
 
 export type AddressTypeValue = 'HOME' | 'WORK' | 'BILLING' | 'SHIPPING' | 'OFFICE' | 'OTHER';
 
@@ -60,3 +60,62 @@ export interface AddressHierarchyNode {
 }
 
 export type AddressFormData = z.input<typeof AddressSchema>;
+
+export interface AddressLocaleLevelSpec {
+  label: string;
+  level: AddressLevelKey;
+  required: boolean;
+  aliases?: string[];
+  helperText?: string | null;
+}
+
+export interface AddressLocalePostalCodeSpec {
+  label: string;
+  required: boolean;
+  description?: string | null;
+}
+
+export interface AddressLocaleMetadata {
+  instructions?: string | null;
+  preferredFields?: string[];
+  validation?: Record<string, string>;
+}
+
+export interface AddressLocaleFormatSpec {
+  levels: AddressLocaleLevelSpec[];
+  metadata?: AddressLocaleMetadata | null;
+  postalCode?: AddressLocalePostalCodeSpec | null;
+  displayTemplate?: string | null;
+}
+
+export interface AddressLocaleExample {
+  label: string;
+  notes?: string | null;
+  address: Record<string, string | null>;
+}
+
+export interface AddressLocale {
+  id: string;
+  code: string;
+  country: string;
+  regionName: string;
+  description?: string | null;
+  formatSpec: AddressLocaleFormatSpec;
+  examples?: AddressLocaleExample[];
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+  voided: boolean;
+}
+
+export interface AddressLocalePayload {
+  code: string;
+  country: string;
+  regionName: string;
+  description?: string | null;
+  formatSpec: AddressLocaleFormatSpec;
+  examples?: AddressLocaleExample[];
+  tags?: string[];
+}
+
+export type AddressLocaleFormData = z.input<typeof AddressLocaleFormSchema>;
