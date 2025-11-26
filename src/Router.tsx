@@ -1,6 +1,6 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/landing/pages';
-import { AddressesPage } from './features/addresses/pages';
+import { AddressesPage, AddressHierarchyPage } from './features/addresses/pages';
 import { DocumentTypesPage } from './features/admin/pages';
 import { DocumentCaseDetail, FoundDocumentCasesPage, LostItemsPage } from './features/cases/pages';
 import { DashboardLayout } from './features/dashboard/components';
@@ -59,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: 'addresses',
         element: <AddressesPage />,
+      },
+      {
+        path: 'address-hierarchy',
+        element: <AddressHierarchyPage />,
       },
     ],
   },

@@ -129,6 +129,12 @@ const data: Array<NavItem> = [
     children: [],
   },
   {
+    icon: 'layersLinked',
+    label: 'Address hierarchy',
+    href: 'address-hierarchy',
+    children: [],
+  },
+  {
     icon: 'mapPin',
     label: 'Addresses',
     href: 'addresses',
