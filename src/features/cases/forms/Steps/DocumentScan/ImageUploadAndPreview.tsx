@@ -16,8 +16,8 @@ import {
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import { useFilteredImage } from '@/features/items/hooks';
-import { ImageProcessFormValues } from '@/features/items/types';
+import { useFilteredImage } from '@/features/cases/hooks';
+import { ImageProcessFormValues } from '@/features/cases/types';
 import { handleApiErrors } from '@/lib/api';
 
 type ImageUploadAndPreviewProps = {

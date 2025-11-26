@@ -14,7 +14,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
-import { ImageScanResult } from '@/features/items/types';
+import { ImageScanResult } from '@/features/cases/types';
 import { flattenObjectToPairs, unflattenPairsToObject } from '@/lib/utils';
 
 type DocumentScanExtractionResultsProps = {

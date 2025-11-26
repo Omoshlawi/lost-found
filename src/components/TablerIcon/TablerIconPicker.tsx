@@ -15,7 +15,7 @@ type TablerIconPickerProps = {
   onIconSelect?: (icon: TablerIconName) => void;
 };
 
-const ITEMS_PER_PAGE = 20; // Define the number of items per page
+const ITEMS_PER_PAGE = 20; // Define the number of cases per page
 
 const TablerIconPicker: React.FC<TablerIconPickerProps> = ({
   renderTriggerComponent,

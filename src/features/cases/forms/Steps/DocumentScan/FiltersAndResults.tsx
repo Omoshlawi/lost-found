@@ -10,8 +10,8 @@ import {
 } from '@mantine/core';
 import { FileWithPath } from '@mantine/dropzone';
 import { ErrorState, TablerIcon, When } from '@/components';
-import { useImageScanResults } from '@/features/items/hooks';
-import { ImageProcessFormValues, ImageScanResult } from '@/features/items/types';
+import { useImageScanResults } from '@/features/cases/hooks';
+import { ImageProcessFormValues, ImageScanResult } from '@/features/cases/types';
 import DocumentFilterForm from './DocumentFilterForm';
 import DocumentScanExtractionResults from './DocumentScanExtractionResults';
 import ScanResultsSkeleton from './ScanResultsSkeleton';

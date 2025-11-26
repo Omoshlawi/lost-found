@@ -1,6 +1,6 @@
 .logoContainer {
   display: flex;
-  align-items: center;
+  align-cases: center;
   width: fit-content;
   justify-content: center;
   gap: 2px;

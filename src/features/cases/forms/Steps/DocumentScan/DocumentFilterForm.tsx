@@ -2,11 +2,9 @@ import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
-  Box,
   Button,
   Divider,
   NumberInput,
-  ScrollArea,
   Select,
   SimpleGrid,
   Slider,
@@ -17,10 +15,8 @@ import {
   useComputedColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
-import { TablerIcon } from '@/components';
-import { ImageProcessFormValues } from '@/features/items/types';
-import { ImageProcessOptionsSchema } from '@/features/items/utils';
+import { ImageProcessFormValues } from '@/features/cases/types';
+import { ImageProcessOptionsSchema } from '@/features/cases/utils';
 
 type DocumentFilterFormProps = {
   onSubmit?: SubmitHandler<ImageProcessFormValues>;

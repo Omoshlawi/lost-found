@@ -1,8 +1,8 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import { LoginPage, RegisterPage } from '@/features/landing/pages';
 import { DocumentTypesPage } from './features/admin/pages';
+import { DocumentReportDetail, FoundItemsPage, LostItemsPage } from './features/cases/pages';
 import { DashboardLayout } from './features/dashboard/components';
-import { DocumentReportDetail, FoundItemsPage, LostItemsPage } from './features/items/pages';
 import { LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
 import UiComponents from './features/ui/UiComponents';

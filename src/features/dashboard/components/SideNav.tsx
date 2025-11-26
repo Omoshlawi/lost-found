@@ -22,8 +22,8 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
   const location = useLocation();
   const { data: user } = authClient.useSession();
 
-  const renderNavItems = (items: NavItem[], parentPath = '') => {
-    return items.map((item, index) => {
+  const renderNavItems = (cases: NavItem[], parentPath = '') => {
+    return cases.map((item, index) => {
       const fullPath = `${parentPath}${item.href ? `/${item.href}` : ''}`;
       const dashboardPath = `/dashboard${fullPath}`;
 
@@ -136,13 +136,13 @@ const data: Array<NavItem> = [
     children: [
       {
         icon: 'listNumbers',
-        label: 'Lost items',
+        label: 'Lost cases',
         href: 'lost-documents',
         children: [],
       },
       {
         icon: 'activity',
-        label: 'Found items',
+        label: 'Found cases',
         href: 'found-documents',
         children: [],
       },

@@ -1,13 +1,24 @@
 import classes from './Welcome.module.scss';
 import { IconFileDescription, IconSearch, IconShieldCheck, IconUsers } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
-import { Anchor, Button, Card, Container, Flex, Grid, Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import {
+  Anchor,
+  Button,
+  Card,
+  Container,
+  Flex,
+  Grid,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
 import { LoginForm } from '@/features/landing/forms';
 import { Dots } from './Dots';
 
-
 export function Welcome() {
-
   return (
     <div>
       <Container className={classes.wrapper} size={1400}>
@@ -28,8 +39,8 @@ export function Welcome() {
 
           <Container p={0} size={600}>
             <Text size="lg" c="dimmed" className={classes.description}>
-              A platform that helps you find and return lost items. Easily report lost items, browse
-              through found items, and connect with others in your community to reunite belongings
+              A platform that helps you find and return lost cases. Easily report lost cases, browse
+              through found cases, and connect with others in your community to reunite belongings
               with their rightful owners.
             </Text>
           </Container>
@@ -66,8 +77,8 @@ export function Welcome() {
               Lost & Found Platform
             </Text>
             <Text c="dimmed" size="xl" maw={680} mx="auto" mt="xl" style={{ lineHeight: 1.8 }}>
-              A platform that helps you find and return lost items. Easily report lost items, browse
-              through found items, and connect with others in your community to reunite belongings
+              A platform that helps you find and return lost cases. Easily report lost cases, browse
+              through found cases, and connect with others in your community to reunite belongings
               with their rightful owners.
             </Text>
           </div>
