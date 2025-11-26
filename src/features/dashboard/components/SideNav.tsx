@@ -129,6 +129,12 @@ const data: Array<NavItem> = [
     children: [],
   },
   {
+    icon: 'mapPin',
+    label: 'Addresses',
+    href: 'addresses',
+    children: [],
+  },
+  {
     icon: 'license',
     label: 'Document',
     description: 'Report lost or found documents',
@@ -136,13 +142,13 @@ const data: Array<NavItem> = [
     children: [
       {
         icon: 'listNumbers',
-        label: 'Lost cases',
+        label: 'Lost Document Cases',
         href: 'lost-documents',
         children: [],
       },
       {
         icon: 'activity',
-        label: 'Found cases',
+        label: 'Found Document Cases',
         href: 'found-documents',
         children: [],
       },
