@@ -10,7 +10,6 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { ReportType } from '../types';
-import { getUrgencyColor } from '../utils/reportUtils';
 
 interface ContactFooterProps {
   contactPreference: string;
@@ -27,7 +26,7 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
   const theme = useMantineTheme();
   const colorScheme = useComputedColorScheme();
 
-  if (reportType === 'Lost')
+  if (reportType === 'Lost') {
     return (
       <Paper
         p="md"
@@ -36,7 +35,7 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
         mt="md"
         style={{
           backgroundColor:
-            colorScheme === 'dark' ? theme.colors.blue[9] + '15' : theme.colors.blue[1],
+            colorScheme === 'dark' ? `${theme.colors.blue[9]}15` : theme.colors.blue[1],
         }}
       >
         <Group>
@@ -59,7 +58,8 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
         </Group>
       </Paper>
     );
-  if (reportType === 'Found')
+  }
+  if (reportType === 'Found') {
     return (
       <Paper
         p="md"
@@ -68,7 +68,7 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
         mt="md"
         style={{
           backgroundColor:
-            colorScheme === 'dark' ? theme.colors.blue[9] + '15' : theme.colors.blue[1],
+            colorScheme === 'dark' ? `${theme.colors.blue[9]}15` : theme.colors.blue[1],
         }}
       >
         <Group>
@@ -87,6 +87,7 @@ const ContactFooter: React.FC<ContactFooterProps> = ({
         </Group>
       </Paper>
     );
+  }
 };
 
 export default ContactFooter;

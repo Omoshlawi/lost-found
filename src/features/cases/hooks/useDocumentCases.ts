@@ -1,5 +1,10 @@
-import { apiFetch, APIFetchResponse, cleanFiles, constructUrl, mutate, useApi } from '@/lib/api';
-import { DocumentCase, DocumentCaseFormData, DocumentImage } from '../types';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
+import {
+  DocumentCase,
+  DocumentImage,
+  FoundDocumentCaseFormData,
+  LostDocumentCaseFormData,
+} from '../types';
 
 export const useDocumentCases = (params: Record<string, any> = {}) => {
   const url = constructUrl(`/documents/cases`, params);
@@ -27,57 +32,83 @@ export const useDocumentCase = (reportId?: string) => {
   };
 };
 
+export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData) => {
+  const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases/found', {
+    method: 'POST',
+    data: payload,
+  });
+  mutate('/documents/cases');
+  return foundDocumentCase.data;
+};
+
+export const updateFoundDocumentCase = async (
+  caseId: string,
+  payload: FoundDocumentCaseFormData
+) => {
+  const foundDocumentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}`, {
+    method: 'PATCH',
+    data: payload,
+  });
+  mutate('/documents/cases');
+  return foundDocumentCase.data;
+};
+
+export const createLostDocumentCase = async (payload: LostDocumentCaseFormData) => {
+  const lostDocumentCase = await apiFetch<DocumentCase>('/documents/cases', {
+    method: 'POST',
+    data: payload,
+  });
+  mutate('/documents/cases');
+  return lostDocumentCase.data;
+};
+
+export const updateLostDocumentCase = async (caseId: string, payload: LostDocumentCaseFormData) => {
+  const lostDocumentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}`, {
+    method: 'PATCH',
+    data: payload,
+  });
+  mutate('/documents/cases');
+  return lostDocumentCase.data;
+};
+
+export const deleteDocumentCase = async (caseId: string, purge: boolean = false) => {
+  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}`, {
+    method: 'DELETE',
+    params: { purge },
+  });
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
+export const restoreDocumentCase = async (caseId: string) => {
+  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/restore`, {
+    method: 'POST',
+  });
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
+const uploadDocumentImage = async (
+  reportId: string,
+  reportDocumentId: string,
+  data: Array<{ url: string }>
+) => {
+  const images = await apiFetch<{ results: Array<DocumentImage> }>(
+    `/documents/cases/${reportId}/document/${reportDocumentId}/images`,
+    { method: 'POST', data }
+  );
+  mutate(`/documents/cases`);
+  return images.data.results ?? [];
+};
+
 export const useDocumentCaseApi = () => {
-  const createDocumentReport = async (payload: DocumentCaseFormData) => {
-    const report = await apiFetch<DocumentCase>('/documents/cases', {
-      method: 'POST',
-      data: payload,
-    });
-    return report.data;
-  };
-  const updateDocumentReport = async (reportId: string, payload: Partial<DocumentCaseFormData>) => {
-    const report = await apiFetch<DocumentCase>(`/documents/cases/${reportId}`, {
-      method: 'PATCH',
-      data: payload,
-    });
-    return report.data;
-  };
-  const deleteDocumentReport = async (reportId: string, purge: boolean = false) => {
-    const report = await apiFetch<DocumentCase>(`/documents/cases/${reportId}`, {
-      method: 'DELETE',
-      params: { purge },
-    });
-    return report.data;
-  };
-
-  const uploadDocumentImage = async (
-    reportId: string,
-    reportDocumentId: string,
-    data: Array<{ url: string }>
-  ) => {
-    const images = await apiFetch<{ results: Array<DocumentImage> }>(
-      `/documents/cases/${reportId}/document/${reportDocumentId}/images`,
-      { method: 'POST', data }
-    );
-    return images.data.results ?? [];
-  };
-  const deleteDocumentImage = async (reportId: string, image: DocumentImage) => {
-    await apiFetch<{ results: Array<DocumentImage> }>(
-      `/documents/cases/${reportId}/document/${image.documentId}/images/${image.id}`,
-      { method: 'DELETE' }
-    );
-    await cleanFiles([image.url]);
-  };
-
-  const mutateDocumentReport = () => {
-    mutate('/documents/cases');
-  };
   return {
-    createDocumentReport,
-    updateDocumentReport,
-    deleteDocumentReport,
-    mutateDocumentReport,
+    createFoundDocumentCase,
+    updateFoundDocumentCase,
+    createLostDocumentCase,
+    updateLostDocumentCase,
+    deleteDocumentCase,
+    restoreDocumentCase,
     uploadDocumentImage,
-    deleteDocumentImage,
   };
 };

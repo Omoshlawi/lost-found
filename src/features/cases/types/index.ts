@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  DocumentReportSchema,
-  ImageProcessOptionsSchema,
-  ReportLostOrFoundDocumentSchema,
-} from '../utils';
+import { FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
 
 export interface DocumentCase {
   id: string;
@@ -124,7 +120,7 @@ export interface Ward {
 export interface ImageScanResult {
   text: string;
   job: string;
-  info: Partial<DocumentCaseFormData['document']>;
+  // info: Partial<DocumentCaseFormData['document']>;
 }
 
 export interface AdditionalField {
@@ -132,6 +128,7 @@ export interface AdditionalField {
   fieldValue: string;
 }
 
-export type DocumentCaseFormData = z.infer<typeof ReportLostOrFoundDocumentSchema>;
-export type ImageProcessFormValues = z.infer<typeof ImageProcessOptionsSchema>;
-export type ReportType = 'Lost' | 'Found' | 'Unknown';
+export type ReportType = 'Lost' | 'Found';
+
+export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
+export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;

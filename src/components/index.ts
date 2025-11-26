@@ -4,7 +4,6 @@ export * from './TablerIcon';
 export * from './ComponentSkeletons';
 export * from './StateWidgets';
 export * from './Workspace';
-export * from './ImagePicker';
 export * from './Datatable';
 export * from './Dashboard';
 export * from './UserHasAccess';

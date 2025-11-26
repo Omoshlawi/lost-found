@@ -1,27 +1,32 @@
 import { apiFetch } from './apiFetch';
+import { constructUrl } from './constructUrl';
 
-export interface UploadedFile {
-  path: string;
-  bytesSize: number;
-  memeType: string;
-  uploadedBy: string;
-  fieldName: string;
-}
-
-export const uploadFile = async (files: Array<File>, uploadTo: string) => {
-  const uploadsData = new FormData();
-  uploadsData.append('path', uploadTo);
-  files.forEach((file) => {
-    uploadsData.append('files', file);
+export const uploadFile = async (file: File) => {
+  // Step 1: Request signed URL from the API
+  const requestUrl = constructUrl('files/upload-url', {
+    fileName: file.name,
+    size: file.size,
+    mimeType: file.type,
   });
-  const res = await apiFetch<Array<UploadedFile>>('/files', {
-    method: 'POST',
-    data: uploadsData,
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return res.data;
-};
 
-export const cleanFiles = async (payload: string[] = []) => {
-  await apiFetch('/files', { method: 'DELETE', data: { paths: payload } });
+  const requestResp = await apiFetch<{ url: string }>(requestUrl);
+  const signedUrl = requestResp.data.url;
+
+  // Step 2: Upload file directly to S3 using the signed URL
+  await apiFetch(signedUrl, {
+    method: 'PUT',
+    data: file,
+    headers: {
+      'Content-Type': file.type || 'application/octet-stream',
+      Accept: undefined,
+    },
+    maxBodyLength: Infinity,
+    timeout: 300000, // 5 minute timeout for large files
+  });
+
+  const url = signedUrl?.split('?')?.[0];
+  if (url) {
+    const fileName = signedUrl.split('/').pop();
+    return `/files/stream?fileName=${fileName}`;
+  }
 };

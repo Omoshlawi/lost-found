@@ -19,7 +19,7 @@ const ReportDocumentImageUploadForm: React.FC<ReportDocumentImageUploadFormProps
 }) => {
   const [files, setFiles] = useState<FileWithPath[]>([]);
   const [loading, setLoading] = useState(false);
-  const { mutateDocumentReport, uploadDocumentImage } = useDocumentCaseApi();
+  const { uploadDocumentImage } = useDocumentCaseApi();
   const previews = files.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
     return <Image key={index} src={imageUrl} onLoad={() => URL.revokeObjectURL(imageUrl)} />;
@@ -28,11 +28,11 @@ const ReportDocumentImageUploadForm: React.FC<ReportDocumentImageUploadFormProps
   const handleUpload = async () => {
     try {
       setLoading(true);
-      const uploaded = await uploadFile(files, 'report-documents');
+      const urls = await Promise.all(files.map((file) => uploadFile(file)));
       const documentImages = await uploadDocumentImage(
         report.id,
         report.document!.id,
-        uploaded.map((u) => ({ url: u.path }))
+        urls.filter((u): u is string => typeof u === 'string').map((u) => ({ url: u }))
       );
       showNotification({
         title: `Success`,
@@ -41,7 +41,6 @@ const ReportDocumentImageUploadForm: React.FC<ReportDocumentImageUploadFormProps
         position: 'top-right',
       });
       onSuccess?.(documentImages);
-      mutateDocumentReport();
       onClose?.();
     } catch (error) {
       const e = handleApiErrors(error);

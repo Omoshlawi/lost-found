@@ -7,7 +7,7 @@ import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/component
 import { launchWorkspace } from '@/components/Workspace';
 import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
-import { DocumentReportForm } from '../forms';
+import FoundDocumentCaseForm from '../forms/FoundDocumentCaseForm';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
 import { DocumentCase } from '../types';
 
@@ -16,7 +16,7 @@ const FoundDocumentCasesPage = () => {
     v: 'custom:include(foundDocumentCase,document:include(type),address)',
     reportType: 'FOUND',
   });
-  const { deleteDocumentReport, mutateDocumentReport } = useDocumentCaseApi();
+  const { deleteDocumentCase } = useDocumentCaseApi();
   const { bgColor } = useAppColors();
   const handleDelete = (report: DocumentCase) => {
     modals.openConfirmModal({
@@ -32,13 +32,12 @@ const FoundDocumentCasesPage = () => {
       confirmProps: { color: 'red' },
       onConfirm: async () => {
         try {
-          await deleteDocumentReport(report.id);
+          await deleteDocumentCase(report.id);
           showNotification({
             title: 'success',
             message: 'Document type deleted succesfully!',
             color: 'green',
           });
-          mutateDocumentReport();
         } catch (error) {
           const e = handleApiErrors<{}>(error);
           if (e.detail) {
@@ -55,11 +54,11 @@ const FoundDocumentCasesPage = () => {
   };
   const handleLaunchReportForm = (report?: DocumentCase) => {
     const close = launchWorkspace(
-      <DocumentReportForm report={report} closeWorkspace={() => close()} />,
+      <FoundDocumentCaseForm case={report} closeWorkspace={() => close()} />,
       {
         expandable: true,
-        width: 'wide',
-        title: 'Document report form',
+        width: 'narrow',
+        title: 'Found Document Case Form',
       }
     );
   };

@@ -14,11 +14,7 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
-import {
-  DocumentReportForm,
-  ReportDocumentImageUploadForm,
-  ReportDocumentInfoForm,
-} from '../forms';
+import { LostDocumentCaseForm, ReportDocumentImageUploadForm } from '../forms';
 import { useDocumentCase, useDocumentCaseApi } from '../hooks';
 import { DocumentImage, ReportType } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
@@ -26,7 +22,8 @@ import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentCase(reportId);
-  const { mutateDocumentReport, deleteDocumentImage } = useDocumentCaseApi();
+  // eslint-disable-next-line no-empty-pattern
+  const {} = useDocumentCaseApi();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [_deleting, setDeleting] = useState(false);
 
@@ -43,12 +40,10 @@ const DocumentCaseDetail = () => {
   const docId = reportData.id ? `${reportData.id.substring(0, 8)}...` : 'Unknown';
   const status = reportData.status || 'PENDING';
   const contactPreference = reportData.lostReport?.contactPreference || 'EMAIL';
-  const isLostReport = reportData.lostReport !== null;
-  const isFoundReport = reportData.foundReport !== null;
-  const reportType: ReportType = isLostReport ? 'Lost' : isFoundReport ? 'Found' : 'Unknown';
+  const reportType: ReportType = reportData.lostReport ? 'Lost' : 'Found';
   const launchDocumentReportInfoForm = () => {
     const dispose = launchWorkspace(
-      <DocumentReportForm report={reportData} closeWorkspace={() => dispose()} />,
+      <LostDocumentCaseForm case={reportData} closeWorkspace={() => dispose()} />,
       { title: 'Update Report', expandable: true, width: 'extra-wide' }
     );
   };
@@ -60,14 +55,9 @@ const DocumentCaseDetail = () => {
       ),
     });
   };
-  const launchDocumentInfoForm = () => {
-    const dispose = launchWorkspace(
-      <ReportDocumentInfoForm report={reportData} closeWorkspace={() => dispose()} />,
-      { title: 'Update report document infomation' }
-    );
-  };
+  const launchDocumentInfoForm = () => {};
 
-  const handleDeleteDocumentImage = async (image: DocumentImage) => {
+  const handleDeleteDocumentImage = async (_image: DocumentImage) => {
     try {
       setDeleting(true);
       const id = showNotification({
@@ -77,7 +67,7 @@ const DocumentCaseDetail = () => {
         autoClose: false,
         withCloseButton: false,
       });
-      await deleteDocumentImage(reportData.id, image);
+      // await deleteDocumentImage(reportData.id, image);
 
       updateNotification({
         id,
@@ -88,7 +78,6 @@ const DocumentCaseDetail = () => {
         loading: false,
         autoClose: 2000,
       });
-      mutateDocumentReport();
     } catch (error) {
       const e = handleApiErrors(error);
       if (e.detail) {
