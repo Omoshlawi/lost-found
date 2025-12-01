@@ -11,7 +11,7 @@ import {
   useComputedColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { FoundReport, LostReport, ReportType } from '../types';
+import { CaseType, FoundDocumentCase, LostDocumentCase } from '../types';
 import { formatDate, getBackgroundColor } from '../utils/reportUtils';
 
 interface ReportDetailsProps {
@@ -19,8 +19,8 @@ interface ReportDetailsProps {
   createdAt?: string;
   description?: string;
   tags?: string[];
-  lostReport?: LostReport;
-  foundReport?: FoundReport;
+  lostReport?: LostDocumentCase;
+  foundReport?: FoundDocumentCase;
 }
 
 const ReportDetails: React.FC<ReportDetailsProps> = ({

@@ -7,6 +7,7 @@ import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/component
 import { launchWorkspace } from '@/components/Workspace';
 import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
+import { formatDate } from '@/lib/utils/helpers';
 import FoundDocumentCaseForm from '../forms/FoundDocumentCaseForm';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
 import { DocumentCase } from '../types';
@@ -52,15 +53,12 @@ const FoundDocumentCasesPage = () => {
       },
     });
   };
-  const handleLaunchReportForm = (report?: DocumentCase) => {
-    const close = launchWorkspace(
-      <FoundDocumentCaseForm case={report} closeWorkspace={() => close()} />,
-      {
-        expandable: true,
-        width: 'wide',
-        title: 'Found Document Case Form',
-      }
-    );
+  const handleLaunchReportForm = () => {
+    const close = launchWorkspace(<FoundDocumentCaseForm closeWorkspace={() => close()} />, {
+      expandable: true,
+      width: 'wide',
+      title: 'Found Document Case Form',
+    });
   };
 
   return (
@@ -80,33 +78,27 @@ const FoundDocumentCasesPage = () => {
           columns={[
             ...columns,
             {
-              header: 'Actions',
               id: 'actions',
               cell: ({ row: { original: docType } }) => (
                 <Menu shadow="md" width={200}>
                   <Menu.Target>
-                    <ActionIcon variant="outline" aria-label="Settings">
+                    <ActionIcon variant="transparent" aria-label="Settings">
                       <TablerIcon
-                        name="dotsVertical"
+                        name="dots"
                         style={{ width: '70%', height: '70%' }}
                         stroke={1.5}
                       />
                     </ActionIcon>
                   </Menu.Target>
                   <Menu.Dropdown>
+                    <Menu.Label>Actions</Menu.Label>
+                    <Menu.Divider />
                     <Menu.Item
                       leftSection={<TablerIcon name="eye" size={14} />}
                       component={Link}
                       to={`${docType.id}`}
                     >
                       View Details
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<TablerIcon name="edit" size={14} />}
-                      color="green"
-                      onClick={() => handleLaunchReportForm(docType)}
-                    >
-                      Edit
                     </Menu.Item>
                     <Menu.Item
                       leftSection={<TablerIcon name="trash" size={14} />}
@@ -131,8 +123,11 @@ export default FoundDocumentCasesPage;
 
 const columns: ColumnDef<DocumentCase>[] = [
   {
-    header: 'No',
-    accessorKey: 'id',
+    header: '#',
+    id: 'no',
+    cell: ({ row, table }) => (table.getSortedRowModel().rows.indexOf(row) + 1).toString(),
+    enableSorting: false,
+    enableHiding: false,
   },
   {
     header: 'Owner name',
@@ -145,7 +140,7 @@ const columns: ColumnDef<DocumentCase>[] = [
   {
     header: 'Found date',
     accessorKey: 'lostOrFoundDate',
-    cell: ({ row: { original: docType } }) => new Date(docType.lostOrFoundDate).toDateString(),
+    cell: ({ row: { original: docType } }) => formatDate(docType.lostOrFoundDate),
   },
   {
     header: 'County',
@@ -179,11 +174,11 @@ const columns: ColumnDef<DocumentCase>[] = [
   {
     header: 'Created at',
     accessorKey: 'createdAt',
-    cell: ({ row: { original: docType } }) => new Date(docType.createdAt).toDateString(),
+    cell: ({ row: { original: docType } }) => formatDate(docType.createdAt),
   },
   {
     header: 'Updated at',
     accessorKey: 'updatedAt',
-    cell: ({ row: { original: docType } }) => new Date(docType.updatedAt).toDateString(),
+    cell: ({ row: { original: docType } }) => formatDate(docType.updatedAt),
   },
 ];

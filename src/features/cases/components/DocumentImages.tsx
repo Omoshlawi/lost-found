@@ -53,7 +53,7 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
       children: (
         <Image
           src={url}
-          height={'100%'}
+          height="100%"
           fit="contain"
           radius="md"
           fallbackSrc="https://placehold.co/600x400?text=Placeholder"
@@ -105,7 +105,7 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
             </Tooltip>
           </Group>
         </Group>
-        <Text c={'dimmed'}>No ducument images for this report</Text>
+        <Text c="dimmed">No ducument images for this report</Text>
       </Paper>
     );
   }
@@ -151,13 +151,13 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
           }}
         >
           {images.map((image, index) => {
-            const url = `/media/${image.url}`;
+            const url = `/api/files/stream?fileName=${image.url}`;
             return (
               <Carousel.Slide key={index} className={styles.slideContainer}>
                 <Group
                   flex={1}
                   justify="center"
-                  pos={'absolute'}
+                  pos="absolute"
                   top={0}
                   bottom={0}
                   left={0}
@@ -186,7 +186,7 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
                 </Group>
                 <Image
                   src={url}
-                  height={'100%'}
+                  height="100%"
                   fit="cover"
                   radius="md"
                   fallbackSrc="https://placehold.co/600x400?text=Placeholder"

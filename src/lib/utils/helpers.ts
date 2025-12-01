@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export const getNameInitials = (name: string) => {
   const nameParts = name.split(' ');
   if (nameParts.length === 1) {
@@ -81,3 +83,14 @@ export function unflattenPairsToObject(pairs: KeyValuePairs): UnflattenedObject 
 
   return result;
 }
+
+export const formatDate = (date: string) => {
+  return dayjs(date).format('DD/MM/YYYY');
+};
+
+export const formatDateTime = (date: string) => {
+  return dayjs(date).format('DD/MM/YYYY HH:mm');
+};
+export const formatTime = (date: string) => {
+  return dayjs(date).format('HH:mm');
+};

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Card, Divider } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification, updateNotification } from '@mantine/notifications';
-import { ErrorState, launchWorkspace, TablerIcon } from '@/components';
+import { ErrorState, TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import {
   AdditionalDetails,
@@ -14,9 +14,9 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
-import { LostDocumentCaseForm, ReportDocumentImageUploadForm } from '../forms';
+import { ReportDocumentImageUploadForm } from '../forms';
 import { useDocumentCase, useDocumentCaseApi } from '../hooks';
-import { DocumentImage, ReportType } from '../types';
+import { CaseType, DocumentImage } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const DocumentCaseDetail = () => {
@@ -38,15 +38,8 @@ const DocumentCaseDetail = () => {
   const docType = reportData.document?.type?.name || 'Unknown';
   const docTypeIcon = reportData.document?.type?.icon || 'id';
   const docId = reportData.id ? `${reportData.id.substring(0, 8)}...` : 'Unknown';
-  const status = reportData.status || 'PENDING';
-  const contactPreference = reportData.lostReport?.contactPreference || 'EMAIL';
-  const reportType: ReportType = reportData.lostReport ? 'Lost' : 'Found';
-  const launchDocumentReportInfoForm = () => {
-    const dispose = launchWorkspace(
-      <LostDocumentCaseForm case={reportData} closeWorkspace={() => dispose()} />,
-      { title: 'Update Report', expandable: true, width: 'extra-wide' }
-    );
-  };
+  const reportType: CaseType = reportData.lostReport ? 'LOST' : 'FOUND';
+  const launchDocumentReportInfoForm = () => {};
   const launchDocumentImageForm = () => {
     const modalId = modals.open({
       title: 'Upload Document Images',

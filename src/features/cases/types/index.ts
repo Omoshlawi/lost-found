@@ -1,45 +1,61 @@
 import { z } from 'zod';
+import { Address } from '@/features/addresses/types';
 import { FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
 
 export interface DocumentCase {
   id: string;
   userId: string;
-  lostOrFoundDate: string;
-  countyCode: string;
-  county?: County;
-  subCountyCode: string;
-  subCounty?: SubCounty;
-  wardCode: string;
-  ward?: Ward;
-  landMark?: string;
+  addressId: string;
+  address?: Address;
+  eventDate: string;
   tags: string[];
-  description: string;
-  status: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
   voided: boolean;
-  lostReport?: LostReport;
-  foundReport?: FoundReport;
+  lostDocumentCase?: LostDocumentCase;
+  foundDocumentCase?: FoundDocumentCase;
   document?: Document;
 }
 
-export interface LostReport {
+export enum LostDocumentCaseStatus {
+  SUBMITTED = 'SUBMITTED', // When user submit lost document info
+  MATCHED = 'MATCHED', // When a match is found
+  COMPLETED = 'COMPLETED', // When the document is reunited with the owner
+}
+
+export enum FoundDocumentCaseStatus {
+  DRAFT = 'DRAFT', // When the document is in draft status
+  SUBMITTED = 'SUBMITTED', // When the document is submitted by the user to pickup station/point
+  VERIFIED = 'VERIFIED', // When the document is verified by the admin
+  MATCHED = 'MATCHED', // When a match is found
+  CLAIMED = 'CLAIMED', // When the document is claimed by the owner
+  COMPLETED = 'COMPLETED', // When the document is reunited with the owner
+}
+
+export interface SecurityQuestion {
+  question: string;
+  answer: string;
+}
+
+export interface LostDocumentCase {
   id: string;
-  reportId: string;
+  caseId: string;
+  case?: DocumentCase;
+  status: LostDocumentCaseStatus;
   createdAt: string;
   updatedAt: string;
-  contactPreference: string;
   voided: boolean;
 }
-export interface FoundReport {
+export interface FoundDocumentCase {
   id: string;
-  reportId: string;
+  caseId: string;
+  case?: DocumentCase;
+  status: FoundDocumentCaseStatus;
   createdAt: string;
   updatedAt: string;
-  handoverPreference: string;
   pointAwarded: number;
-  securityQuestion: any;
-  securityAnswer: any;
+  securityQuestion: Array<SecurityQuestion>;
   voided: boolean;
 }
 
@@ -98,37 +114,12 @@ export interface Type {
   voided: boolean;
 }
 
-export interface County {
-  code: string;
-  name: string;
-  subCounties: SubCounty[];
-}
-
-export interface SubCounty {
-  code: string;
-  name: string;
-  countyCode: string;
-  wards: Ward[];
-}
-
-export interface Ward {
-  code: string;
-  name: string;
-  countyCode: string;
-  subCountyCode: string;
-}
-export interface ImageScanResult {
-  text: string;
-  job: string;
-  // info: Partial<DocumentCaseFormData['document']>;
-}
-
 export interface AdditionalField {
   fieldName: string;
   fieldValue: string;
 }
 
-export type ReportType = 'Lost' | 'Found';
+export type CaseType = 'LOST' | 'FOUND';
 
 export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
 export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;

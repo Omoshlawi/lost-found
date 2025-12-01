@@ -11,7 +11,7 @@ import {
   useComputedColorScheme,
 } from '@mantine/core';
 import { TablerIcon, TablerIconName } from '@/components';
-import { ReportType } from '../types';
+import { CaseType } from '../types';
 import { getStatusColor } from '../utils/reportUtils';
 
 interface ReportHeaderProps {
@@ -20,7 +20,7 @@ interface ReportHeaderProps {
   status: string;
   pointAwarded?: number;
   docTypeIcon: string;
-  reportType: ReportType;
+  reportType: CaseType;
   onUpdateReportDetails?: () => void;
 }
 
@@ -48,7 +48,7 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
           </Text>
         </div>
       </Group>
-      <Group w={'100%'}>
+      <Group w="100%">
         <Badge size="lg" color={getStatusColor(status, colorScheme)} variant="filled">
           {status}
         </Badge>
@@ -57,7 +57,7 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
             {pointAwarded} Points
           </Badge>
         )} */}
-        {reportType === 'Found' && (
+        {reportType === 'FOUND' && (
           <Tooltip label="Points are awarded when document is reunited with owner succesfully">
             <Badge size="lg" color={colorScheme === 'dark' ? 'green.7' : 'green'} variant="outline">
               {pointAwarded} Points

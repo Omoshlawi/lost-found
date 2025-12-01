@@ -9,12 +9,12 @@ import {
   useComputedColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { ReportType } from '../types';
+import { CaseType } from '../types';
 
 interface ContactFooterProps {
   contactPreference: string;
   handoverPreference?: string;
-  reportType: ReportType;
+  reportType: CaseType;
 }
 
 const ContactFooter: React.FC<ContactFooterProps> = ({
