@@ -14,7 +14,7 @@ import { DocumentCase } from '../types';
 const FoundDocumentCasesPage = () => {
   const documentreportAsync = useDocumentCases({
     v: 'custom:include(foundDocumentCase,document:include(type),address)',
-    reportType: 'FOUND',
+    caseType: 'FOUND',
   });
   const { deleteDocumentCase } = useDocumentCaseApi();
   const { bgColor } = useAppColors();

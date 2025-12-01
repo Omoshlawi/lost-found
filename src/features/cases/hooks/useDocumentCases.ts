@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
 import {
   DocumentCase,
@@ -35,7 +36,7 @@ export const useDocumentCase = (reportId?: string) => {
 export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData) => {
   const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases', {
     method: 'POST',
-    data: payload,
+    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
   });
   mutate('/documents/cases');
   return foundDocumentCase.data;
@@ -47,7 +48,7 @@ export const updateFoundDocumentCase = async (
 ) => {
   const foundDocumentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}`, {
     method: 'PATCH',
-    data: payload,
+    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
   });
   mutate('/documents/cases');
   return foundDocumentCase.data;
@@ -56,7 +57,7 @@ export const updateFoundDocumentCase = async (
 export const createLostDocumentCase = async (payload: LostDocumentCaseFormData) => {
   const lostDocumentCase = await apiFetch<DocumentCase>('/documents/cases', {
     method: 'POST',
-    data: payload,
+    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
   });
   mutate('/documents/cases');
   return lostDocumentCase.data;
@@ -65,7 +66,7 @@ export const createLostDocumentCase = async (payload: LostDocumentCaseFormData) 
 export const updateLostDocumentCase = async (caseId: string, payload: LostDocumentCaseFormData) => {
   const lostDocumentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}`, {
     method: 'PATCH',
-    data: payload,
+    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
   });
   mutate('/documents/cases');
   return lostDocumentCase.data;

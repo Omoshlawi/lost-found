@@ -13,16 +13,11 @@ import { DocumentCase, FoundDocumentCaseFormData } from '../types';
 import { FoundDocumentCaseSchema } from '../utils';
 
 type DocumentCaseFormProps = {
-  case?: DocumentCase;
   closeWorkspace?: () => void;
   onSuccess?: (caseData: DocumentCase) => void;
 };
 
-const FoundDocumentCaseForm = ({
-  case: docCase,
-  closeWorkspace,
-  onSuccess,
-}: DocumentCaseFormProps) => {
+const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps) => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const imageUploadRef = useRef<ImageUploadRef>(null);
 
@@ -31,7 +26,7 @@ const FoundDocumentCaseForm = ({
     resolver: zodResolver(FoundDocumentCaseSchema),
   });
   const { addresses, isLoading } = useAddresses();
-  const { createFoundDocumentCase, updateFoundDocumentCase } = useDocumentCaseApi();
+  const { createFoundDocumentCase } = useDocumentCaseApi();
 
   const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
     try {
@@ -76,21 +71,19 @@ const FoundDocumentCaseForm = ({
         images: imageUrls.length > 0 ? (imageUrls as [string, ...string[]]) : [],
       };
 
-      const doc = docCase
-        ? await updateFoundDocumentCase(docCase.id, submitData)
-        : await createFoundDocumentCase(submitData);
+      const doc = await createFoundDocumentCase(submitData);
       onSuccess?.(doc);
       showNotification({
         title: 'Success',
         color: 'green',
-        message: `Document report ${docCase ? 'updated' : 'created'} successfully`,
+        message: `Found Document case created successfully`,
       });
       closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<FoundDocumentCaseFormData>(error);
       if ('detail' in e && e.detail) {
         showNotification({
-          title: `Error ${docCase ? 'updating' : 'creating'} document report`,
+          title: `Error creating found document case`,
           message: e.detail,
           color: 'red',
           position: 'top-right',
@@ -189,7 +182,7 @@ const FoundDocumentCaseForm = ({
             disabled={form.formState.isSubmitting || uploadingImages}
             leftSection={<TablerIcon name="check" size={18} />}
           >
-            {docCase ? 'Update' : 'Submit'} Report
+            Submit Found Document Case
           </Button>
         </Group>
       </Stack>

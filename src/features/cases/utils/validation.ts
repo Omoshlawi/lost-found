@@ -64,8 +64,6 @@ export const FoundDocumentCaseSchema = z.object({
   description: z.string().optional(),
 });
 
-export const LostDocumentCaseSchema = FoundDocumentCaseSchema.extend({
-  document: CaseDocumentSchema.extend({
-    expiryDate: z.coerce.date().optional(),
-  }),
+export const LostDocumentCaseSchema = FoundDocumentCaseSchema.merge(CaseDocumentSchema).omit({
+  images: true,
 });

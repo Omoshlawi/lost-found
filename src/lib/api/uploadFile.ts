@@ -10,23 +10,19 @@ export const uploadFile = async (file: File) => {
     mimeType: file.type,
   });
 
-  const requestResp = await apiFetch<{ url: string }>(requestUrl);
+  const requestResp = await apiFetch<{ url: string; key: string }>(requestUrl);
   const signedUrl = requestResp.data.url;
-
+  const key = requestResp.data.key;
   // Step 2: Upload file directly to S3 using the signed URL
-  await httpClient.put(signedUrl, {
-    data: file,
+  await httpClient.put(signedUrl, file, {
     headers: {
       'Content-Type': file.type || 'application/octet-stream',
       Accept: undefined,
     },
     maxBodyLength: Infinity,
+    maxContentLength: Infinity,
     timeout: 300000, // 5 minute timeout for large files
   });
 
-  const url = signedUrl?.split('?')?.[0];
-  if (url) {
-    const fileName = signedUrl?.split('/')?.pop();
-    return fileName;
-  }
+  return key;
 };
