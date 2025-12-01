@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Badge,
   Button,
-  Flex,
   Group,
   Text,
   ThemeIcon,
@@ -36,45 +35,44 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
   const colorScheme = useComputedColorScheme();
 
   return (
-    <Group mb="md">
-      <Group>
-        <ThemeIcon size={50} radius="md" color="blue.6">
-          <TablerIcon name={docTypeIcon as TablerIconName} size={30} />
+    <Group justify="space-between" align="flex-start" wrap="nowrap">
+      <Group gap="md">
+        <ThemeIcon size={56} radius="md" color="blue" variant="light">
+          <TablerIcon name={docTypeIcon as TablerIconName} size={32} />
         </ThemeIcon>
         <div>
-          <Title order={3}>{docType} Report</Title>
+          <Title order={2} mb={4}>
+            {docType} Report
+          </Title>
           <Text size="sm" c="dimmed">
             Report ID: {docId}
           </Text>
         </div>
       </Group>
-      <Group w="100%">
-        <Badge size="lg" color={getStatusColor(status, colorScheme)} variant="filled">
+      <Group gap="sm">
+        <Badge size="lg" color={getStatusColor(status, colorScheme)} variant="light">
           {status}
         </Badge>
-        {/* {reportType === 'Lost' && (
-          <Badge size="lg" color={colorScheme === 'dark' ? 'green.7' : 'green'} variant="outline">
-            {pointAwarded} Points
-          </Badge>
-        )} */}
-        {reportType === 'FOUND' && (
-          <Tooltip label="Points are awarded when document is reunited with owner succesfully">
-            <Badge size="lg" color={colorScheme === 'dark' ? 'green.7' : 'green'} variant="outline">
+        {reportType === 'FOUND' && pointAwarded && pointAwarded > 0 && (
+          <Tooltip label="Points are awarded when document is reunited with owner successfully">
+            <Badge size="lg" color={colorScheme === 'dark' ? 'green.7' : 'green'} variant="light">
               {pointAwarded} Points
             </Badge>
           </Tooltip>
         )}
-        <Flex flex={1} />
-        <Tooltip label="Update Report Information">
-          <Button
-            variant="outline"
-            color="blue"
-            leftSection={<TablerIcon name="edit" size={16} />}
-            onClick={onUpdateReportDetails}
-          >
-            Update Report
-          </Button>
-        </Tooltip>
+        {onUpdateReportDetails && (
+          <Tooltip label="Update Report Information">
+            <Button
+              variant="light"
+              color="blue"
+              size="sm"
+              leftSection={<TablerIcon name="edit" size={16} />}
+              onClick={onUpdateReportDetails}
+            >
+              Edit
+            </Button>
+          </Tooltip>
+        )}
       </Group>
     </Group>
   );

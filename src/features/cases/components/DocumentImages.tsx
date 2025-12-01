@@ -6,18 +6,14 @@ import {
   Collapse,
   Group,
   Image,
-  Paper,
   Text,
   ThemeIcon,
   Title,
   Tooltip,
-  useComputedColorScheme,
-  useMantineTheme,
 } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
 import { DocumentImage } from '../types';
-import { getBackgroundColor } from '../utils';
 import styles from './DocumentImage.module.css';
 
 type Prop = {
@@ -27,8 +23,6 @@ type Prop = {
 };
 
 const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteImage }) => {
-  const theme = useMantineTheme();
-  const colorScheme = useComputedColorScheme();
   const [imagesOpen, setImagesOpen] = useState(true);
   const handleView = (url: string) => {
     modals.open({
@@ -79,22 +73,16 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
 
   if (!images || images.length === 0) {
     return (
-      <Paper
-        p="md"
-        radius="md"
-        withBorder
-        mb="md"
-        style={{ backgroundColor: getBackgroundColor('red', theme, colorScheme) }}
-      >
-        <Group mb="xs">
+      <div>
+        <Group mb="md" justify="space-between">
           <Title order={4}>Document Images</Title>
-          <Group flex={1} justify="space-between">
-            <ThemeIcon size="lg" radius="xl" color="green">
+          <Group gap="sm">
+            <ThemeIcon size="lg" radius="xl" color="green" variant="light">
               <TablerIcon name="photo" size={20} />
             </ThemeIcon>
             <Tooltip label="Upload New Image">
               <Button
-                variant="filled"
+                variant="light"
                 color="green"
                 size="sm"
                 leftSection={<TablerIcon name="upload" size={16} />}
@@ -105,28 +93,22 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
             </Tooltip>
           </Group>
         </Group>
-        <Text c="dimmed">No ducument images for this report</Text>
-      </Paper>
+        <Text c="dimmed">No document images for this report</Text>
+      </div>
     );
   }
 
   return (
-    <Paper
-      p="md"
-      radius="md"
-      withBorder
-      mb="md"
-      style={{ backgroundColor: getBackgroundColor('red', theme, colorScheme) }}
-    >
-      <Group mb="xs">
+    <div>
+      <Group mb="md" justify="space-between">
         <Title order={4}>Document Images</Title>
-        <Group flex={1} justify="space-between">
-          <ActionIcon onClick={() => setImagesOpen(!imagesOpen)}>
+        <Group gap="sm">
+          <ActionIcon variant="subtle" onClick={() => setImagesOpen(!imagesOpen)}>
             <TablerIcon name={imagesOpen ? 'chevronUp' : 'chevronDown'} size={16} />
           </ActionIcon>
           <Tooltip label="Upload New Image">
             <Button
-              variant="filled"
+              variant="light"
               color="green"
               size="sm"
               leftSection={<TablerIcon name="upload" size={16} />}
@@ -196,7 +178,7 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
           })}
         </Carousel>
       </Collapse>
-    </Paper>
+    </div>
   );
 };
 

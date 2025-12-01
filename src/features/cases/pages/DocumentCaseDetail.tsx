@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Divider } from '@mantine/core';
+import { Stack, Tabs } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification, updateNotification } from '@mantine/notifications';
 import { ErrorState, TablerIcon } from '@/components';
@@ -15,17 +15,14 @@ import {
   ReportHeader,
 } from '../components';
 import { ReportDocumentImageUploadForm } from '../forms';
-import { useDocumentCase, useDocumentCaseApi } from '../hooks';
-import { CaseType, DocumentImage } from '../types';
+import { useDocumentCase } from '../hooks';
+import { CaseType, DocumentImage, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentCase(reportId);
-  // eslint-disable-next-line no-empty-pattern
-  const {} = useDocumentCaseApi();
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [_deleting, setDeleting] = useState(false);
 
   if (isLoading) {
     return <DocumentCaseDetailSkeleton />;
@@ -34,12 +31,22 @@ const DocumentCaseDetail = () => {
     return <ErrorState error={error} message="No report data available" title="Report Detail" />;
   }
 
+  // Determine report type - a report can't be both lost and found
+  const isLostCase = !!reportData.lostDocumentCase;
+  const reportType: CaseType = isLostCase ? 'LOST' : 'FOUND';
+
   // Extract common data
   const docType = reportData.document?.type?.name || 'Unknown';
   const docTypeIcon = reportData.document?.type?.icon || 'id';
   const docId = reportData.id ? `${reportData.id.substring(0, 8)}...` : 'Unknown';
-  const reportType: CaseType = reportData.lostReport ? 'LOST' : 'FOUND';
-  const launchDocumentReportInfoForm = () => {};
+
+  // Get status from the appropriate case type
+  const status = isLostCase
+    ? reportData.lostDocumentCase?.status || LostDocumentCaseStatus.SUBMITTED
+    : reportData.foundDocumentCase?.status || FoundDocumentCaseStatus.DRAFT;
+
+  const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
+
   const launchDocumentImageForm = () => {
     const modalId = modals.open({
       title: 'Upload Document Images',
@@ -48,15 +55,13 @@ const DocumentCaseDetail = () => {
       ),
     });
   };
-  const launchDocumentInfoForm = () => {};
 
   const handleDeleteDocumentImage = async (_image: DocumentImage) => {
     try {
-      setDeleting(true);
       const id = showNotification({
         loading: true,
         title: 'Deleting Image',
-        message: 'please wait ...',
+        message: 'Please wait...',
         autoClose: false,
         withCloseButton: false,
       });
@@ -66,7 +71,7 @@ const DocumentCaseDetail = () => {
         id,
         color: 'green',
         title: 'Success',
-        message: 'Image deleted succesfully',
+        message: 'Image deleted successfully',
         icon: <TablerIcon name="check" size={18} />,
         loading: false,
         autoClose: 2000,
@@ -75,73 +80,95 @@ const DocumentCaseDetail = () => {
       const e = handleApiErrors(error);
       if (e.detail) {
         showNotification({
-          title: `Error Uploading document image`,
+          title: 'Error deleting document image',
           message: e.detail,
           color: 'red',
           position: 'top-right',
         });
       }
-    } finally {
-      setDeleting(false);
     }
   };
 
   return (
-    <Card shadow="sm" padding="xl" radius="md" withBorder>
+    <Stack gap="xl">
       <ReportHeader
         docType={docType}
         docId={docId}
         status={status}
-        pointAwarded={reportData.foundReport?.pointAwarded ?? 0}
+        pointAwarded={pointAwarded}
         docTypeIcon={docTypeIcon}
         reportType={reportType}
-        onUpdateReportDetails={launchDocumentReportInfoForm}
       />
 
-      <Divider my="md" />
+      <Tabs defaultValue="document" variant="default">
+        <Tabs.List>
+          <Tabs.Tab value="document" leftSection={<TablerIcon name="id" size={16} />}>
+            Document
+          </Tabs.Tab>
+          <Tabs.Tab value="images" leftSection={<TablerIcon name="photo" size={16} />}>
+            Images
+          </Tabs.Tab>
+          <Tabs.Tab value="location" leftSection={<TablerIcon name="mapPin" size={16} />}>
+            Location
+          </Tabs.Tab>
+          <Tabs.Tab value="details" leftSection={<TablerIcon name="infoCircle" size={16} />}>
+            Report Details
+          </Tabs.Tab>
+          <Tabs.Tab value="additional" leftSection={<TablerIcon name="fileText" size={16} />}>
+            Additional
+          </Tabs.Tab>
+        </Tabs.List>
 
-      <DocumentImages
-        // images={[{ url: 'https://picsum.photos/200/300' }, { url: 'https://picsum.photos/200' }]}
-        images={reportData?.document?.images}
-        onUploadImage={launchDocumentImageForm}
-        onDeleteImage={handleDeleteDocumentImage}
-      />
-      <DocumentInformation
-        document={reportData.document}
-        onUpdateReportDocument={launchDocumentInfoForm}
-      />
+        <Tabs.Panel value="document" pt="xl">
+          <DocumentInformation document={reportData.document} />
+        </Tabs.Panel>
 
-      <LocationInformation
-        county={reportData.county}
-        subCounty={reportData.subCounty}
-        ward={reportData.ward}
-        landMark={reportData.landMark}
-      />
+        <Tabs.Panel value="images" pt="xl">
+          <DocumentImages
+            images={reportData?.document?.images}
+            onUploadImage={launchDocumentImageForm}
+            onDeleteImage={handleDeleteDocumentImage}
+          />
+        </Tabs.Panel>
 
-      <ReportDetails
-        lostOrFoundDate={reportData.lostOrFoundDate}
-        createdAt={reportData.createdAt}
-        description={reportData.description}
-        tags={reportData.tags}
-        lostReport={reportData?.lostReport}
-        foundReport={reportData?.foundReport}
-      />
+        <Tabs.Panel value="location" pt="xl">
+          <LocationInformation
+            county={(reportData as any).county}
+            subCounty={(reportData as any).subCounty}
+            ward={(reportData as any).ward}
+            landMark={(reportData as any).landMark}
+          />
+        </Tabs.Panel>
 
-      <AdditionalDetails
-        isOpen={detailsOpen}
-        toggleOpen={() => setDetailsOpen(!detailsOpen)}
-        createdAt={reportData.createdAt}
-        updatedAt={reportData.updatedAt}
-        status={status}
-        document={reportData.document}
-      />
+        <Tabs.Panel value="details" pt="xl">
+          <Stack gap="lg">
+            <ReportDetails
+              lostOrFoundDate={reportData.eventDate}
+              createdAt={reportData.createdAt}
+              description={reportData.description}
+              tags={reportData.tags}
+              lostDocumentCase={reportData.lostDocumentCase}
+              foundDocumentCase={reportData.foundDocumentCase}
+            />
+            <ContactFooter
+              reportType={reportType}
+              foundDocumentCase={reportData.foundDocumentCase}
+            />
+          </Stack>
+        </Tabs.Panel>
 
-      <ContactFooter
-        contactPreference={contactPreference}
-        reportType={reportType}
-        handoverPreference={reportData?.foundReport?.handoverPreference}
-      />
-    </Card>
+        <Tabs.Panel value="additional" pt="xl">
+          <AdditionalDetails
+            isOpen={detailsOpen}
+            toggleOpen={() => setDetailsOpen(!detailsOpen)}
+            createdAt={reportData.createdAt}
+            updatedAt={reportData.updatedAt}
+            status={status}
+            document={reportData.document}
+          />
+        </Tabs.Panel>
+      </Tabs>
+    </Stack>
   );
 };
 

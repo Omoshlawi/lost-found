@@ -139,37 +139,17 @@ const columns: ColumnDef<DocumentCase>[] = [
   },
   {
     header: 'Found date',
-    accessorKey: 'lostOrFoundDate',
-    cell: ({ row: { original: docType } }) => formatDate(docType.lostOrFoundDate),
+    accessorKey: 'eventDate',
+    cell: ({ row: { original: docType } }) => formatDate(docType.eventDate),
   },
   {
-    header: 'County',
-    accessorKey: 'county.name',
-    cell: ({ row: { original: docType } }) => docType.county?.name ?? '--',
-  },
-  {
-    header: 'Subcounty',
-    accessorKey: 'subCounty.name',
-    cell: ({ row: { original: docType } }) => docType.subCounty?.name ?? '--',
-  },
-  {
-    header: 'Ward',
-    accessorKey: 'ward.name',
-    cell: ({ row: { original: docType } }) => docType.ward?.name ?? '--',
-  },
-  {
-    header: 'Landmark',
-    accessorKey: 'landMark',
+    header: 'Address',
+    accessorKey: 'address.label',
   },
   {
     header: 'Status',
-    accessorKey: 'status',
-    cell: ({ row: { original: docType } }) => docType.status ?? '--',
-  },
-  {
-    header: 'Handover preference',
-    accessorKey: 'foundReport.handoverPreference',
-    cell: ({ row: { original: docType } }) => docType?.foundReport?.handoverPreference ?? '--',
+    accessorKey: 'foundDocumentCase.status',
+    cell: ({ row: { original: docType } }) => docType.foundDocumentCase?.status ?? '--',
   },
   {
     header: 'Created at',

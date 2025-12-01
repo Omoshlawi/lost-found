@@ -1,8 +1,6 @@
 import React from 'react';
-import { Grid, Group, Paper, Text, ThemeIcon, Title, useMantineTheme } from '@mantine/core';
+import { Grid, Group, Text, ThemeIcon, Title } from '@mantine/core';
 import { IconMapPin } from '@tabler/icons-react';
-import { useComputedColorScheme } from '@mantine/core';
-import { getBackgroundColor } from '../utils/reportUtils';
 
 interface LocationProps {
   county?: { name?: string };
@@ -17,43 +15,42 @@ const LocationInformation: React.FC<LocationProps> = ({
   ward, 
   landMark 
 }) => {
-  const theme = useMantineTheme();
-  const colorScheme = useComputedColorScheme();
-
   return (
-    <Paper
-      p="md"
-      radius="md"
-      withBorder
-      mb="md"
-      style={{ backgroundColor: getBackgroundColor('green', theme, colorScheme) }}
-    >
-      <Group mb="xs">
+    <div>
+      <Group mb="md" justify="space-between">
         <Title order={4}>Location Information</Title>
-        <ThemeIcon size="lg" radius="xl" color="green">
+        <ThemeIcon size="lg" radius="xl" color="green" variant="light">
           <IconMapPin size={20} />
         </ThemeIcon>
       </Group>
 
       <Grid>
-        <Grid.Col span={4}>
-          <Text fw={700}>County:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            County
+          </Text>
           <Text>{county?.name || 'Not specified'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Sub-County:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Sub-County
+          </Text>
           <Text>{subCounty?.name || 'Not specified'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Ward:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Ward
+          </Text>
           <Text>{ward?.name || 'Not specified'}</Text>
         </Grid.Col>
         <Grid.Col span={12}>
-          <Text fw={700}>Landmark:</Text>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Landmark
+          </Text>
           <Text>{landMark || 'Not specified'}</Text>
         </Grid.Col>
       </Grid>
-    </Paper>
+    </div>
   );
 };
 

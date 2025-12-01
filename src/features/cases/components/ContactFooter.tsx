@@ -1,93 +1,73 @@
 import React from 'react';
-import { IconMail, IconPhone } from '@tabler/icons-react';
 import {
   Badge,
   Group,
-  Paper,
   Text,
   ThemeIcon,
-  useComputedColorScheme,
-  useMantineTheme,
 } from '@mantine/core';
-import { CaseType } from '../types';
+import { TablerIcon } from '@/components';
+import { CaseType, FoundDocumentCase } from '../types';
 
 interface ContactFooterProps {
-  contactPreference: string;
-  handoverPreference?: string;
   reportType: CaseType;
+  foundDocumentCase?: FoundDocumentCase;
 }
 
-const ContactFooter: React.FC<ContactFooterProps> = ({
-  contactPreference,
-
-  reportType,
-  handoverPreference,
-}) => {
-  const theme = useMantineTheme();
-  const colorScheme = useComputedColorScheme();
-
-  if (reportType === 'Lost') {
+const ContactFooter: React.FC<ContactFooterProps> = ({ reportType, foundDocumentCase }) => {
+  if (reportType === 'LOST') {
     return (
-      <Paper
-        p="md"
-        radius="md"
-        withBorder
-        mt="md"
-        style={{
-          backgroundColor:
-            colorScheme === 'dark' ? `${theme.colors.blue[9]}15` : theme.colors.blue[1],
-        }}
-      >
-        <Group>
+      <div>
+        <Group justify="space-between">
           <Group>
             <ThemeIcon size="md" radius="xl" color="blue">
-              {contactPreference === 'EMAIL' ? <IconMail size={16} /> : <IconPhone size={16} />}
+              <TablerIcon name="info-circle" size={16} />
             </ThemeIcon>
             <div>
-              <Text size="sm">Contact Preference</Text>
-              <Text fw={700}>{contactPreference}</Text>
+              <Text size="sm" c="dimmed">Report Type</Text>
+              <Text fw={700}>Lost Document</Text>
             </div>
           </Group>
-          {/* <Badge
-            size="lg"
-            variant="outline"
-            color={getUrgencyColor(urgencyLevel, colorScheme) as any}
-          >
-            {urgencyLevel} Priority
-          </Badge> */}
-        </Group>
-      </Paper>
-    );
-  }
-  if (reportType === 'Found') {
-    return (
-      <Paper
-        p="md"
-        radius="md"
-        withBorder
-        mt="md"
-        style={{
-          backgroundColor:
-            colorScheme === 'dark' ? `${theme.colors.blue[9]}15` : theme.colors.blue[1],
-        }}
-      >
-        <Group>
-          <Group>
-            <ThemeIcon size="md" radius="xl" color="blue">
-              {contactPreference === 'EMAIL' ? <IconMail size={16} /> : <IconPhone size={16} />}
-            </ThemeIcon>
-            <div>
-              <Text size="sm">Handover Preference</Text>
-              <Text fw={700}>{handoverPreference}</Text>
-            </div>
-          </Group>
-          <Badge size="lg" variant="outline" color="green">
-            Ready for Claim
+          <Badge size="lg" variant="light" color="orange">
+            Searching for Match
           </Badge>
         </Group>
-      </Paper>
+      </div>
     );
   }
+
+  if (reportType === 'FOUND') {
+    const isReadyForClaim = foundDocumentCase?.status === 'VERIFIED' || 
+                            foundDocumentCase?.status === 'MATCHED' ||
+                            foundDocumentCase?.status === 'CLAIMED';
+
+    return (
+      <div>
+        <Group justify="space-between">
+          <Group>
+            <ThemeIcon size="md" radius="xl" color="green">
+              <TablerIcon name="check" size={16} />
+            </ThemeIcon>
+            <div>
+              <Text size="sm" c="dimmed">Report Type</Text>
+              <Text fw={700}>Found Document</Text>
+            </div>
+          </Group>
+          {isReadyForClaim && (
+            <Badge size="lg" variant="light" color="green">
+              Ready for Claim
+            </Badge>
+          )}
+          {foundDocumentCase && foundDocumentCase.pointAwarded > 0 && (
+            <Badge size="lg" variant="outline" color="green">
+              {foundDocumentCase.pointAwarded} Points
+            </Badge>
+          )}
+        </Group>
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default ContactFooter;

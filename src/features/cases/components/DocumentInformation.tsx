@@ -1,124 +1,125 @@
 import React from 'react';
 import {
   Avatar,
-  Button,
   Grid,
   Group,
-  Paper,
   Text,
   Title,
-  Tooltip,
-  useComputedColorScheme,
-  useMantineTheme,
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { Document } from '../types';
-import { formatDate, getBackgroundColor } from '../utils/reportUtils';
+import { formatDate } from '../utils/reportUtils';
 
 interface DocumentProps {
   document?: Document;
   onUpdateReportDocument?: () => void;
 }
 
-const DocumentInformation: React.FC<DocumentProps> = ({ document, onUpdateReportDocument }) => {
-  const theme = useMantineTheme();
-  const colorScheme = useComputedColorScheme();
-
+const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
   return (
-    <Paper
-      p="md"
-      radius="md"
-      withBorder
-      mb="md"
-      style={{ backgroundColor: getBackgroundColor('blue', theme, colorScheme) }}
-    >
-      <Group mb="xs">
+    <div>
+      <Group mb="md" justify="space-between">
         <Title order={4}>Document Information</Title>
-        <Group flex={1} justify="space-between">
-          <Avatar size="md" radius="xl" color="blue">
-            <TablerIcon name={document?.type?.icon as any} size={24} />
-          </Avatar>
-          <Tooltip label="Update Document Information">
-            <Button
-              variant="outline"
-              color="blue"
-              size="sm"
-              leftSection={<TablerIcon name="pencil" size={16} />}
-              onClick={onUpdateReportDocument}
-            >
-              Edit Document
-            </Button>
-          </Tooltip>
-        </Group>
+        <Avatar size="md" radius="xl" color="blue" variant="light">
+          <TablerIcon name={document?.type?.icon as any} size={24} />
+        </Avatar>
       </Group>
 
       <Grid>
-        <Grid.Col span={4}>
-          <Text fw={700}>Owner:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Owner
+          </Text>
           <Text>{document?.ownerName || 'Not specified'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Document Type:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Document Type
+          </Text>
           <Text>{document?.type?.name || 'Unknown'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Serial Number:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Serial Number
+          </Text>
           <Text>{document?.serialNumber || 'Not available'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Document Number:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Document Number
+          </Text>
           <Text>{document?.documentNumber || 'Not available'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Batch Number:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Batch Number
+          </Text>
           <Text>{document?.batchNumber || 'Not available'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Gender:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Gender
+          </Text>
           <Text>{document?.gender || 'Unknown'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Place of birth:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Place of Birth
+          </Text>
           <Text>{document?.placeOfBirth || 'N/A'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Date of birth:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Date of Birth
+          </Text>
           <Text>{formatDate(document?.dateOfBirth)}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Issuer:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Issuer
+          </Text>
           <Text>{document?.issuer || 'N/A'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Place of issue:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Place of Issue
+          </Text>
           <Text>{document?.placeOfIssue || 'N/A'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Nationality:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Nationality
+          </Text>
           <Text>{document?.nationality || 'N/A'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Blood Group:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Blood Group
+          </Text>
           <Text>{document?.bloodGroup || 'N/A'}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Issuance Date:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Issuance Date
+          </Text>
           <Text>{formatDate(document?.issuanceDate)}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Expiry Date:</Text>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Expiry Date
+          </Text>
           <Text>{formatDate(document?.expiryDate)}</Text>
         </Grid.Col>
-        <Grid.Col span={4}>
-          <Text fw={700}>Expiry Date:</Text>
-          <Text>{formatDate(document?.expiryDate)}</Text>
-        </Grid.Col>
-        <Grid.Col span={12}>
-          <Text fw={700}>Additional notes:</Text>
-          <Text>{document?.note ?? 'Not available'}</Text>
-        </Grid.Col>
+        {document?.note && (
+          <Grid.Col span={12}>
+            <Text size="sm" fw={600} c="dimmed" mb={4}>
+              Additional Notes
+            </Text>
+            <Text>{document.note}</Text>
+          </Grid.Col>
+        )}
       </Grid>
-    </Paper>
+    </div>
   );
 };
 

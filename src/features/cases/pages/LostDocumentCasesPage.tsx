@@ -144,38 +144,18 @@ const columns: ColumnDef<DocumentCase>[] = [
   {
     header: 'Lost date',
     accessorKey: 'lostOrFoundDate',
-    cell: ({ row: { original: docType } }) => formatDate(docType.lostOrFoundDate),
+    cell: ({ row: { original: docType } }) => formatDate(docType.eventDate),
   },
   {
-    header: 'County',
-    accessorKey: 'county.name',
-    cell: ({ row: { original: docType } }) => docType.county?.name ?? '--',
-  },
-  {
-    header: 'Subcounty',
-    accessorKey: 'subCounty.name',
-    cell: ({ row: { original: docType } }) => docType.subCounty?.name ?? '--',
-  },
-  {
-    header: 'Ward',
-    accessorKey: 'ward.name',
-    cell: ({ row: { original: docType } }) => docType.ward?.name ?? '--',
-  },
-  {
-    header: 'Landmark',
-    accessorKey: 'landMark',
-    cell: ({ row: { original: docType } }) => docType.landMark ?? '--',
+    header: 'Address',
+    accessorKey: 'address.label',
   },
   {
     header: 'Status',
     accessorKey: 'status',
-    cell: ({ row: { original: docType } }) => docType.status ?? '--',
+    cell: ({ row: { original: docType } }) => docType.lostDocumentCase?.status ?? '--',
   },
-  {
-    header: 'Contact preference',
-    accessorKey: 'lostReport.contactPreference',
-    cell: ({ row: { original: docType } }) => docType?.lostReport?.contactPreference ?? '--',
-  },
+
   {
     header: 'Created at',
     accessorKey: 'createdAt',

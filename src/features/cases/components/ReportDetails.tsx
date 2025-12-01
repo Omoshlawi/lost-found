@@ -4,23 +4,20 @@ import {
   Badge,
   Grid,
   Group,
-  Paper,
   Text,
   ThemeIcon,
   Title,
-  useComputedColorScheme,
-  useMantineTheme,
 } from '@mantine/core';
 import { CaseType, FoundDocumentCase, LostDocumentCase } from '../types';
-import { formatDate, getBackgroundColor } from '../utils/reportUtils';
+import { formatDate } from '../utils/reportUtils';
 
 interface ReportDetailsProps {
   lostOrFoundDate?: string;
   createdAt?: string;
   description?: string;
   tags?: string[];
-  lostReport?: LostDocumentCase;
-  foundReport?: FoundDocumentCase;
+  lostDocumentCase?: LostDocumentCase;
+  foundDocumentCase?: FoundDocumentCase;
 }
 
 const ReportDetails: React.FC<ReportDetailsProps> = ({
@@ -28,13 +25,11 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   createdAt,
   description,
   tags,
-  lostReport,
-  foundReport,
+  lostDocumentCase,
+  foundDocumentCase,
 }) => {
-  const theme = useMantineTheme();
-  const colorScheme = useComputedColorScheme();
-  const isLostReport = lostReport !== null;
-  const isFoundReport = foundReport !== null;
+  const isLostReport = !!lostDocumentCase;
+  const isFoundReport = !!foundDocumentCase;
 
   const Common = () => (
     <>
@@ -67,23 +62,12 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
 
   if (isLostReport)
     return (
-      <Paper
-        p="md"
-        radius="md"
-        withBorder
-        mb="md"
-        style={{ backgroundColor: getBackgroundColor('orange', theme, colorScheme) }}
-      >
-        <Group mb="xs">
+      <div>
+        <Group mb="md" justify="space-between">
           <Title order={4}>Lost Report Details</Title>
-          <Group>
-            <Badge size="md" variant="dot" color="blue">
-              {lostReport?.contactPreference}
-            </Badge>
-            <ThemeIcon size="lg" radius="xl" color="orange">
-              <IconInfoCircle size={20} />
-            </ThemeIcon>
-          </Group>
+          <ThemeIcon size="lg" radius="xl" color="orange" variant="light">
+            <IconInfoCircle size={20} />
+          </ThemeIcon>
         </Group>
 
         <Grid>
@@ -91,30 +75,24 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
             <Text fw={700}>Date Lost:</Text>
             <Text>{formatDate(lostOrFoundDate)}</Text>
           </Grid.Col>
-
+          <Grid.Col span={6}>
+            <Text fw={700}>Status:</Text>
+            <Badge variant="light" color="orange">
+              {lostDocumentCase?.status}
+            </Badge>
+          </Grid.Col>
           <Common />
         </Grid>
-      </Paper>
+      </div>
     );
   if (isFoundReport)
     return (
-      <Paper
-        p="md"
-        radius="md"
-        withBorder
-        mb="md"
-        style={{ backgroundColor: getBackgroundColor('orange', theme, colorScheme) }}
-      >
-        <Group mb="xs">
+      <div>
+        <Group mb="md" justify="space-between">
           <Title order={4}>Found Report Details</Title>
-          <Group>
-            <Badge size="md" variant="dot" color="blue">
-              {foundReport?.handoverPreference}
-            </Badge>
-            <ThemeIcon size="lg" radius="xl" color="orange">
-              <IconInfoCircle size={20} />
-            </ThemeIcon>
-          </Group>
+          <ThemeIcon size="lg" radius="xl" color="orange" variant="light">
+            <IconInfoCircle size={20} />
+          </ThemeIcon>
         </Group>
 
         <Grid>
@@ -122,10 +100,18 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
             <Text fw={700}>Date Found:</Text>
             <Text>{formatDate(lostOrFoundDate)}</Text>
           </Grid.Col>
+          <Grid.Col span={6}>
+            <Text fw={700}>Status:</Text>
+            <Badge variant="light" color="orange">
+              {foundDocumentCase?.status}
+            </Badge>
+          </Grid.Col>
           <Common />
         </Grid>
-      </Paper>
+      </div>
     );
+  
+  return null;
 };
 
 export default ReportDetails;

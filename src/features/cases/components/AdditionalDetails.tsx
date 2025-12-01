@@ -6,10 +6,8 @@ import {
   Divider,
   Grid,
   Group,
-  Paper,
   Text,
   Timeline,
-  useMantineTheme,
 } from '@mantine/core';
 import { 
   IconAlertCircle, 
@@ -18,8 +16,7 @@ import {
   IconClock, 
   IconInfoCircle 
 } from '@tabler/icons-react';
-import { useComputedColorScheme } from '@mantine/core';
-import { formatDate, getBackgroundColor } from '../utils/reportUtils';
+import { formatDate } from '../utils/reportUtils';
 
 interface DocumentType {
   name?: string;
@@ -46,8 +43,6 @@ const AdditionalDetails: React.FC<AdditionalDetailsProps> = ({
   status,
   document
 }) => {
-  const theme = useMantineTheme();
-  const colorScheme = useComputedColorScheme();
 
   return (
     <Box>
@@ -59,13 +54,7 @@ const AdditionalDetails: React.FC<AdditionalDetailsProps> = ({
       </Group>
 
       <Collapse in={isOpen}>
-        <Paper
-          p="md"
-          radius="md"
-          withBorder
-          mt="md"
-          style={{ backgroundColor: getBackgroundColor('gray', theme, colorScheme) }}
-        >
+        <div style={{ marginTop: '1rem' }}>
           <Timeline active={1} bulletSize={24} lineWidth={2}>
             <Timeline.Item bullet={<IconClock size={12} />} title="Report Created">
               <Text c="dimmed" size="sm">
@@ -119,7 +108,7 @@ const AdditionalDetails: React.FC<AdditionalDetailsProps> = ({
               </Text>
             </Grid.Col>
           </Grid>
-        </Paper>
+        </div>
       </Collapse>
     </Box>
   );
