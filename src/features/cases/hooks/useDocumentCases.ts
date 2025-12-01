@@ -34,7 +34,7 @@ export const useDocumentCase = (reportId?: string) => {
 };
 
 export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData) => {
-  const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases', {
+  const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases/found', {
     method: 'POST',
     data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
   });
@@ -55,9 +55,19 @@ export const updateFoundDocumentCase = async (
 };
 
 export const createLostDocumentCase = async (payload: LostDocumentCaseFormData) => {
-  const lostDocumentCase = await apiFetch<DocumentCase>('/documents/cases', {
+  const lostDocumentCase = await apiFetch<DocumentCase>('/documents/cases/lost', {
     method: 'POST',
-    data: { ...payload, eventDate: dayjs(payload?.eventDate).format('YYYY-MM-DD') },
+    data: {
+      ...payload,
+      eventDate: payload?.eventDate ? dayjs(payload?.eventDate).format('YYYY-MM-DD') : undefined,
+      dateOfBirth: payload?.dateOfBirth
+        ? dayjs(payload?.dateOfBirth).format('YYYY-MM-DD')
+        : undefined,
+      issuanceDate: payload?.issuanceDate
+        ? dayjs(payload?.issuanceDate).format('YYYY-MM-DD')
+        : undefined,
+      expiryDate: payload?.expiryDate ? dayjs(payload?.expiryDate).format('YYYY-MM-DD') : undefined,
+    },
   });
   mutate('/documents/cases');
   return lostDocumentCase.data;

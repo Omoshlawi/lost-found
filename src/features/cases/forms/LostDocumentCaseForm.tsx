@@ -58,7 +58,6 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
 
   const handleSubmit: SubmitHandler<LostDocumentCaseFormData> = async (data) => {
     try {
-      // Submit form with uploaded image URLs
       const doc = await createLostDocumentCase(data);
       onSuccess?.(doc);
       showNotification({

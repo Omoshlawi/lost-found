@@ -5,18 +5,25 @@ const handleApiErrors = <T extends Record<string, unknown>>(
 ): { [field in keyof T]?: string } & { detail?: string } => {
   if (isAxiosError(error)) {
     if (error.response?.status === 400) {
-      return Object.entries(error.response?.data ?? {}).reduce((prev, [key, value]) => {
-        if (key === '_errors') {
-          return { ...prev, detail: (value as string[]).join(', ') };
-        }
-        return {
-          ...prev,
-          [key]: (value as { _errors: string[] })._errors.join(', '),
-        };
-      }, {});
+      return Object.entries((error.response?.data ?? {})?.errors ?? {}).reduce(
+        (prev, [key, value]) => {
+          if (key === '_errors') {
+            return { ...prev, detail: (value as string[]).join(', ') };
+          }
+          return {
+            ...prev,
+            [key]: (value as { _errors: string[] })._errors.join(', '),
+          };
+        },
+        {}
+      );
     }
     return {
-      detail: error?.response?.data?.detail ?? error.message ?? 'Unknown error occured',
+      detail:
+        error?.response?.data?.detail ??
+        error?.response?.data?.message ??
+        error.message ??
+        'Unknown error occured',
     };
   }
   return {
