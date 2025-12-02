@@ -1,25 +1,44 @@
-/* CarouselSlide.module.css */
-.slideContainer {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .actionButtonsGroup {
-    opacity: 0;
-    background-color: rgba(0, 0, 0, 0.5); /* Darkened overlay */
-    transition: opacity 0.3s ease;
-    z-index: 1;
-  }
-  
-  .slideContainer:hover .actionButtonsGroup {
-    opacity: 1;
-  }
-  
-  .actionButton {
-    transform: scale(0.8);
-    transition: transform 0.3s ease;
-  }
-  
-  .slideContainer:hover .actionButton {
-    transform: scale(1);
-  }
+/* DocumentImage.module.css */
+.imageCard {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.imageCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.imageContainer {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--mantine-radius-md);
+}
+
+.actionButtonsGroup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  backdrop-filter: blur(2px);
+}
+
+.imageContainer:hover .actionButtonsGroup {
+  opacity: 1;
+}
+
+.actionButton {
+  transform: scale(0.9);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.actionButton:hover {
+  transform: scale(1.1);
+}

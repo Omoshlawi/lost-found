@@ -1,6 +1,5 @@
 import React from 'react';
-import { Carousel } from '@mantine/carousel';
-import { ActionIcon, Button, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core';
+import { ActionIcon, Button, Card, Grid, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
 import CaseDocumentImageUploadForm from '../forms/CaseDocumentImageUploadForm';
@@ -53,6 +52,45 @@ const DocumentImages: React.FC<Prop> = ({ document }) => {
     });
   };
 
+  if (images.length === 0) {
+    return (
+      <div>
+        <Group mb="md" justify="space-between">
+          <Stack>
+            <Title order={4}>Document Images</Title>
+            <Text size="sm" c="dimmed" mb={4}>
+              Scanned Images of the document
+            </Text>
+          </Stack>
+          <Button
+            variant="light"
+            color="green"
+            size="sm"
+            leftSection={<TablerIcon name="upload" size={16} />}
+            onClick={onUploadImage}
+          >
+            Upload Images
+          </Button>
+        </Group>
+        <Card p="xl" radius="md" withBorder style={{ textAlign: 'center' }}>
+          <Stack align="center" gap="md">
+            <TablerIcon name="photo" size={48} style={{ opacity: 0.3 }} />
+            <Text c="dimmed">No images uploaded yet</Text>
+            <Button
+              variant="light"
+              color="green"
+              size="sm"
+              leftSection={<TablerIcon name="upload" size={16} />}
+              onClick={onUploadImage}
+            >
+              Upload Images
+            </Button>
+          </Stack>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Group mb="md" justify="space-between">
@@ -73,62 +111,73 @@ const DocumentImages: React.FC<Prop> = ({ document }) => {
         </Button>
       </Group>
 
-      <Carousel
-        // withIndicators
-        height={400}
-        slideSize={{ base: '100%', sm: '50%', md: '33.333333%' }}
-        slideGap="md"
-        emblaOptions={{
-          loop: true,
-          dragFree: false,
-          align: 'center',
-        }}
-      >
+      <Grid gutter="lg">
         {images.map((image, index) => {
           const url = `/api/files/stream?fileName=${image.url}`;
           return (
-            <Carousel.Slide key={index} className={styles.slideContainer}>
-              <Group
-                flex={1}
-                justify="center"
-                pos="absolute"
-                top={0}
-                bottom={0}
-                left={0}
-                right={0}
-                className={styles.actionButtonsGroup}
-              >
-                <Tooltip label="Filter Image and rescan">
-                  <ActionIcon color="teal" size={50} className={styles.actionButton}>
-                    <TablerIcon name="filter" />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip label="Re-scan Document Image">
-                  <ActionIcon color="red" size={50} className={styles.actionButton}>
-                    <TablerIcon name="scan" />
-                  </ActionIcon>
-                </Tooltip>
-                <Tooltip label="Expand image">
-                  <ActionIcon
-                    size={50}
-                    className={styles.actionButton}
-                    onClick={() => handleView(url)}
-                  >
-                    <TablerIcon name="windowMaximize" />
-                  </ActionIcon>
-                </Tooltip>
-              </Group>
-              <Image
-                src={url}
-                height="100%"
-                fit="cover"
+            <Grid.Col key={index} span={{ base: 12, sm: images.length === 1 ? 12 : 6 }}>
+              <Card
+                p={0}
                 radius="md"
-                fallbackSrc="https://placehold.co/600x400?text=Placeholder"
-              />
-            </Carousel.Slide>
+                withBorder
+                className={styles.imageCard}
+                style={{ overflow: 'hidden' }}
+              >
+                <div className={styles.imageContainer}>
+                  <Image
+                    src={url}
+                    height={images.length === 1 ? 500 : 400}
+                    fit="cover"
+                    radius="md"
+                    fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+                  />
+                  <Group
+                    gap="md"
+                    justify="center"
+                    className={styles.actionButtonsGroup}
+                  >
+                    <Tooltip label="Filter Image and rescan">
+                      <ActionIcon
+                        color="teal"
+                        variant="filled"
+                        size="lg"
+                        className={styles.actionButton}
+                      >
+                        <TablerIcon name="filter" size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Re-scan Document Image">
+                      <ActionIcon
+                        color="red"
+                        variant="filled"
+                        size="lg"
+                        className={styles.actionButton}
+                      >
+                        <TablerIcon name="scan" size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                    <Tooltip label="Expand image">
+                      <ActionIcon
+                        variant="filled"
+                        size="lg"
+                        className={styles.actionButton}
+                        onClick={() => handleView(url)}
+                      >
+                        <TablerIcon name="windowMaximize" size={18} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
+                </div>
+                {images.length > 1 && (
+                  <Text size="xs" c="dimmed" p="xs" ta="center" fw={500}>
+                    Image {index + 1} of {images.length}
+                  </Text>
+                )}
+              </Card>
+            </Grid.Col>
           );
         })}
-      </Carousel>
+      </Grid>
     </div>
   );
 };
