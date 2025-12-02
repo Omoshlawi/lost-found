@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Stack, Tabs } from '@mantine/core';
-import { modals } from '@mantine/modals';
-import { showNotification, updateNotification } from '@mantine/notifications';
 import { ErrorState, TablerIcon } from '@/components';
-import { handleApiErrors } from '@/lib/api';
 import {
   AdditionalDetails,
   ContactFooter,
@@ -14,9 +11,8 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
-import { ReportDocumentImageUploadForm } from '../forms';
 import { useDocumentCase } from '../hooks';
-import { CaseType, DocumentImage, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const DocumentCaseDetail = () => {
@@ -47,48 +43,6 @@ const DocumentCaseDetail = () => {
 
   const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
 
-  const launchDocumentImageForm = () => {
-    const modalId = modals.open({
-      title: 'Upload Document Images',
-      children: (
-        <ReportDocumentImageUploadForm report={reportData} onClose={() => modals.close(modalId)} />
-      ),
-    });
-  };
-
-  const handleDeleteDocumentImage = async (_image: DocumentImage) => {
-    try {
-      const id = showNotification({
-        loading: true,
-        title: 'Deleting Image',
-        message: 'Please wait...',
-        autoClose: false,
-        withCloseButton: false,
-      });
-      // await deleteDocumentImage(reportData.id, image);
-
-      updateNotification({
-        id,
-        color: 'green',
-        title: 'Success',
-        message: 'Image deleted successfully',
-        icon: <TablerIcon name="check" size={18} />,
-        loading: false,
-        autoClose: 2000,
-      });
-    } catch (error) {
-      const e = handleApiErrors(error);
-      if (e.detail) {
-        showNotification({
-          title: 'Error deleting document image',
-          message: e.detail,
-          color: 'red',
-          position: 'top-right',
-        });
-      }
-    }
-  };
-
   return (
     <Stack gap="xl">
       <ReportHeader
@@ -105,9 +59,11 @@ const DocumentCaseDetail = () => {
           <Tabs.Tab value="document" leftSection={<TablerIcon name="id" size={16} />}>
             Document
           </Tabs.Tab>
-          <Tabs.Tab value="images" leftSection={<TablerIcon name="photo" size={16} />}>
-            Images
-          </Tabs.Tab>
+          {reportType === 'FOUND' && (
+            <Tabs.Tab value="images" leftSection={<TablerIcon name="photo" size={16} />}>
+              Images
+            </Tabs.Tab>
+          )}
           <Tabs.Tab value="location" leftSection={<TablerIcon name="mapPin" size={16} />}>
             Location
           </Tabs.Tab>
@@ -120,15 +76,11 @@ const DocumentCaseDetail = () => {
         </Tabs.List>
 
         <Tabs.Panel value="document" pt="xl">
-          <DocumentInformation document={reportData.document} />
+          <DocumentInformation document={reportData.document!} />
         </Tabs.Panel>
 
         <Tabs.Panel value="images" pt="xl">
-          <DocumentImages
-            images={reportData?.document?.images}
-            onUploadImage={launchDocumentImageForm}
-            onDeleteImage={handleDeleteDocumentImage}
-          />
+          <DocumentImages document={reportData.document!} />
         </Tabs.Panel>
 
         <Tabs.Panel value="location" pt="xl">

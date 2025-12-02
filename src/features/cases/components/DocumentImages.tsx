@@ -1,29 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Carousel } from '@mantine/carousel';
-import {
-  ActionIcon,
-  Button,
-  Collapse,
-  Group,
-  Image,
-  Text,
-  ThemeIcon,
-  Title,
-  Tooltip,
-} from '@mantine/core';
+import { ActionIcon, Button, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
-import { DocumentImage } from '../types';
+import CaseDocumentImageUploadForm from '../forms/CaseDocumentImageUploadForm';
+import { Document } from '../types';
 import styles from './DocumentImage.module.css';
 
 type Prop = {
-  images?: Array<DocumentImage>;
-  onUploadImage?: () => void;
-  onDeleteImage?: (image: DocumentImage) => Promise<void>;
+  document: Document;
 };
 
-const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteImage }) => {
-  const [imagesOpen, setImagesOpen] = useState(true);
+const DocumentImages: React.FC<Prop> = ({ document }) => {
+  const { images = [] } = document;
+  const onUploadImage = () => {
+    const modalId = modals.open({
+      title: 'Upload Document Images',
+      children: (
+        <CaseDocumentImageUploadForm document={document} onClose={() => modals.close(modalId)} />
+      ),
+    });
+  };
   const handleView = (url: string) => {
     modals.open({
       size: '90vw', // Sets the width to 90% of viewport width
@@ -56,128 +53,82 @@ const DocumentImages: React.FC<Prop> = ({ images = [], onUploadImage, onDeleteIm
     });
   };
 
-  const handleConfirmDeleteimage = (image: DocumentImage) => {
-    modals.openConfirmModal({
-      title: 'Delete Document Image',
-      centered: true,
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete the image? This action is destructive and not reversible
-        </Text>
-      ),
-      labels: { confirm: 'Delete image', cancel: "No don't delete it" },
-      confirmProps: { color: 'red' },
-      onConfirm: async () => await onDeleteImage?.(image),
-    });
-  };
-
-  if (!images || images.length === 0) {
-    return (
-      <div>
-        <Group mb="md" justify="space-between">
-          <Title order={4}>Document Images</Title>
-          <Group gap="sm">
-            <ThemeIcon size="lg" radius="xl" color="green" variant="light">
-              <TablerIcon name="photo" size={20} />
-            </ThemeIcon>
-            <Tooltip label="Upload New Image">
-              <Button
-                variant="light"
-                color="green"
-                size="sm"
-                leftSection={<TablerIcon name="upload" size={16} />}
-                onClick={onUploadImage}
-              >
-                Upload Image
-              </Button>
-            </Tooltip>
-          </Group>
-        </Group>
-        <Text c="dimmed">No document images for this report</Text>
-      </div>
-    );
-  }
-
   return (
     <div>
       <Group mb="md" justify="space-between">
-        <Title order={4}>Document Images</Title>
-        <Group gap="sm">
-          <ActionIcon variant="subtle" onClick={() => setImagesOpen(!imagesOpen)}>
-            <TablerIcon name={imagesOpen ? 'chevronUp' : 'chevronDown'} size={16} />
-          </ActionIcon>
-          <Tooltip label="Upload New Image">
-            <Button
-              variant="light"
-              color="green"
-              size="sm"
-              leftSection={<TablerIcon name="upload" size={16} />}
-              onClick={onUploadImage}
-            >
-              Upload Image
-            </Button>
-          </Tooltip>
-        </Group>
+        <Stack>
+          <Title order={4}>Document Images</Title>
+          <Text size="sm" c="dimmed" mb={4}>
+            Scanned Images of the document
+          </Text>
+        </Stack>
+        <Button
+          variant="light"
+          color="green"
+          size="sm"
+          leftSection={<TablerIcon name="upload" size={16} />}
+          onClick={onUploadImage}
+        >
+          Reupload
+        </Button>
       </Group>
 
-      <Collapse in={imagesOpen}>
-        <Carousel
-          // withIndicators
-          height={400}
-          slideSize={{ base: '100%', sm: '50%', md: '33.333333%' }}
-          slideGap="md"
-          emblaOptions={{
-            loop: true,
-            dragFree: false,
-            align: 'center',
-          }}
-        >
-          {images.map((image, index) => {
-            const url = `/api/files/stream?fileName=${image.url}`;
-            return (
-              <Carousel.Slide key={index} className={styles.slideContainer}>
-                <Group
-                  flex={1}
-                  justify="center"
-                  pos="absolute"
-                  top={0}
-                  bottom={0}
-                  left={0}
-                  right={0}
-                  className={styles.actionButtonsGroup}
-                >
-                  <Tooltip label="Delete Document Image">
-                    <ActionIcon
-                      color="red"
-                      size={50}
-                      className={styles.actionButton}
-                      onClick={() => handleConfirmDeleteimage(image)}
-                    >
-                      <TablerIcon name="trash" />
-                    </ActionIcon>
-                  </Tooltip>
-                  <Tooltip label="Expand image">
-                    <ActionIcon
-                      size={50}
-                      className={styles.actionButton}
-                      onClick={() => handleView(url)}
-                    >
-                      <TablerIcon name="windowMaximize" />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-                <Image
-                  src={url}
-                  height="100%"
-                  fit="cover"
-                  radius="md"
-                  fallbackSrc="https://placehold.co/600x400?text=Placeholder"
-                />
-              </Carousel.Slide>
-            );
-          })}
-        </Carousel>
-      </Collapse>
+      <Carousel
+        // withIndicators
+        height={400}
+        slideSize={{ base: '100%', sm: '50%', md: '33.333333%' }}
+        slideGap="md"
+        emblaOptions={{
+          loop: true,
+          dragFree: false,
+          align: 'center',
+        }}
+      >
+        {images.map((image, index) => {
+          const url = `/api/files/stream?fileName=${image.url}`;
+          return (
+            <Carousel.Slide key={index} className={styles.slideContainer}>
+              <Group
+                flex={1}
+                justify="center"
+                pos="absolute"
+                top={0}
+                bottom={0}
+                left={0}
+                right={0}
+                className={styles.actionButtonsGroup}
+              >
+                <Tooltip label="Filter Image and rescan">
+                  <ActionIcon color="teal" size={50} className={styles.actionButton}>
+                    <TablerIcon name="filter" />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Re-scan Document Image">
+                  <ActionIcon color="red" size={50} className={styles.actionButton}>
+                    <TablerIcon name="scan" />
+                  </ActionIcon>
+                </Tooltip>
+                <Tooltip label="Expand image">
+                  <ActionIcon
+                    size={50}
+                    className={styles.actionButton}
+                    onClick={() => handleView(url)}
+                  >
+                    <TablerIcon name="windowMaximize" />
+                  </ActionIcon>
+                </Tooltip>
+              </Group>
+              <Image
+                src={url}
+                height="100%"
+                fit="cover"
+                radius="md"
+                fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+              />
+            </Carousel.Slide>
+          );
+        })}
+      </Carousel>
     </div>
   );
 };

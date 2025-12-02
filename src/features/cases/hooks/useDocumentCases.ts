@@ -128,16 +128,16 @@ export const updateCaseDocument = async (
 };
 
 const uploadDocumentImage = async (
-  reportId: string,
-  reportDocumentId: string,
-  data: Array<{ url: string }>
+  caseId: string,
+  documentId: string,
+  data: { images: Array<string> }
 ) => {
-  const images = await apiFetch<{ results: Array<DocumentImage> }>(
-    `/documents/cases/${reportId}/document/${reportDocumentId}/images`,
+  const images = await apiFetch<{ images: Array<DocumentImage> }>(
+    `/documents/cases/${caseId}/documents/${documentId}/images`,
     { method: 'POST', data }
   );
   mutate(`/documents/cases`);
-  return images.data.results ?? [];
+  return images.data.images ?? [];
 };
 
 export const useDocumentCaseApi = () => {

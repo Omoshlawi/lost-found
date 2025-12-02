@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionIcon, Grid, Group, Text, Title } from '@mantine/core';
+import { ActionIcon, Grid, Group, Stack, Text, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
@@ -20,8 +20,13 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
   };
   return (
     <div>
-      <Group mb="md" justify="space-between">
-        <Title order={4}>Document Information</Title>
+      <Group mb="md" justify="space-between" align="start">
+        <Stack>
+          <Title order={4}>Document Information</Title>
+          <Text size="sm" c="dimmed" mb={4}>
+            Information about the document
+          </Text>
+        </Stack>
         <ActionIcon onClick={handleUpdateDocument}>
           <TablerIcon name="edit" size={16} />
         </ActionIcon>
