@@ -1,7 +1,6 @@
-import { ErrorState, TablerIcon } from '@/components';
-import { Stack, Tabs } from '@mantine/core';
-import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Stack, Tabs } from '@mantine/core';
+import { ErrorState, launchWorkspace, TablerIcon } from '@/components';
 import {
   AdditionalDetails,
   ContactFooter,
@@ -11,6 +10,7 @@ import {
   ReportDetails,
   ReportHeader,
 } from '../components';
+import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import { useDocumentCase } from '../hooks';
 import { CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
@@ -18,8 +18,6 @@ import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentCase(reportId);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-
   if (isLoading) {
     return <DocumentCaseDetailSkeleton />;
   }
@@ -43,10 +41,10 @@ const DocumentCaseDetail = () => {
 
   const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
   const handleUpdateReportDetails = () => {
-    // const closeWorkspace = launchWorkspace(
-    //   <UpdateCaseAddressForm documentCase={reportData} closeWorkspace={() => closeWorkspace()} />,
-    //   { width: 'wide' }
-    // );
+    const closeWorkspace = launchWorkspace(
+      <UpdateCasedetailsForm documentCase={reportData} closeWorkspace={() => closeWorkspace()} />,
+      { title: 'Update Case Details' }
+    );
   };
 
   return (
@@ -103,6 +101,7 @@ const DocumentCaseDetail = () => {
               tags={reportData.tags}
               lostDocumentCase={reportData.lostDocumentCase}
               foundDocumentCase={reportData.foundDocumentCase}
+              onUpdateCaseDetails={handleUpdateReportDetails}
             />
             <ContactFooter
               reportType={reportType}
@@ -113,8 +112,6 @@ const DocumentCaseDetail = () => {
 
         <Tabs.Panel value="additional" pt="xl">
           <AdditionalDetails
-            isOpen={detailsOpen}
-            toggleOpen={() => setDetailsOpen(!detailsOpen)}
             createdAt={reportData.createdAt}
             updatedAt={reportData.updatedAt}
             status={status}

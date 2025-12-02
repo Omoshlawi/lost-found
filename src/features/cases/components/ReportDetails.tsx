@@ -1,14 +1,8 @@
 import React from 'react';
 import { IconInfoCircle } from '@tabler/icons-react';
-import {
-  Badge,
-  Grid,
-  Group,
-  Text,
-  ThemeIcon,
-  Title,
-} from '@mantine/core';
-import { CaseType, FoundDocumentCase, LostDocumentCase } from '../types';
+import { ActionIcon, Badge, Grid, Group, Text, ThemeIcon, Title } from '@mantine/core';
+import { TablerIcon } from '@/components';
+import { FoundDocumentCase, LostDocumentCase } from '../types';
 import { formatDate } from '../utils/reportUtils';
 
 interface ReportDetailsProps {
@@ -18,6 +12,7 @@ interface ReportDetailsProps {
   tags?: string[];
   lostDocumentCase?: LostDocumentCase;
   foundDocumentCase?: FoundDocumentCase;
+  onUpdateCaseDetails?: () => void;
 }
 
 const ReportDetails: React.FC<ReportDetailsProps> = ({
@@ -27,6 +22,7 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   tags,
   lostDocumentCase,
   foundDocumentCase,
+  onUpdateCaseDetails,
 }) => {
   const isLostReport = !!lostDocumentCase;
   const isFoundReport = !!foundDocumentCase;
@@ -60,14 +56,14 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
     </>
   );
 
-  if (isLostReport)
+  if (isLostReport) {
     return (
       <div>
         <Group mb="md" justify="space-between">
           <Title order={4}>Lost Report Details</Title>
-          <ThemeIcon size="lg" radius="xl" color="orange" variant="light">
-            <IconInfoCircle size={20} />
-          </ThemeIcon>
+          <ActionIcon onClick={onUpdateCaseDetails}>
+            <TablerIcon name="edit" size={20} />
+          </ActionIcon>
         </Group>
 
         <Grid>
@@ -85,14 +81,15 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
         </Grid>
       </div>
     );
-  if (isFoundReport)
+  }
+  if (isFoundReport) {
     return (
       <div>
         <Group mb="md" justify="space-between">
           <Title order={4}>Found Report Details</Title>
-          <ThemeIcon size="lg" radius="xl" color="orange" variant="light">
-            <IconInfoCircle size={20} />
-          </ThemeIcon>
+          <ActionIcon onClick={onUpdateCaseDetails}>
+            <TablerIcon name="edit" size={20} />
+          </ActionIcon>
         </Group>
 
         <Grid>
@@ -110,7 +107,8 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
         </Grid>
       </div>
     );
-  
+  }
+
   return null;
 };
 
