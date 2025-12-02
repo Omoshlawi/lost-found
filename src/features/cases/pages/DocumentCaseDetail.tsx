@@ -84,12 +84,7 @@ const DocumentCaseDetail = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="location" pt="xl">
-          <LocationInformation
-            county={(reportData as any).county}
-            subCounty={(reportData as any).subCounty}
-            ward={(reportData as any).ward}
-            landMark={(reportData as any).landMark}
-          />
+          <LocationInformation documentCase={reportData} />
         </Tabs.Panel>
 
         <Tabs.Panel value="details" pt="xl">

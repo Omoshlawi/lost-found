@@ -50,6 +50,9 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
         </div>
       </Group>
       <Group gap="sm">
+        <Badge size="lg" variant="light">
+          {reportType === 'FOUND' ? 'Found Document' : 'Lost Document'}
+        </Badge>
         <Badge size="lg" color={getStatusColor(status, colorScheme)} variant="light">
           {status}
         </Badge>

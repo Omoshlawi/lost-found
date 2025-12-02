@@ -40,7 +40,8 @@ export interface Address {
   endDate?: string | null;
   preferred: boolean;
   formatted?: string | null;
-  localeFormat?: LocaleFormat | null;
+  localeId?: string | null;
+  locale?: AddressLocale | null;
   cases?: DocumentCase[];
   createdAt: string;
   updatedAt: string;
