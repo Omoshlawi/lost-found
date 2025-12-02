@@ -111,6 +111,15 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
           </Text>
           <Text>{formatDate(document?.expiryDate)}</Text>
         </Grid.Col>
+        {document?.additionalFields?.map((field, i) => (
+          <Grid.Col span={{ base: 12, sm: 6, md: 4 }} key={i}>
+            <Text size="sm" fw={600} c="dimmed" mb={4}>
+              {field.fieldName}
+            </Text>
+            <Text>{field.fieldValue}</Text>
+          </Grid.Col>
+        ))}
+
         {document?.note && (
           <Grid.Col span={12}>
             <Text size="sm" fw={600} c="dimmed" mb={4}>
