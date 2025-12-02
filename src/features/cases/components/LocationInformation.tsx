@@ -1,6 +1,7 @@
 import React from 'react';
-import { IconMapPin } from '@tabler/icons-react';
-import { Grid, Group, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { ActionIcon, Grid, Group, Stack, Text, Title } from '@mantine/core';
+import { launchWorkspace, TablerIcon } from '@/components';
+import UpdateCaseAddressForm from '../forms/UpdateCaseAddressForm';
 import { DocumentCase } from '../types';
 
 interface LocationProps {
@@ -8,6 +9,12 @@ interface LocationProps {
 }
 
 const LocationInformation: React.FC<LocationProps> = ({ documentCase }) => {
+  const handleUpdateAddress = () => {
+    const closeWorkspace = launchWorkspace(
+      <UpdateCaseAddressForm documentCase={documentCase} closeWorkspace={() => closeWorkspace()} />,
+      { title: 'Update Address' }
+    );
+  };
   const address = documentCase.address;
 
   return (
@@ -19,10 +26,9 @@ const LocationInformation: React.FC<LocationProps> = ({ documentCase }) => {
             Location details where the document was lost or found
           </Text>
         </Stack>
-        <Title order={4}>Location Information</Title>
-        <ThemeIcon size="lg" radius="xl" color="green" variant="light">
-          <IconMapPin size={20} />
-        </ThemeIcon>
+        <ActionIcon onClick={handleUpdateAddress}>
+          <TablerIcon name="edit" size={20} />
+        </ActionIcon>
       </Group>
 
       <Grid>

@@ -1,7 +1,7 @@
+import { ErrorState, TablerIcon } from '@/components';
+import { Stack, Tabs } from '@mantine/core';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Stack, Tabs } from '@mantine/core';
-import { ErrorState, TablerIcon } from '@/components';
 import {
   AdditionalDetails,
   ContactFooter,
@@ -42,6 +42,12 @@ const DocumentCaseDetail = () => {
     : reportData.foundDocumentCase?.status || FoundDocumentCaseStatus.DRAFT;
 
   const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
+  const handleUpdateReportDetails = () => {
+    // const closeWorkspace = launchWorkspace(
+    //   <UpdateCaseAddressForm documentCase={reportData} closeWorkspace={() => closeWorkspace()} />,
+    //   { width: 'wide' }
+    // );
+  };
 
   return (
     <Stack gap="xl">
@@ -52,6 +58,7 @@ const DocumentCaseDetail = () => {
         pointAwarded={pointAwarded}
         docTypeIcon={docTypeIcon}
         reportType={reportType}
+        onUpdateReportDetails={handleUpdateReportDetails}
       />
 
       <Tabs defaultValue="document" variant="default">

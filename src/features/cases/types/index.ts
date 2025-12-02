@@ -124,5 +124,6 @@ export interface AdditionalField {
 export type CaseType = 'LOST' | 'FOUND';
 
 export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
+
 export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;
 export type CaseDocumentFormData = z.infer<typeof CaseDocumentSchema>;

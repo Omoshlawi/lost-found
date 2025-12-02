@@ -140,6 +140,15 @@ const uploadDocumentImage = async (
   return images.data.images ?? [];
 };
 
+const updateDocumentCase = async (caseId: string, payload: Partial<FoundDocumentCaseFormData>) => {
+  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}`, {
+    method: 'PATCH',
+    data: payload,
+  });
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
 export const useDocumentCaseApi = () => {
   return {
     createFoundDocumentCase,
@@ -150,5 +159,6 @@ export const useDocumentCaseApi = () => {
     restoreDocumentCase,
     uploadDocumentImage,
     updateCaseDocument,
+    updateDocumentCase,
   };
 };

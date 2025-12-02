@@ -67,3 +67,4 @@ export const FoundDocumentCaseSchema = z.object({
 export const LostDocumentCaseSchema = FoundDocumentCaseSchema.merge(CaseDocumentSchema).omit({
   images: true,
 });
+

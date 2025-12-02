@@ -64,7 +64,7 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
           </Tooltip>
         )}
         {onUpdateReportDetails && (
-          <Tooltip label="Update Report Information">
+          <Tooltip label="Update Case Information">
             <Button
               variant="light"
               color="blue"
