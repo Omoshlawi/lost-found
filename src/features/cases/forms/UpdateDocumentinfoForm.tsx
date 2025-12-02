@@ -1,6 +1,6 @@
+import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import {
   ActionIcon,
   Button,
@@ -9,7 +9,6 @@ import {
   Paper,
   Select,
   Stack,
-  TagsInput,
   Text,
   Textarea,
   TextInput,
@@ -17,30 +16,51 @@ import {
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
-import { useAddresses } from '@/features/addresses/hooks';
 import { useDocumentTypes } from '@/features/admin/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { INPUT_WRAPPER_ORDER } from '@/lib/utils';
 import { useDocumentCaseApi } from '../hooks';
-import { DocumentCase, LostDocumentCaseFormData } from '../types';
-import { LostDocumentCaseSchema } from '../utils';
+import { CaseDocumentFormData, Document } from '../types';
+import { CaseDocumentSchema } from '../utils';
 
-type LostDocumentCaseFormProps = {
+interface UpdateDocumentinfoFormProps {
+  document: Document;
+  onSuccess?: (document: Document) => void;
   closeWorkspace?: () => void;
-  onSuccess?: (caseData: DocumentCase) => void;
-};
+}
 
-const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFormProps) => {
-  const navigate = useNavigate();
-  const form = useForm<LostDocumentCaseFormData>({
+const UpdateDocumentinfoForm: React.FC<UpdateDocumentinfoFormProps> = ({
+  document,
+  closeWorkspace,
+  onSuccess,
+}) => {
+  const form = useForm<CaseDocumentFormData>({
     defaultValues: {
-      additionalFields: [],
+      typeId: document?.typeId ?? undefined,
+      ownerName: document?.ownerName ?? undefined,
+      serialNumber: document?.serialNumber ?? undefined,
+      documentNumber: document?.documentNumber ?? undefined,
+      batchNumber: document?.batchNumber ?? undefined,
+      dateOfBirth: document?.dateOfBirth ? new Date(document?.dateOfBirth) : undefined,
+      placeOfBirth: document?.placeOfBirth ?? undefined,
+      placeOfIssue: document?.placeOfIssue ?? undefined,
+      gender: document?.gender ?? undefined,
+      nationality: document?.nationality ?? undefined,
+      note: document?.note ?? undefined,
+      images: document?.images?.map((img) => ({ url: img.url })) || [],
+      additionalFields:
+        document?.additionalFields?.map((field) => ({
+          fieldName: field.fieldName,
+          fieldValue: field.fieldValue,
+        })) || [],
+      issuanceDate: document?.issuanceDate ? new Date(document?.issuanceDate) : undefined,
+      expiryDate: document?.expiryDate ? new Date(document?.expiryDate) : undefined,
+      issuer: document?.issuer ?? undefined,
     },
-    resolver: zodResolver(LostDocumentCaseSchema),
+    resolver: zodResolver(CaseDocumentSchema),
   });
-  const { addresses, isLoading } = useAddresses();
+  const { updateCaseDocument } = useDocumentCaseApi();
   const { documentTypes, isLoading: isDocumentTypesLoading } = useDocumentTypes();
-  const { createLostDocumentCase } = useDocumentCaseApi();
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -58,36 +78,38 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
     />
   );
 
-  const handleSubmit: SubmitHandler<LostDocumentCaseFormData> = async (data) => {
+  const onSubmit: SubmitHandler<CaseDocumentFormData> = async (data) => {
     try {
-      const doc = await createLostDocumentCase(data);
-      onSuccess?.(doc);
+      const updatedCase = await updateCaseDocument(document.caseId, document.id, data);
+      // Extract document from the returned case
+      const updatedDocument = updatedCase.document || document;
+      onSuccess?.(updatedDocument);
       showNotification({
         title: 'Success',
         color: 'green',
-        message: `Lost Document case created successfully`,
+        message: 'Document information updated successfully',
       });
-      navigate(`/dashboard/lost-documents/${doc.id}`);
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<LostDocumentCaseFormData>(error);
+      const e = handleApiErrors<CaseDocumentFormData>(error);
       if ('detail' in e && e.detail) {
         showNotification({
-          title: `Error creating lost document case`,
+          title: 'Error updating document',
           message: e.detail,
           color: 'red',
           position: 'top-right',
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof LostDocumentCaseFormData, { message: val as string })
+          form.setError(key as keyof CaseDocumentFormData, { message: val as string })
         );
       }
     }
   };
+
   return (
     <form
-      onSubmit={form.handleSubmit(handleSubmit)}
+      onSubmit={form.handleSubmit(onSubmit)}
       style={{
         flex: 1,
         flexDirection: 'column',
@@ -120,60 +142,6 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
                   />
                 )
               }
-            />
-            <Controller
-              control={form.control}
-              name="eventDate"
-              render={({ field, fieldState }) => (
-                <DateInput
-                  {...field}
-                  label="Date Lost"
-                  error={fieldState.error?.message}
-                  placeholder="Select date"
-                  leftSection={<TablerIcon name="calendar" size={18} />}
-                  required
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="addressId"
-              render={({ field, fieldState }) =>
-                isLoading ? (
-                  <InputSkeleton />
-                ) : (
-                  <Select
-                    {...field}
-                    value={field.value || null}
-                    data={addresses.map((l) => ({ value: l.id, label: l.label ?? '' }))}
-                    label="Address"
-                    error={fieldState.error?.message}
-                    nothingFoundMessage="Nothing found..."
-                    searchable
-                    placeholder="Select address"
-                    leftSection={<TablerIcon name="mapPin" size={18} />}
-                    inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                    description="The address where the document was lost"
-                    required
-                  />
-                )
-              }
-            />
-            <Controller
-              control={form.control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <Textarea
-                  {...field}
-                  value={field.value as string}
-                  placeholder="Describe the lost document..."
-                  label="Description"
-                  error={fieldState.error?.message}
-                  minRows={3}
-                  autosize
-                  description="Provide additional details about the lost document"
-                />
-              )}
             />
           </Stack>
 
@@ -349,19 +317,34 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
                 )}
               />
             </Group>
-            <Controller
-              control={form.control}
-              name="issuanceDate"
-              render={({ field, fieldState }) => (
-                <DateInput
-                  {...field}
-                  label="Issuance Date"
-                  error={fieldState.error?.message}
-                  placeholder="Select date"
-                  leftSection={<TablerIcon name="calendar" size={18} />}
-                />
-              )}
-            />
+            <Group grow>
+              <Controller
+                control={form.control}
+                name="issuanceDate"
+                render={({ field, fieldState }) => (
+                  <DateInput
+                    {...field}
+                    label="Issuance Date"
+                    error={fieldState.error?.message}
+                    placeholder="Select date"
+                    leftSection={<TablerIcon name="calendar" size={18} />}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="expiryDate"
+                render={({ field, fieldState }) => (
+                  <DateInput
+                    {...field}
+                    label="Expiry Date"
+                    error={fieldState.error?.message}
+                    placeholder="Select date"
+                    leftSection={<TablerIcon name="calendar" size={18} />}
+                  />
+                )}
+              />
+            </Group>
           </Stack>
 
           {/* Additional Fields Section */}
@@ -429,24 +412,22 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
             )}
           </Paper>
 
-          {/* Metadata Section */}
-          {sectionTitle('Metadata')}
+          {/* Additional Notes Section */}
+          {sectionTitle('Additional Notes')}
           <Stack gap="md">
             <Controller
               control={form.control}
-              name="tags"
+              name="note"
               render={({ field, fieldState }) => (
-                <TagsInput
+                <Textarea
                   {...field}
-                  data={field.value ?? []}
-                  value={field.value ?? []}
-                  label="Tags"
+                  value={field.value as string}
+                  placeholder="Enter additional notes..."
+                  label="Notes"
                   error={fieldState.error?.message}
-                  placeholder="Add tags"
-                  clearable
-                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                  description="Keywords to help find the document case"
-                  leftSection={<TablerIcon name="tag" size={18} />}
+                  minRows={3}
+                  autosize
+                  description="Any additional information about the document"
                 />
               )}
             />
@@ -470,7 +451,7 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
             disabled={form.formState.isSubmitting}
             leftSection={<TablerIcon name="check" size={18} />}
           >
-            Submit Lost Document Case
+            Update Document
           </Button>
         </Group>
       </Stack>
@@ -478,4 +459,4 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
   );
 };
 
-export default LostDocumentCaseForm;
+export default UpdateDocumentinfoForm;

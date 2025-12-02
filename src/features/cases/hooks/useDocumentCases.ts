@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
 import {
+  CaseDocumentFormData,
   DocumentCase,
   DocumentImage,
   FoundDocumentCaseFormData,
@@ -20,7 +21,7 @@ export const useDocumentCases = (params: Record<string, any> = {}) => {
 };
 export const useDocumentCase = (reportId?: string) => {
   const url = constructUrl(`/documents/cases/${reportId}`, {
-    v: 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type, images))',
+    v: 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type, images),document:include(additionalFields))',
   });
   const { data, error, mutate, isLoading } = useApi<APIFetchResponse<DocumentCase>>(
     reportId ? url : null
@@ -99,6 +100,33 @@ export const restoreDocumentCase = async (caseId: string) => {
   return documentCase.data;
 };
 
+export const updateCaseDocument = async (
+  caseId: string,
+  documentId: string,
+  payload: CaseDocumentFormData
+) => {
+  const documentCase = await apiFetch<DocumentCase>(
+    `/documents/cases/${caseId}/documents/${documentId}`,
+    {
+      method: 'PATCH',
+      data: {
+        ...payload,
+        dateOfBirth: payload?.dateOfBirth
+          ? dayjs(payload?.dateOfBirth).format('YYYY-MM-DD')
+          : undefined,
+        issuanceDate: payload?.issuanceDate
+          ? dayjs(payload?.issuanceDate).format('YYYY-MM-DD')
+          : undefined,
+        expiryDate: payload?.expiryDate
+          ? dayjs(payload?.expiryDate).format('YYYY-MM-DD')
+          : undefined,
+      },
+    }
+  );
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
 const uploadDocumentImage = async (
   reportId: string,
   reportDocumentId: string,
@@ -121,5 +149,6 @@ export const useDocumentCaseApi = () => {
     deleteDocumentCase,
     restoreDocumentCase,
     uploadDocumentImage,
+    updateCaseDocument,
   };
 };

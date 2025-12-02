@@ -1,28 +1,30 @@
 import React from 'react';
-import {
-  Avatar,
-  Grid,
-  Group,
-  Text,
-  Title,
-} from '@mantine/core';
+import { ActionIcon, Grid, Group, Text, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
+import { launchWorkspace } from '@/components/Workspace';
+import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import { Document } from '../types';
 import { formatDate } from '../utils/reportUtils';
 
 interface DocumentProps {
-  document?: Document;
+  document: Document;
   onUpdateReportDocument?: () => void;
 }
 
 const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
+  const handleUpdateDocument = () => {
+    const closeWorkspace = launchWorkspace(
+      <UpdateDocumentinfoForm document={document} closeWorkspace={() => closeWorkspace()} />,
+      { width: 'wide' }
+    );
+  };
   return (
     <div>
       <Group mb="md" justify="space-between">
         <Title order={4}>Document Information</Title>
-        <Avatar size="md" radius="xl" color="blue" variant="light">
-          <TablerIcon name={document?.type?.icon as any} size={24} />
-        </Avatar>
+        <ActionIcon onClick={handleUpdateDocument}>
+          <TablerIcon name="edit" size={16} />
+        </ActionIcon>
       </Group>
 
       <Grid>
@@ -91,12 +93,6 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
             Nationality
           </Text>
           <Text>{document?.nationality || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Blood Group
-          </Text>
-          <Text>{document?.bloodGroup || 'N/A'}</Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>

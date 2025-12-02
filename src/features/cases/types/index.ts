@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Address } from '@/features/addresses/types';
-import { FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
+import { CaseDocumentSchema, FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
 
 export interface DocumentCase {
   id: string;
@@ -71,6 +71,8 @@ export interface DocumentField {
 
 export interface Document {
   id: string;
+  caseId: string;
+  case?: DocumentCase;
   serialNumber?: string;
   documentNumber?: string;
   batchNumber?: string;
@@ -123,3 +125,4 @@ export type CaseType = 'LOST' | 'FOUND';
 
 export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
 export type LostDocumentCaseFormData = z.infer<typeof LostDocumentCaseSchema>;
+export type CaseDocumentFormData = z.infer<typeof CaseDocumentSchema>;

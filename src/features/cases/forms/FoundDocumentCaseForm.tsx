@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { showNotification } from '@mantine/notifications';
@@ -20,7 +21,7 @@ type DocumentCaseFormProps = {
 const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormProps) => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const imageUploadRef = useRef<ImageUploadRef>(null);
-
+  const navigate = useNavigate();
   const form = useForm<FoundDocumentCaseFormData>({
     defaultValues: {},
     resolver: zodResolver(FoundDocumentCaseSchema),
@@ -78,6 +79,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
         color: 'green',
         message: `Found Document case created successfully`,
       });
+      navigate(`/dashboard/found-documents/${doc.id}`);
       closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<FoundDocumentCaseFormData>(error);
