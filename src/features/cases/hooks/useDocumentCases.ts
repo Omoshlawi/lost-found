@@ -149,6 +149,14 @@ const updateDocumentCase = async (caseId: string, payload: Partial<FoundDocument
   return documentCase.data;
 };
 
+const submitDocumentCase = async (caseId: string) => {
+  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/submit`, {
+    method: 'POST',
+  });
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
 export const useDocumentCaseApi = () => {
   return {
     createFoundDocumentCase,
@@ -160,5 +168,6 @@ export const useDocumentCaseApi = () => {
     uploadDocumentImage,
     updateCaseDocument,
     updateDocumentCase,
+    submitDocumentCase,
   };
 };

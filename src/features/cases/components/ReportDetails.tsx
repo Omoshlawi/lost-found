@@ -1,6 +1,5 @@
 import React from 'react';
-import { IconInfoCircle } from '@tabler/icons-react';
-import { ActionIcon, Badge, Grid, Group, Text, ThemeIcon, Title } from '@mantine/core';
+import { ActionIcon, Badge, Grid, Group, Text, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { FoundDocumentCase, LostDocumentCase } from '../types';
 import { formatDate } from '../utils/reportUtils';

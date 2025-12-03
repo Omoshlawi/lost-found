@@ -50,6 +50,7 @@ const DocumentCaseDetail = () => {
   return (
     <Stack gap="xl">
       <ReportHeader
+        caseId={reportData.id}
         docType={docType}
         docId={docId}
         status={status}
