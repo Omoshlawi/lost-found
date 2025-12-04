@@ -3,15 +3,17 @@ import { ActionIcon, Grid, Group, Stack, Text, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
-import { Document } from '../types';
+import { CaseType, Document, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import { formatDate } from '../utils/reportUtils';
 
 interface DocumentProps {
   document: Document;
   onUpdateReportDocument?: () => void;
+  reportType: CaseType;
+  status: string;
 }
 
-const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
+const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, status }) => {
   const handleUpdateDocument = () => {
     const closeWorkspace = launchWorkspace(
       <UpdateDocumentinfoForm document={document} closeWorkspace={() => closeWorkspace()} />,
@@ -27,7 +29,13 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
             Information about the document
           </Text>
         </Stack>
-        <ActionIcon onClick={handleUpdateDocument}>
+        <ActionIcon
+          onClick={handleUpdateDocument}
+          disabled={
+            (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+            (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
+          }
+        >
           <TablerIcon name="edit" size={16} />
         </ActionIcon>
       </Group>

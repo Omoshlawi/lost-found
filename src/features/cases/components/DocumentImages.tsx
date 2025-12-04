@@ -1,16 +1,29 @@
 import React from 'react';
-import { ActionIcon, Button, Card, Grid, Group, Image, Stack, Text, Title, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Grid,
+  Group,
+  Image,
+  Stack,
+  Text,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
 import CaseDocumentImageUploadForm from '../forms/CaseDocumentImageUploadForm';
-import { Document } from '../types';
+import { CaseType, Document, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import styles from './DocumentImage.module.css';
 
 type Prop = {
   document: Document;
+  reportType: CaseType;
+  status: string;
 };
 
-const DocumentImages: React.FC<Prop> = ({ document }) => {
+const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
   const { images = [] } = document;
   const onUploadImage = () => {
     const modalId = modals.open({
@@ -68,6 +81,10 @@ const DocumentImages: React.FC<Prop> = ({ document }) => {
             size="sm"
             leftSection={<TablerIcon name="upload" size={16} />}
             onClick={onUploadImage}
+            disabled={
+              (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+              (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
+            }
           >
             Upload Images
           </Button>
@@ -82,6 +99,10 @@ const DocumentImages: React.FC<Prop> = ({ document }) => {
               size="sm"
               leftSection={<TablerIcon name="upload" size={16} />}
               onClick={onUploadImage}
+              disabled={
+                (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+                (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
+              }
             >
               Upload Images
             </Button>
@@ -106,6 +127,10 @@ const DocumentImages: React.FC<Prop> = ({ document }) => {
           size="sm"
           leftSection={<TablerIcon name="upload" size={16} />}
           onClick={onUploadImage}
+          disabled={
+            (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+            (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
+          }
         >
           Reupload
         </Button>
@@ -131,11 +156,7 @@ const DocumentImages: React.FC<Prop> = ({ document }) => {
                     radius="md"
                     fallbackSrc="https://placehold.co/600x400?text=Placeholder"
                   />
-                  <Group
-                    gap="md"
-                    justify="center"
-                    className={styles.actionButtonsGroup}
-                  >
+                  <Group gap="md" justify="center" className={styles.actionButtonsGroup}>
                     <Tooltip label="Filter Image and rescan">
                       <ActionIcon
                         color="teal"

@@ -1,7 +1,12 @@
 import React from 'react';
 import { ActionIcon, Badge, Grid, Group, Text, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
-import { FoundDocumentCase, LostDocumentCase } from '../types';
+import {
+  FoundDocumentCase,
+  FoundDocumentCaseStatus,
+  LostDocumentCase,
+  LostDocumentCaseStatus,
+} from '../types';
 import { formatDate } from '../utils/reportUtils';
 
 interface ReportDetailsProps {
@@ -60,7 +65,10 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
       <div>
         <Group mb="md" justify="space-between">
           <Title order={4}>Lost Report Details</Title>
-          <ActionIcon onClick={onUpdateCaseDetails}>
+          <ActionIcon
+            onClick={onUpdateCaseDetails}
+            disabled={lostDocumentCase?.status !== LostDocumentCaseStatus.SUBMITTED}
+          >
             <TablerIcon name="edit" size={20} />
           </ActionIcon>
         </Group>
@@ -86,7 +94,10 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
       <div>
         <Group mb="md" justify="space-between">
           <Title order={4}>Found Report Details</Title>
-          <ActionIcon onClick={onUpdateCaseDetails}>
+          <ActionIcon
+            onClick={onUpdateCaseDetails}
+            disabled={foundDocumentCase?.status !== FoundDocumentCaseStatus.DRAFT}
+          >
             <TablerIcon name="edit" size={20} />
           </ActionIcon>
         </Group>

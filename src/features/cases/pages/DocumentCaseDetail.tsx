@@ -82,15 +82,19 @@ const DocumentCaseDetail = () => {
         </Tabs.List>
 
         <Tabs.Panel value="document" pt="xl">
-          <DocumentInformation document={reportData.document!} />
+          <DocumentInformation
+            document={reportData.document!}
+            reportType={reportType}
+            status={status}
+          />
         </Tabs.Panel>
 
         <Tabs.Panel value="images" pt="xl">
-          <DocumentImages document={reportData.document!} />
+          <DocumentImages document={reportData.document!} reportType={reportType} status={status} />
         </Tabs.Panel>
 
         <Tabs.Panel value="location" pt="xl">
-          <LocationInformation documentCase={reportData} />
+          <LocationInformation documentCase={reportData} reportType={reportType} status={status} />
         </Tabs.Panel>
 
         <Tabs.Panel value="details" pt="xl">

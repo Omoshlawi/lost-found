@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Box, Menu, Paper, Stack, Text } from '@mantine/core';
+import { ActionIcon, Badge, Box, Menu, Paper, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
@@ -11,6 +11,7 @@ import { formatDate } from '@/lib/utils/helpers';
 import FoundDocumentCaseForm from '../forms/FoundDocumentCaseForm';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
 import { DocumentCase } from '../types';
+import { getStatusColor } from '../utils';
 
 const FoundDocumentCasesPage = () => {
   const documentreportAsync = useDocumentCases({
@@ -149,7 +150,11 @@ const columns: ColumnDef<DocumentCase>[] = [
   {
     header: 'Status',
     accessorKey: 'foundDocumentCase.status',
-    cell: ({ row: { original: docType } }) => docType.foundDocumentCase?.status ?? '--',
+    cell: ({ row: { original: docType } }) => (
+      <Badge variant="light" color={getStatusColor(docType.foundDocumentCase?.status)}>
+        {docType.foundDocumentCase?.status}
+      </Badge>
+    ),
   },
   {
     header: 'Created at',

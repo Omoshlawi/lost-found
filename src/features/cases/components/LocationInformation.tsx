@@ -2,13 +2,15 @@ import React from 'react';
 import { ActionIcon, Grid, Group, Stack, Text, Title } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
 import UpdateCaseAddressForm from '../forms/UpdateCaseAddressForm';
-import { DocumentCase } from '../types';
+import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 
 interface LocationProps {
   documentCase: DocumentCase;
+  reportType: CaseType;
+  status: string;
 }
 
-const LocationInformation: React.FC<LocationProps> = ({ documentCase }) => {
+const LocationInformation: React.FC<LocationProps> = ({ documentCase, reportType, status }) => {
   const handleUpdateAddress = () => {
     const closeWorkspace = launchWorkspace(
       <UpdateCaseAddressForm documentCase={documentCase} closeWorkspace={() => closeWorkspace()} />,
@@ -26,7 +28,13 @@ const LocationInformation: React.FC<LocationProps> = ({ documentCase }) => {
             Location details where the document was lost or found
           </Text>
         </Stack>
-        <ActionIcon onClick={handleUpdateAddress}>
+        <ActionIcon
+          onClick={handleUpdateAddress}
+          disabled={
+            (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+            (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
+          }
+        >
           <TablerIcon name="edit" size={20} />
         </ActionIcon>
       </Group>
