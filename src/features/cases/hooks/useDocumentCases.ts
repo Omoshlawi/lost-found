@@ -157,6 +157,22 @@ const submitDocumentCase = async (caseId: string) => {
   return documentCase.data;
 };
 
+const verifyDocumentCase = async (caseId: string) => {
+  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/verify`, {
+    method: 'POST',
+  });
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
+const rejectDocumentCase = async (caseId: string) => {
+  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/reject`, {
+    method: 'POST',
+  });
+  mutate('/documents/cases');
+  return documentCase.data;
+};
+
 export const useDocumentCaseApi = () => {
   return {
     createFoundDocumentCase,
@@ -169,5 +185,7 @@ export const useDocumentCaseApi = () => {
     updateCaseDocument,
     updateDocumentCase,
     submitDocumentCase,
+    verifyDocumentCase,
+    rejectDocumentCase,
   };
 };

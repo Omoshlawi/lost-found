@@ -20,7 +20,6 @@ export interface DocumentCase {
 
 export enum LostDocumentCaseStatus {
   SUBMITTED = 'SUBMITTED', // When user submit lost document info
-  MATCHED = 'MATCHED', // When a match is found
   COMPLETED = 'COMPLETED', // When the document is reunited with the owner
 }
 
@@ -28,8 +27,7 @@ export enum FoundDocumentCaseStatus {
   DRAFT = 'DRAFT', // When the document is in draft status
   SUBMITTED = 'SUBMITTED', // When the document is submitted by the user to pickup station/point
   VERIFIED = 'VERIFIED', // When the document is verified by the admin
-  MATCHED = 'MATCHED', // When a match is found
-  CLAIMED = 'CLAIMED', // When the document is claimed by the owner
+  REJECTED = 'REJECTED', // When the document is rejected by the admin
   COMPLETED = 'COMPLETED', // When the document is reunited with the owner
 }
 

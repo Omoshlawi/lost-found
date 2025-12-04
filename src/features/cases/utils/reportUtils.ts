@@ -12,15 +12,13 @@ export const formatDate = (dateString?: string) => {
 export const getStatusColor = (status?: FoundDocumentCaseStatus | LostDocumentCaseStatus) => {
   switch (status) {
     case FoundDocumentCaseStatus.DRAFT:
-      return 'green';
+      return 'gray';
     case FoundDocumentCaseStatus.SUBMITTED:
       return 'blue';
     case FoundDocumentCaseStatus.VERIFIED:
-      return 'gray';
-    case FoundDocumentCaseStatus.MATCHED:
-      return 'yellow';
-    case FoundDocumentCaseStatus.CLAIMED:
-      return 'green';
+      return 'teal';
+    case FoundDocumentCaseStatus.REJECTED:
+      return 'red';
     case FoundDocumentCaseStatus.COMPLETED:
       return 'green';
     default:

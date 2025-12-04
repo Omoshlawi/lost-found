@@ -93,7 +93,11 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({
             <Badge size="xs" variant="light">
               {reportType === 'FOUND' ? 'Found Document' : 'Lost Document'}
             </Badge>
-            <Badge size="xs" color={getStatusColor(status, colorScheme)} variant="light">
+            <Badge
+              size="xs"
+              color={getStatusColor(status as FoundDocumentCaseStatus | LostDocumentCaseStatus)}
+              variant="light"
+            >
               {status}
             </Badge>
             {reportType === 'FOUND' && pointAwarded && pointAwarded > 0 && (

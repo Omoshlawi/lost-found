@@ -3,7 +3,12 @@ import { Link } from 'react-router-dom';
 import { ActionIcon, Badge, Box, Menu, Paper, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import {
+  DashboardPageHeader,
+  StateFullDataTable,
+  SystemAuthorized,
+  TablerIcon,
+} from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
@@ -18,8 +23,46 @@ const FoundDocumentCasesPage = () => {
     v: 'custom:include(foundDocumentCase,document:include(type),address)',
     caseType: 'FOUND',
   });
-  const { deleteDocumentCase } = useDocumentCaseApi();
+  const { deleteDocumentCase, verifyDocumentCase, rejectDocumentCase } = useDocumentCaseApi();
   const { bgColor } = useAppColors();
+  const handleVerify = async (caseId: string) => {
+    try {
+      await verifyDocumentCase(caseId);
+      showNotification({
+        title: 'Success',
+        message: 'Document case verified successfully',
+        color: 'teal',
+      });
+    } catch (error) {
+      const e = handleApiErrors<{ detail: string }>(error);
+      if (e.detail) {
+        showNotification({
+          title: 'Error verifying document case',
+          message: e.detail,
+          color: 'red',
+        });
+      }
+    }
+  };
+  const handleReject = async (caseId: string) => {
+    try {
+      await rejectDocumentCase(caseId);
+      showNotification({
+        title: 'Success',
+        message: 'Document case rejected successfully',
+        color: 'teal',
+      });
+    } catch (error) {
+      const e = handleApiErrors<{ detail: string }>(error);
+      if (e.detail) {
+        showNotification({
+          title: 'Error rejecting document case',
+          message: e.detail,
+          color: 'red',
+        });
+      }
+    }
+  };
   const handleDelete = (report: DocumentCase) => {
     modals.openConfirmModal({
       title: 'Delete your profile',
@@ -101,6 +144,30 @@ const FoundDocumentCasesPage = () => {
                     >
                       View Details
                     </Menu.Item>
+                    <SystemAuthorized
+                      permissions={{ documentCase: ['verify'] }}
+                      unauthorizedAction={{ type: 'hide' }}
+                    >
+                      <Menu.Item
+                        leftSection={<TablerIcon name="check" size={14} />}
+                        onClick={() => handleVerify(docType.id)}
+                        color="green"
+                      >
+                        Verify
+                      </Menu.Item>
+                    </SystemAuthorized>
+                    <SystemAuthorized
+                      permissions={{ documentCase: ['reject'] }}
+                      unauthorizedAction={{ type: 'hide' }}
+                    >
+                      <Menu.Item
+                        leftSection={<TablerIcon name="x" size={14} />}
+                        onClick={() => handleReject(docType.id)}
+                        color="red"
+                      >
+                        Reject
+                      </Menu.Item>
+                    </SystemAuthorized>
                     <Menu.Item
                       leftSection={<TablerIcon name="trash" size={14} />}
                       color="red"
