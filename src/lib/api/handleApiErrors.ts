@@ -4,7 +4,7 @@ const handleApiErrors = <T extends Record<string, unknown>>(
   error: any
 ): { [field in keyof T]?: string } & { detail?: string } => {
   if (isAxiosError(error)) {
-    if (error.response?.status === 400) {
+    if (error.response?.status === 400 && error.response?.data?.errors) {
       return Object.entries((error.response?.data ?? {})?.errors ?? {}).reduce(
         (prev, [key, value]) => {
           if (key === '_errors') {
