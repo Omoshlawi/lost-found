@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -9,7 +10,7 @@ import { InputSkeleton, TablerIcon } from '@/components';
 import { useAddresses } from '@/features/addresses/hooks';
 import { handleApiErrors, uploadFile } from '@/lib/api';
 import { ImageUpload, ImageUploadRef } from '../components';
-import { useDocumentCaseApi } from '../hooks';
+import { useStreamFoundDocumentCase } from '../hooks/useFoundDocumentCase';
 import { DocumentCase, FoundDocumentCaseFormData } from '../types';
 import { FoundDocumentCaseSchema } from '../utils';
 
@@ -27,7 +28,8 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
     resolver: zodResolver(FoundDocumentCaseSchema),
   });
   const { addresses, isLoading } = useAddresses();
-  const { createFoundDocumentCase } = useDocumentCaseApi();
+  const { createFoundDocumentCase } = useStreamFoundDocumentCase();
+  // const { createFoundDocumentCase } = useDocumentCaseApi();
 
   const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
     try {
@@ -72,15 +74,15 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
         images: imageUrls.length > 0 ? (imageUrls as [string, ...string[]]) : [],
       };
 
-      const doc = await createFoundDocumentCase(submitData);
-      onSuccess?.(doc);
-      showNotification({
-        title: 'Success',
-        color: 'green',
-        message: `Found Document case created successfully`,
-      });
-      navigate(`/dashboard/found-documents/${doc.id}`);
-      closeWorkspace?.();
+      createFoundDocumentCase(submitData);
+      // onSuccess?.(doc);
+      // showNotification({
+      //   title: 'Success',
+      //   color: 'green',
+      //   message: `Found Document case created successfully`,
+      // });
+      // navigate(`/dashboard/found-documents/${doc.id}`);
+      // closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<FoundDocumentCaseFormData>(error);
       if ('detail' in e && e.detail) {
