@@ -114,6 +114,16 @@ export interface Type {
   voided: boolean;
 }
 
+export interface AsyncState<TData = any, TError extends Error = Error> {
+  isLoading: boolean;
+  error?: TError;
+  data?: TData;
+}
+
+export interface Extraction {
+  id: string;
+}
+
 export interface AdditionalField {
   fieldName: string;
   fieldValue: string;

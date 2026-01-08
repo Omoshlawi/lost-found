@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
+import { closeModal, openModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
 import { useAddresses } from '@/features/addresses/hooks';
 import { handleApiErrors, uploadFile } from '@/lib/api';
-import { ImageUpload, ImageUploadRef } from '../components';
-import { useStreamFoundDocumentCase } from '../hooks/useFoundDocumentCase';
+import { CreatingFoundDocumentCase, ImageUpload, ImageUploadRef } from '../components';
+import { useDocumentExtraction } from '../hooks/useDocumentExtraction';
 import { DocumentCase, FoundDocumentCaseFormData } from '../types';
 import { FoundDocumentCaseSchema } from '../utils';
 
@@ -28,7 +28,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
     resolver: zodResolver(FoundDocumentCaseSchema),
   });
   const { addresses, isLoading } = useAddresses();
-  const { createFoundDocumentCase } = useStreamFoundDocumentCase();
+  const { startExtraction } = useDocumentExtraction();
   // const { createFoundDocumentCase } = useDocumentCaseApi();
 
   const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
@@ -74,7 +74,36 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
         images: imageUrls.length > 0 ? (imageUrls as [string, ...string[]]) : [],
       };
 
-      createFoundDocumentCase(submitData);
+      const extraction = await startExtraction();
+      if (!extraction) {
+        return showNotification({
+          color: 'red',
+          title: 'Extraction failed',
+          message: 'Failed to start document extraction',
+        });
+      }
+      const modelId = openModal({
+        fullScreen: true,
+        title: 'Extract document',
+        children: (
+          <CreatingFoundDocumentCase
+            extraction={extraction}
+            onExtractionComplete={(docCase) => {
+              onSuccess?.(docCase);
+              showNotification({
+                title: 'Success',
+                color: 'green',
+                message: `Found Document case created successfully`,
+              });
+              navigate(`/dashboard/found-documents/${docCase.id}`);
+              closeModal(modelId);
+              closeWorkspace?.();
+            }}
+            data={submitData}
+          />
+        ),
+      });
+      // const doc = await createFoundDocumentCase(submitData);
       // onSuccess?.(doc);
       // showNotification({
       //   title: 'Success',
