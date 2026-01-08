@@ -114,11 +114,48 @@ export interface Type {
   voided: boolean;
 }
 
+export interface AiInteraction {
+  id: string;
+  userId: string;
+  interactionType: string;
+  aiModel: string;
+  modelVersion: string;
+  entityType: string;
+  entityId?: string;
+  prompt: string;
+  response: string;
+  tokenUsage: TokenUsage;
+  processingTime?: string;
+  estimatedCost?: string;
+  success: boolean;
+  errorMessage?: string;
+  retryCount: number;
+  createdAt: string;
+}
+
+export interface TokenUsage {
+  totalTokenCount: number;
+  promptTokenCount: number;
+  candidatesTokenCount: number;
+}
+
 export interface AsyncState<TData = any, TError extends Error = Error> {
   isLoading: boolean;
   error?: TError;
   data?: TData;
 }
+
+interface _ProgressEvent {
+  key: 'IMAGE_ANALYSIS' | 'DATA_EXTRACTION' | 'CONFIDENCE_SCORE' | 'SECURITY_QUESTIONS';
+  state: AsyncState<AiInteraction>;
+}
+
+export interface ImageValidationEvent {
+  key: 'IMAGE_VALIDATION';
+  state: AsyncState<string>;
+}
+
+export type ProgressEvent = ImageValidationEvent | _ProgressEvent;
 
 export interface Extraction {
   id: string;
