@@ -145,7 +145,7 @@ export interface AsyncState<TData = any, TError extends Error = Error> {
   data?: TData;
 }
 
-interface _ProgressEvent {
+export interface AiInteractionProgressEvent {
   key: 'IMAGE_ANALYSIS' | 'DATA_EXTRACTION' | 'CONFIDENCE_SCORE' | 'SECURITY_QUESTIONS';
   state: AsyncState<AiInteraction>;
 }
@@ -155,7 +155,7 @@ export interface ImageValidationEvent {
   state: AsyncState<string>;
 }
 
-export type ProgressEvent = ImageValidationEvent | _ProgressEvent;
+export type ProgressEvent = ImageValidationEvent | AiInteractionProgressEvent;
 
 export interface Extraction {
   id: string;

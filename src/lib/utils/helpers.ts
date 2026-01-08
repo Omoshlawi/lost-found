@@ -94,3 +94,10 @@ export const formatDateTime = (date: string) => {
 export const formatTime = (date: string) => {
   return dayjs(date).format('HH:mm');
 };
+
+export function cleanAiResponseText(responseText: string) {
+  return responseText
+    .trim()
+    .replace(/^```json\s*/, '')
+    .replace(/\s*```$/, '');
+}

@@ -9,7 +9,8 @@ import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
 import { useAddresses } from '@/features/addresses/hooks';
 import { handleApiErrors, uploadFile } from '@/lib/api';
-import { CreatingFoundDocumentCase, ImageUpload, ImageUploadRef } from '../components';
+import { ImageUpload, ImageUploadRef } from '../components';
+import { ExtractionProgress } from '../components/extraction';
 import { useDocumentExtraction } from '../hooks/useDocumentExtraction';
 import { DocumentCase, FoundDocumentCaseFormData } from '../types';
 import { FoundDocumentCaseSchema } from '../utils';
@@ -86,7 +87,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
         fullScreen: true,
         title: 'Extract document',
         children: (
-          <CreatingFoundDocumentCase
+          <ExtractionProgress
             extraction={extraction}
             onExtractionComplete={(docCase) => {
               onSuccess?.(docCase);

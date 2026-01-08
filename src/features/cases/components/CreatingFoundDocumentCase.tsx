@@ -1,5 +1,4 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { IconAlertCircle, IconCheck, IconClock } from '@tabler/icons-react';
 import {
   Badge,
   Box,
@@ -11,7 +10,6 @@ import {
   Progress,
   Stack,
   Text,
-  ThemeIcon,
 } from '@mantine/core';
 import { useAppColors } from '@/hooks/useAppColors';
 import { useDocumentExtraction } from '../hooks/useDocumentExtraction';
@@ -22,6 +20,7 @@ import {
   FoundDocumentCaseFormData,
   ProgressEvent,
 } from '../types';
+import { Status, StatusBadge, StatusIcon } from './extraction';
 
 type CreatingFoundDocumentCaseProps = {
   extraction: Extraction;
@@ -29,11 +28,9 @@ type CreatingFoundDocumentCaseProps = {
   data: FoundDocumentCaseFormData;
 };
 
-type StepStatus = 'pending' | 'loading' | 'completed' | 'error';
-
 interface StepState {
   key: string;
-  status: StepStatus;
+  status: Status;
   message?: string;
   data?: any;
 }
@@ -134,7 +131,7 @@ const CreatingFoundDocumentCase: FC<CreatingFoundDocumentCaseProps> = ({
       const key = event.key;
       const state = event.state;
 
-      let status: StepStatus = 'pending';
+      let status: Status = 'pending';
       let message: string | undefined;
       let stepData: any;
 
@@ -186,64 +183,6 @@ const CreatingFoundDocumentCase: FC<CreatingFoundDocumentCaseProps> = ({
       return aIndex - bIndex;
     });
   }, [progressEvents]);
-
-  const getStatusIcon = (status: StepStatus, _key: string) => {
-    switch (status) {
-      case 'completed':
-        return (
-          <ThemeIcon color="green" size="lg" radius="xl">
-            <IconCheck size={20} />
-          </ThemeIcon>
-        );
-      case 'loading':
-        return (
-          <ThemeIcon color="blue" size="lg" radius="xl" variant="light">
-            <Loader size={20} />
-          </ThemeIcon>
-        );
-      case 'error':
-        return (
-          <ThemeIcon color="red" size="lg" radius="xl">
-            <IconAlertCircle size={20} />
-          </ThemeIcon>
-        );
-      default:
-        return (
-          <ThemeIcon color="gray" size="lg" radius="xl" variant="light">
-            <IconClock size={20} />
-          </ThemeIcon>
-        );
-    }
-  };
-
-  const getStatusBadge = (status: StepStatus) => {
-    switch (status) {
-      case 'completed':
-        return (
-          <Badge color="green" variant="light">
-            Completed
-          </Badge>
-        );
-      case 'loading':
-        return (
-          <Badge color="blue" variant="light" leftSection={<Loader size={12} />}>
-            Processing
-          </Badge>
-        );
-      case 'error':
-        return (
-          <Badge color="red" variant="light">
-            Error
-          </Badge>
-        );
-      default:
-        return (
-          <Badge color="gray" variant="light">
-            Pending
-          </Badge>
-        );
-    }
-  };
 
   const renderStepData = (step: StepState) => {
     if (!step.data || step.status !== 'completed') {
@@ -529,7 +468,7 @@ const CreatingFoundDocumentCase: FC<CreatingFoundDocumentCaseProps> = ({
               <Stack gap="sm">
                 <Group justify="space-between" align="flex-start">
                   <Group gap="md" align="flex-start">
-                    {getStatusIcon(step.status, step.key)}
+                    <StatusIcon status={step.status} key={step.key} />
                     <Box style={{ flex: 1 }}>
                       <Text fw={500} size="md">
                         {stepLabels[step.key] || step.key}
@@ -541,7 +480,7 @@ const CreatingFoundDocumentCase: FC<CreatingFoundDocumentCaseProps> = ({
                       )}
                     </Box>
                   </Group>
-                  {getStatusBadge(step.status)}
+                  <StatusBadge status={step.status} />
                 </Group>
 
                 {step.status === 'loading' && (
