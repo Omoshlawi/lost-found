@@ -20,7 +20,9 @@ type AiInteractionProgressEventStepProps = {
   showPending?: boolean;
 };
 
-type ProgressEventStepProps = ImageValidationProgressEventStepProps | AiInteractionProgressEventStepProps;
+type ProgressEventStepProps =
+  | ImageValidationProgressEventStepProps
+  | AiInteractionProgressEventStepProps;
 
 const ProgressEventStep: FC<ProgressEventStepProps> = ({
   events = [],
@@ -72,7 +74,7 @@ const ProgressEventStep: FC<ProgressEventStepProps> = ({
               </Text>
               {typeof renderDescription === 'function' && (
                 <Text size="sm" c="dimmed" mt={4}>
-                  {status}-{renderDescription(status)}
+                  {renderDescription(status)}
                 </Text>
               )}
             </Box>

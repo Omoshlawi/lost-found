@@ -36,6 +36,40 @@ export interface SecurityQuestion {
   answer: string;
 }
 
+export interface ImageAnalysisResult {
+  index: number;
+  imageType: string;
+  quality: number;
+  readability: number;
+  focus: number;
+  lighting: number;
+  tamperingDetected: boolean;
+  warnings: string[];
+  usableForExtraction: boolean;
+}
+
+export interface ConfidenceScore {
+  serialNumber: number;
+  documentNumber: number;
+  batchNumber: number;
+  issuer: number;
+  ownerName: number;
+  dateOfBirth: number;
+  placeOfBirth: number;
+  placeOfIssue: number;
+  gender: number;
+  note: number;
+  typeId: number;
+  issuanceDate: number;
+  expiryDate: number;
+  additionalFields: Array<{
+    fieldName: string;
+    nameScore: number;
+    fieldValue: string;
+    valueScore: number;
+  }>;
+}
+
 export interface LostDocumentCase {
   id: string;
   caseId: string;

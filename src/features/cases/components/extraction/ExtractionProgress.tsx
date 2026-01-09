@@ -1,15 +1,22 @@
 import { FC, useEffect, useRef, useState } from 'react';
-import { Badge, Box, Card, Group, Loader, Progress, Stack, Text } from '@mantine/core';
+import { Badge, Box, Card, Group, Loader, Paper, Progress, Stack, Text } from '@mantine/core';
 import { useDocumentExtraction } from '../../hooks/useDocumentExtraction';
 import {
+  ConfidenceScore,
   Document,
   DocumentCase,
   Extraction,
   FoundDocumentCaseFormData,
+  ImageAnalysisResult,
   ProgressEvent,
+  SecurityQuestion,
 } from '../../types';
 import AiInteractionStep from './AiInteractionStep';
-import DataExtractionStep from './DataExtractionStep';
+import {
+  DataExtractionConfidenceScore,
+  DataExtractionStep,
+  ImageAnalysis,
+} from './DataExtractionStep';
 import ProgressEventStep from './ProgressEventStep';
 
 type ExtractionProgressProps = {
@@ -160,12 +167,12 @@ const ExtractionProgress: FC<ExtractionProgressProps> = ({
               title="Data Extraction"
               renderDescription={(status) =>
                 status === 'completed'
-                  ? 'Image Validation Complete'
+                  ? 'Data Extraction Complete'
                   : status === 'error'
-                    ? 'Error validating image'
+                    ? 'Error Extracting data'
                     : status === 'loading'
-                      ? 'Validating image'
-                      : 'Pending Validation'
+                      ? 'Extracting data from image'
+                      : 'Pending data extraction'
               }
               renderData={(data) => {
                 if (data) {
@@ -178,7 +185,6 @@ const ExtractionProgress: FC<ExtractionProgressProps> = ({
                     />
                   );
                 }
-                return <pre>{JSON.stringify(data, null, 2)}</pre>;
               }}
             />
             <ProgressEventStep
@@ -187,16 +193,29 @@ const ExtractionProgress: FC<ExtractionProgressProps> = ({
               title="Security Question Generation"
               renderDescription={(status) =>
                 status === 'completed'
-                  ? 'Image Validation Complete'
+                  ? 'Security Questions generation Complete'
                   : status === 'error'
-                    ? 'Error validating image'
+                    ? 'Error generating Security Question'
                     : status === 'loading'
-                      ? 'Validating image'
-                      : 'Pending Validation'
+                      ? 'Generating sequrity questions'
+                      : 'Pending security question generation'
               }
               renderData={(data) => {
                 if (data) {
-                  return <AiInteractionStep aiInteraction={data} />;
+                  return (
+                    <AiInteractionStep<{ questions: Array<SecurityQuestion> }>
+                      aiInteraction={data}
+                      renderParsedResponse={({ questions }) => (
+                        <Paper p="md" mt="sm" withBorder>
+                          {questions.map((q, i) => (
+                            <Text>
+                              {i + 1}.{q.question}({q.answer})
+                            </Text>
+                          ))}
+                        </Paper>
+                      )}
+                    />
+                  );
                 }
               }}
             />
@@ -206,16 +225,23 @@ const ExtractionProgress: FC<ExtractionProgressProps> = ({
               title="Confidence Scoring"
               renderDescription={(status) =>
                 status === 'completed'
-                  ? 'Image Validation Complete'
+                  ? 'Confidence scoring Complete'
                   : status === 'error'
                     ? 'Error validating image'
                     : status === 'loading'
-                      ? 'Validating image'
+                      ? 'Confidence scoring'
                       : 'Pending Validation'
               }
               renderData={(data) => {
                 if (data) {
-                  return <AiInteractionStep aiInteraction={data} />;
+                  return (
+                    <AiInteractionStep<ConfidenceScore>
+                      aiInteraction={data}
+                      renderParsedResponse={(confidenceScore) => (
+                        <DataExtractionConfidenceScore confidenceScore={confidenceScore} />
+                      )}
+                    />
+                  );
                 }
               }}
             />
@@ -225,16 +251,21 @@ const ExtractionProgress: FC<ExtractionProgressProps> = ({
               title="Image Analysis"
               renderDescription={(status) =>
                 status === 'completed'
-                  ? 'Image Validation Complete'
+                  ? 'Image analysis Complete'
                   : status === 'error'
-                    ? 'Error validating image'
+                    ? 'Error analysing image'
                     : status === 'loading'
-                      ? 'Validating image'
+                      ? 'Analysing image'
                       : 'Pending Validation'
               }
               renderData={(data) => {
                 if (data) {
-                  return <AiInteractionStep aiInteraction={data} />;
+                  return (
+                    <AiInteractionStep<Array<ImageAnalysisResult>>
+                      aiInteraction={data}
+                      renderParsedResponse={(analysis) => <ImageAnalysis analysis={analysis} />}
+                    />
+                  );
                 }
               }}
             />
