@@ -85,7 +85,8 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
       }
       const modelId = openModal({
         fullScreen: true,
-        title: 'Extract document',
+        withCloseButton: false,
+        closeOnEscape: false,
         children: (
           <ExtractionProgress
             extraction={extraction}

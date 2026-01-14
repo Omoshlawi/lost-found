@@ -3,7 +3,7 @@ import { DocumentType, DocumentTypeFormData } from '../types';
 
 // lists all document types
 export const useDocumentTypes = () => {
-  const url = constructUrl('/documents/types');
+  const url = constructUrl('/documents/types', { limit: 100, includeVoided: true });
   const { data, error, isLoading, mutate } =
     useApi<APIFetchResponse<{ results: Array<DocumentType> }>>(url);
   return {

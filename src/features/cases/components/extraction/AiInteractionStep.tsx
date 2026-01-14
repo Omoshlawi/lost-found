@@ -14,31 +14,29 @@ const AiInteractionStep = <T extends object>({
   renderParsedResponse,
 }: AiInteractionStepProps<T>) => {
   return (
-    <Tabs defaultValue={typeof renderParsedResponse === 'function' ? 'data' : 'json'}>
-      <Tabs.List>
-        {typeof renderParsedResponse === 'function' && (
-          <Tabs.Tab value="data" leftSection={<TablerIcon name="database" size={12} />}>
-            Data
+    <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Hide">
+      <Tabs defaultValue={typeof renderParsedResponse === 'function' ? 'data' : 'json'}>
+        <Tabs.List>
+          {typeof renderParsedResponse === 'function' && (
+            <Tabs.Tab value="data" leftSection={<TablerIcon name="database" size={12} />}>
+              Data
+            </Tabs.Tab>
+          )}
+          <Tabs.Tab value="json" leftSection={<TablerIcon name="json" size={12} />}>
+            JSON
           </Tabs.Tab>
-        )}
-        <Tabs.Tab value="json" leftSection={<TablerIcon name="json" size={12} />}>
-          JSON
-        </Tabs.Tab>
-        <Tabs.Tab value="ai" leftSection={<TablerIcon name="ai" size={12} />}>
-          AI Interaction Details
-        </Tabs.Tab>
-      </Tabs.List>
+          <Tabs.Tab value="ai" leftSection={<TablerIcon name="ai" size={12} />}>
+            AI Interaction Details
+          </Tabs.Tab>
+        </Tabs.List>
 
-      {typeof renderParsedResponse === 'function' && (
-        <Tabs.Panel value="data">
-          <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Hide">
+        {typeof renderParsedResponse === 'function' && (
+          <Tabs.Panel value="data">
             {renderParsedResponse(JSON.parse(cleanAiResponseText(aiData.response)))}
-          </Spoiler>
-        </Tabs.Panel>
-      )}
+          </Tabs.Panel>
+        )}
 
-      <Tabs.Panel value="json">
-        <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Hide">
+        <Tabs.Panel value="json">
           <Paper
             p="md"
             mt="sm"
@@ -47,10 +45,8 @@ const AiInteractionStep = <T extends object>({
           >
             {JSON.stringify(JSON.parse(cleanAiResponseText(aiData.response)), null, 2)}
           </Paper>
-        </Spoiler>
-      </Tabs.Panel>
-      <Tabs.Panel value="ai">
-        <Spoiler maxHeight={120} showLabel="Show more" hideLabel="Hide">
+        </Tabs.Panel>
+        <Tabs.Panel value="ai">
           <Paper p="md" mt="sm" withBorder>
             <Text size="sm" fw={500} mb="xs">
               AI Interaction Details:
@@ -161,9 +157,9 @@ const AiInteractionStep = <T extends object>({
               </Group>
             )}
           </Paper>
-        </Spoiler>
-      </Tabs.Panel>
-    </Tabs>
+        </Tabs.Panel>
+      </Tabs>
+    </Spoiler>
   );
 };
 
