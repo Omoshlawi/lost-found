@@ -1,5 +1,7 @@
 import { User } from 'better-auth';
 import { z } from 'zod';
+import { FoundDocumentCase } from '../cases/types';
+import { Match } from '../matches/types';
 import { claimFormSchema } from './utils/validation';
 
 export enum ClaimStatus {
@@ -23,8 +25,10 @@ export interface Claim {
   userId: string;
   user?: User;
   foundDocumentCaseId: string;
+  foundDocumentCase: FoundDocumentCase;
   attachments: ClaimAttachment[];
   matchId: string;
+  match?: Match;
   status: ClaimStatus;
   pickupStationId?: string;
   preferredHandoverDate?: string;

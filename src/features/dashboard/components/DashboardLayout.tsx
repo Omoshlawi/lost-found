@@ -81,9 +81,9 @@ const DashboardLayout: FC = () => {
         <AppShell.Main>
           <Outlet />
         </AppShell.Main>
-        <AppShell.Footer>
+        {/* <AppShell.Footer>
           <p>lorem impsum with some interesting staff bana</p>
-        </AppShell.Footer>
+        </AppShell.Footer> */}
       </AppShell>
       <Modal
         opened={modalOpened}
