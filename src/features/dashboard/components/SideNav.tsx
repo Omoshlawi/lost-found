@@ -166,7 +166,12 @@ const data: Array<NavItem> = [
       },
     ],
   },
-
+  {
+    icon: 'filterQuestion',
+    label: 'Claims',
+    href: 'claims',
+    children: [],
+  },
   {
     icon: 'settings',
     label: 'Settings',
