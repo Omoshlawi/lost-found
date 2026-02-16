@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { useClaim } from './use-claimes';
 
 const useCompareCases = (claimId?: string) => {
@@ -7,7 +7,7 @@ const useCompareCases = (claimId?: string) => {
   const foundCase = useMemo(() => claim?.foundDocumentCase, [claim]);
   const lostCase = useMemo(() => claim?.match?.lostDocumentCase, [claim]);
   const dateFomart = 'ddd DD MMM, YYYY';
-  const comparisons = useMemo<Array<{ lost: any; found: any; field: string }>>(
+  const comparisons = useMemo<Array<{ lost: ReactNode; found: ReactNode; field: string }>>(
     () => [
       {
         field: 'Owner name',
@@ -95,6 +95,31 @@ const useCompareCases = (claimId?: string) => {
         field: 'Case Description',
         found: foundCase?.status ?? 'N/A',
         lost: lostCase?.status ?? 'N/A',
+      },
+      {
+        field: 'Additional Fields',
+        found: foundCase?.case?.document?.additionalFields?.length ? (
+          <ul style={{ margin: 0, paddingLeft: 16 }}>
+            {foundCase.case.document.additionalFields.map((ad, index) => (
+              <li key={index}>
+                {ad.fieldName}: {ad.fieldValue}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          'N/A'
+        ),
+        lost: lostCase?.case?.document?.additionalFields?.length ? (
+          <ul style={{ margin: 0, paddingLeft: 16 }}>
+            {lostCase.case.document.additionalFields.map((ad, index) => (
+              <li key={index}>
+                {ad.fieldName}: {ad.fieldValue}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          'N/A'
+        ),
       },
     ],
     [foundCase, lostCase]

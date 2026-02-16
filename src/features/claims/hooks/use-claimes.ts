@@ -17,7 +17,7 @@ export const useClaims = (paras: Record<string, any> = {}) => {
 
 export const useClaim = (claimId?: string, paras: Record<string, any> = {}) => {
   const url = constructUrl(`/claim/${claimId}`, {
-    v: 'custom:include(verification,attachments,match:include(lostDocumentCase:include(case:include(document:include(type)))),foundDocumentCase:include(case:include(document:include(type,images))),user)',
+    v: 'custom:include(verification,attachments,match:include(lostDocumentCase:include(case:include(document:include(type,additionalFields)))),foundDocumentCase:include(case:include(document:include(type,images,additionalFields))),user)',
     ...paras,
   });
   const { data, error, isLoading } = useSWR<APIFetchResponse<Claim>>(url);
