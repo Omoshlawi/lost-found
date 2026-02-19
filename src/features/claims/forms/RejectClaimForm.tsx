@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
+import { useTransitionReasons } from '@/features/status-transitions/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useClaimApi } from '../hooks';
 import { Claim, RejectClaimFormData } from '../types';
@@ -20,6 +21,12 @@ const RejectClaimForm: FC<RejectClaimFormProps> = ({ claim, onClose, onSuccess }
     resolver: zodResolver(rejectClaimSchema),
   });
   const { rejectClaim } = useClaimApi();
+  const { reasons } = useTransitionReasons({
+    entityType: 'Claim',
+    fromStatus: claim.status,
+    toStatus: 'REJECTED',
+    auto: 'false',
+  });
   const handleSubmit: SubmitHandler<RejectClaimFormData> = async (data) => {
     try {
       const updatedClaim = await rejectClaim(claim.id, data);
@@ -62,22 +69,7 @@ const RejectClaimForm: FC<RejectClaimFormProps> = ({ claim, onClose, onSuccess }
             name="reason"
             render={({ field, fieldState }) => (
               <Select
-                data={[
-                  { value: 'INVALID_DOCUMENT', label: 'Invalid document' },
-                  { value: 'INCOMPLETE_DOCUMENTATION', label: 'Incomplete documentation' },
-                  { value: 'INCORRECT_INFORMATION', label: 'Incorrect information' },
-                  { value: 'DUPLICATE_CLAIM', label: 'Duplicate claim' },
-                  { value: 'NOT_ELIGIBLE', label: 'Not eligible' },
-                  { value: 'POLICY_VIOLATION', label: 'Policy violation' },
-                  { value: 'FRAUD_SUSPECTED', label: 'Fraud suspected' },
-                  { value: 'FRAUD_CONFIRMED', label: 'Fraud confirmed' },
-                  {
-                    value: 'NEW_EVIDENCE_INVALIDATES_CLAIM',
-                    label: 'New evidence invalidates claim',
-                  },
-                  { value: 'VERIFIED_BY_MISTAKE', label: 'Verified by mistake' },
-                  { value: 'OTHER', label: 'Other' },
-                ]}
+                data={reasons.map((reason) => ({ value: reason.id, label: reason.label }))}
                 label="Reject reason"
                 value={field.value}
                 placeholder="Select a reason"

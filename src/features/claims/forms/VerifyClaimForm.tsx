@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
+import { useTransitionReasons } from '@/features/status-transitions/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useClaimApi } from '../hooks';
 import { Claim, VerifyClaimFormData } from '../types';
@@ -17,6 +18,12 @@ const VerifyClaimForm = ({ claim, onClose, onSuccess }: VerifyClaimFormProps) =>
   const form = useForm<VerifyClaimFormData>({
     defaultValues: {},
     resolver: zodResolver(verifyClaimSchema),
+  });
+  const { reasons } = useTransitionReasons({
+    entityType: 'Claim',
+    fromStatus: claim.status,
+    toStatus: 'VERIFIED',
+    auto: 'false',
   });
   const { verifyClaim } = useClaimApi();
   const handleSubmit: SubmitHandler<VerifyClaimFormData> = async (data) => {
@@ -61,13 +68,7 @@ const VerifyClaimForm = ({ claim, onClose, onSuccess }: VerifyClaimFormProps) =>
             name="reason"
             render={({ field, fieldState }) => (
               <Select
-                data={[
-                  { value: 'DOCUMENTS_VALIDATED', label: 'Documents validated' },
-                  { value: 'MANUAL_REVIEW_APPROVED', label: 'Manual review approved' },
-                  { value: 'DISPUTE_RESOLVED_IN_FAVOR', label: 'Dispute resolved in favor' },
-                  { value: 'ADDITIONAL_EVIDENCE_ACCEPTED', label: 'Additional evidence accepted' },
-                  { value: 'OTHER', label: 'Other' },
-                ]}
+                data={reasons.map((reason) => ({ value: reason.id, label: reason.label }))}
                 label="Verification reason"
                 value={field.value}
                 placeholder="Select a reason"
