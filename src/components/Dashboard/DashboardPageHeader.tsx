@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import React, { FC } from 'react';
+import React, { FC, ReactNode } from 'react';
 import { Box, Divider, Group, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { TablerIcon, TablerIconName } from '../TablerIcon';
 
@@ -7,9 +7,10 @@ type PageHeaderProps = {
   title: string;
   subTitle: string | (() => React.JSX.Element);
   icon: TablerIconName | (() => React.JSX.Element);
+  traiiling?: ReactNode;
 };
 
-const DashboardPageHeader: FC<PageHeaderProps> = ({ icon, subTitle, title }) => {
+const DashboardPageHeader: FC<PageHeaderProps> = ({ icon, subTitle, title, traiiling }) => {
   return (
     <Box>
       <Group align="flex-start" justify="space-between">
@@ -30,10 +31,14 @@ const DashboardPageHeader: FC<PageHeaderProps> = ({ icon, subTitle, title }) => 
             </Stack>
           </Group>
         </Group>
-        <Group gap="xs" visibleFrom="sm">
-          <TablerIcon name="calendar" size={20} />
-          <Text c="dimmed">{dayjs().format('ddd DD MMM, YYYY')}</Text>
-        </Group>
+        {traiiling ? (
+          traiiling
+        ) : (
+          <Group gap="xs" visibleFrom="sm">
+            <TablerIcon name="calendar" size={20} />
+            <Text c="dimmed">{dayjs().format('ddd DD MMM, YYYY')}</Text>
+          </Group>
+        )}
       </Group>
       <Divider />
     </Box>

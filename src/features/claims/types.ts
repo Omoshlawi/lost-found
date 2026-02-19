@@ -2,7 +2,7 @@ import { User } from 'better-auth';
 import { z } from 'zod';
 import { FoundDocumentCase } from '../cases/types';
 import { Match } from '../matches/types';
-import { claimFormSchema } from './utils/validation';
+import { claimFormSchema, rejectClaimSchema, verifyClaimSchema } from './utils/validation';
 
 export enum ClaimStatus {
   PENDING = 'PENDING',
@@ -51,3 +51,5 @@ export interface ClaimUserResponse {
 }
 
 export type ClaimFormData = z.infer<typeof claimFormSchema>;
+export type RejectClaimFormData = z.infer<typeof rejectClaimSchema>;
+export type VerifyClaimFormData = z.infer<typeof verifyClaimSchema>;

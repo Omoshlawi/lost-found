@@ -1,6 +1,6 @@
 import useSWR from 'swr';
-import { APIFetchResponse, constructUrl } from '@/lib/api';
-import { Claim } from '../types';
+import { apiFetch, APIFetchResponse, constructUrl, mutate } from '@/lib/api';
+import { Claim, RejectClaimFormData, VerifyClaimFormData } from '../types';
 
 export const useClaims = (paras: Record<string, any> = {}) => {
   const url = constructUrl('/claim', {
@@ -26,4 +26,27 @@ export const useClaim = (claimId?: string, paras: Record<string, any> = {}) => {
     error,
     isLoading,
   };
+};
+
+const verifyClaim = async (claimId: string, data: VerifyClaimFormData) => {
+  const url = constructUrl(`/claim/${claimId}/verify`);
+  const res = await apiFetch<Claim>(url, {
+    method: 'POST',
+    data,
+  });
+  mutate('/claim');
+  return res.data;
+};
+const rejectClaim = async (claimId: string, data: RejectClaimFormData) => {
+  const url = constructUrl(`/claim/${claimId}/reject`);
+  const res = await apiFetch<Claim>(url, {
+    method: 'POST',
+    data,
+  });
+  mutate('/claim');
+  return res.data;
+};
+
+export const useClaimApi = () => {
+  return { verifyClaim, rejectClaim };
 };

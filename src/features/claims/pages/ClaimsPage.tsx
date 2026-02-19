@@ -1,12 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Badge, Box, Menu, Paper, Stack } from '@mantine/core';
-import {
-  DashboardPageHeader,
-  StateFullDataTable,
-  SystemAuthorized,
-  TablerIcon,
-} from '@/components';
+import { ActionIcon, Badge, Box, Paper, Stack } from '@mantine/core';
+import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { useAppColors } from '@/hooks/useAppColors';
 import { formatDate } from '@/lib/utils';
 import { useClaims } from '../hooks';
@@ -29,47 +24,14 @@ const ClaimsPage = () => {
             {
               id: 'actions',
               cell: ({ row: { original: docType } }) => (
-                <Menu shadow="md" width={200}>
-                  <Menu.Target>
-                    <ActionIcon variant="transparent" aria-label="Settings">
-                      <TablerIcon
-                        name="dots"
-                        style={{ width: '70%', height: '70%' }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Label>Actions</Menu.Label>
-                    <Menu.Divider />
-                    <Menu.Item
-                      leftSection={<TablerIcon name="eye" size={14} />}
-                      component={Link}
-                      to={`${docType.id}`}
-                    >
-                      View Details
-                    </Menu.Item>
-                    <SystemAuthorized
-                      permissions={{ documentCase: ['verify'] }}
-                      unauthorizedAction={{ type: 'hide' }}
-                    >
-                      <Menu.Item leftSection={<TablerIcon name="check" size={14} />} color="green">
-                        Verify
-                      </Menu.Item>
-                    </SystemAuthorized>
-                    <SystemAuthorized
-                      permissions={{ documentCase: ['reject'] }}
-                      unauthorizedAction={{ type: 'hide' }}
-                    >
-                      <Menu.Item leftSection={<TablerIcon name="x" size={14} />} color="red">
-                        Reject
-                      </Menu.Item>
-                    </SystemAuthorized>
-                    <Menu.Item leftSection={<TablerIcon name="trash" size={14} />} color="red">
-                      Delete
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
+                <ActionIcon
+                  component={Link}
+                  to={`${docType.id}`}
+                  variant="subtle"
+                  aria-label="Settings"
+                >
+                  <TablerIcon name="eye" size={14} />
+                </ActionIcon>
               ),
             },
           ]}

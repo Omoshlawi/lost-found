@@ -58,13 +58,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ address, onSuccess, closeWork
       endDate: address?.endDate ?? undefined,
       preferred: address?.preferred ?? false,
       formatted: address?.formatted ?? '',
-      localeFormat: {
-        level1: address?.localeFormat?.level1 ?? '',
-        level2: address?.localeFormat?.level2 ?? '',
-        level3: address?.localeFormat?.level3 ?? '',
-        level4: address?.localeFormat?.level4 ?? '',
-        level5: address?.localeFormat?.level5 ?? '',
-      },
     }),
     [address]
   );

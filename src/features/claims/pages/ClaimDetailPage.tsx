@@ -2,8 +2,10 @@ import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   ActionIcon,
+  Badge,
   Box,
   Divider,
+  Group,
   Image,
   Paper,
   SimpleGrid,
@@ -14,7 +16,7 @@ import {
 } from '@mantine/core';
 import { DashboardPageHeader, ErrorState, TablerIcon } from '@/components';
 import { useAppColors } from '@/hooks/useAppColors';
-import { ClaimDetailSkeleton } from '../components';
+import { ClaimActions, ClaimDetailSkeleton } from '../components';
 import useCompareCases from '../hooks/use-compare-cases';
 
 const ClaimDetailPage = () => {
@@ -35,6 +37,7 @@ const ClaimDetailPage = () => {
       (prev) => (prev + direction + attachments.length) % attachments.length
     );
   };
+
   if (isLoading) {
     return <ClaimDetailSkeleton />;
   }
@@ -46,7 +49,13 @@ const ClaimDetailPage = () => {
       <DashboardPageHeader
         icon="filterQuestion"
         title={`#CLM-2025-${claim?.claimNumber}`}
-        subTitle="Claim detail"
+        subTitle={() => (
+          <Group gap="sm">
+            <Text c="dimmed">Claim detail</Text>
+            <Badge size="xs">{claim?.status}</Badge>
+          </Group>
+        )}
+        traiiling={<ClaimActions claim={claim!} />}
       />
       <Tabs defaultValue="claim">
         <Tabs.List>
