@@ -1,10 +1,10 @@
-import { authClient, handleApiErrors } from '@/lib/api';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import { useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Box, Button, Checkbox, Flex, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { authClient, handleApiErrors } from '@/lib/api';
 import { LoginFormData } from '../types';
 import { LoginValidationSchema } from '../utils/validation';
 
@@ -24,7 +24,7 @@ const LoginForm = () => {
   });
   const handleSubmit: SubmitHandler<LoginFormData> = async (values) => {
     try {
-      const { data, error } = await authClient.signIn.email({ ...values });
+      const { error } = await authClient.signIn.email({ ...values });
       if (error) {
         throw error;
       }
@@ -112,15 +112,27 @@ const LoginForm = () => {
         <Button type="submit" variant="gradient" loading={form.formState.isSubmitting}>
           Login
         </Button>
-        <Flex justify={'flex-start'} align={'center'}>
-          <Text>Don't have an account?</Text>
-          <Link
-            to={`/register${callbackUrl ? '?callbackUrl=' + encodeURIComponent(callbackUrl) : ''}`}
-          >
-            <Button variant="transparent" p={'xs'}>
-              Sign up
-            </Button>
+        <Flex
+          justify={'space-between'}
+          align={'center'}
+          direction={{ base: 'column', sm: 'row' }}
+          gap="sm"
+        >
+          <Link to="/forgot-password">
+            <Text size="sm" c="blue" style={{ cursor: 'pointer' }}>
+              Forgot password?
+            </Text>
           </Link>
+          <Flex justify={'flex-end'} align={'center'}>
+            <Text size="sm">Don't have an account?</Text>
+            <Link
+              to={`/register${callbackUrl ? '?callbackUrl=' + encodeURIComponent(callbackUrl) : ''}`}
+            >
+              <Button variant="transparent" p={'xs'}>
+                Sign up
+              </Button>
+            </Link>
+          </Flex>
         </Flex>
       </Stack>
     </form>

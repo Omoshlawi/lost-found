@@ -129,6 +129,13 @@ const data: Array<NavItem> = [
     children: [],
   },
   {
+    icon: 'users',
+    label: 'Users',
+    href: 'users',
+    description: 'Manage platform users',
+    children: [],
+  },
+  {
     icon: 'layersLinked',
     label: 'Address hierarchy',
     href: 'address-hierarchy',

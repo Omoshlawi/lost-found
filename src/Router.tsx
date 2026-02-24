@@ -1,5 +1,13 @@
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
-import { LoginPage, RegisterPage } from '@/features/landing/pages';
+import {
+  AboutUsPage,
+  ContactUsPage,
+  ForgotPasswordPage,
+  HowItWorksPage,
+  LoginPage,
+  RegisterPage,
+  ResetPasswordPage,
+} from '@/features/landing/pages';
 import {
   AddressesPage,
   AddressHierarchyPage,
@@ -9,9 +17,11 @@ import { DocumentTypesPage } from './features/admin/pages';
 import { DocumentCaseDetail, FoundDocumentCasesPage, LostItemsPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import { DashboardLayout } from './features/dashboard/components';
-import { LoginRequired } from './features/landing/components';
+import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
+import { SettingsPage } from './features/settings';
 import UiComponents from './features/ui/UiComponents';
+import { UserDetailPage, UsersPage } from './features/users/pages';
 import { HomePage } from './pages/Home.page';
 
 const router = createBrowserRouter([
@@ -21,12 +31,38 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       {
+        path: '/about',
+        element: <AboutUsPage />,
+      },
+      {
+        path: '/how-it-works',
+        element: <HowItWorksPage />,
+      },
+      {
+        path: '/contact',
+        element: <ContactUsPage />,
+      },
+    ],
+  },
+  {
+    path: '/',
+    element: <AuthLayout />,
+    children: [
+      {
         path: '/register',
         element: <RegisterPage />,
       },
       {
         path: '/login',
         element: <LoginPage />,
+      },
+      {
+        path: '/forgot-password',
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: '/reset-password',
+        element: <ResetPasswordPage />,
       },
     ],
   },
@@ -55,7 +91,11 @@ const router = createBrowserRouter([
           { path: ':reportId', element: <DocumentCaseDetail /> },
         ],
       },
-      { path: 'settings', element: <div>Account settings</div> },
+      {
+        path: 'settings',
+        element: <SettingsPage />,
+        children: [{ path: ':tab', element: <SettingsPage /> }],
+      },
       {
         path: 'claims',
         element: <Outlet />,
@@ -80,6 +120,14 @@ const router = createBrowserRouter([
       {
         path: 'address-locales',
         element: <AddressLocalesPage />,
+      },
+      {
+        path: 'users',
+        element: <Outlet />,
+        children: [
+          { index: true, element: <UsersPage /> },
+          { path: ':id', element: <UserDetailPage /> },
+        ],
       },
     ],
   },

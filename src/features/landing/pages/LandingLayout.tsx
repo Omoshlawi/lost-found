@@ -2,23 +2,25 @@ import { Link, Outlet } from 'react-router-dom';
 import { AppShell, Box, Burger, Button, Flex, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle, Logo } from '@/components';
-import { FooterCentered } from '@/components/Footer/Footer';
 
 const LandingLayout = () => {
   const [opened, { toggle, close }] = useDisclosure();
 
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: 70 }}
       navbar={{
         width: 300,
         breakpoint: 'md',
         collapsed: { mobile: !opened, desktop: true },
       }}
-      padding="md"
     >
-      <AppShell.Header>
-        <Flex align="center" justify="space-between" h="100%" px="md">
+      <AppShell.Header
+        withBorder={false}
+        bg="transparent"
+        style={{ backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+      >
+        <Flex align="center" justify="space-between" h="100%" px="xl" maw={1400} mx="auto">
           <Group gap="md" style={{ flex: '0 0 auto' }}>
             <Burger opened={opened} onClick={toggle} hiddenFrom="md" size="sm" />
             <Button variant="transparent" component={Link} to="/about" visibleFrom="md">
@@ -31,8 +33,19 @@ const LandingLayout = () => {
           </Box>
 
           <Group gap="sm" style={{ flex: '0 0 auto' }}>
-            <Button variant="outline" component={Link} to="/login">
+            <Button variant="subtle" color="gray.3" component={Link} to="/login">
               Sign In
+            </Button>
+            <Button
+              variant="gradient"
+              gradient={{ from: 'citizenTeal.7', to: 'citizenNavy.7' }}
+              component={Link}
+              to="/register"
+              radius="xl"
+              px="xl"
+              visibleFrom="xs"
+            >
+              Get Started
             </Button>
             <ColorSchemeToggle />
           </Group>
@@ -50,6 +63,26 @@ const LandingLayout = () => {
             justify="flex-start"
           >
             About us
+          </Button>
+          <Button
+            variant="subtle"
+            component={Link}
+            to="/how-it-works"
+            onClick={close}
+            fullWidth
+            justify="flex-start"
+          >
+            How it works
+          </Button>
+          <Button
+            variant="subtle"
+            component={Link}
+            to="/contact"
+            onClick={close}
+            fullWidth
+            justify="flex-start"
+          >
+            Contact us
           </Button>
         </Stack>
       </AppShell.Navbar>
