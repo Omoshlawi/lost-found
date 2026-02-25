@@ -1,7 +1,7 @@
+import classes from './FooterCentered.module.scss';
 import { IconBrandInstagram, IconBrandTwitter, IconBrandYoutube } from '@tabler/icons-react';
 import { ActionIcon, Anchor, Group } from '@mantine/core';
 import { Logo } from '../Logo';
-import classes from './FooterCentered.module.css';
 
 const links = [
   { link: '#', label: 'Contact' },
@@ -28,7 +28,7 @@ export function FooterCentered() {
   return (
     <div className={classes.footer}>
       <div className={classes.inner}>
-        <Logo />
+        <Logo mode="name" />
 
         <Group className={classes.links}>{cases}</Group>
 

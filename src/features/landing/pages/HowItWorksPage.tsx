@@ -1,4 +1,4 @@
-import { Container, rem, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { Container, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { TablerIcon } from '@/components';
 
 export default function HowItWorksPage() {

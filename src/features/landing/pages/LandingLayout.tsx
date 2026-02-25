@@ -1,9 +1,11 @@
 import { Link, Outlet } from 'react-router-dom';
-import { AppShell, Box, Burger, Button, Flex, Group, Stack } from '@mantine/core';
+import { AppShell, Button, Flex, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle, Logo } from '@/components';
+import { FooterCentered } from '@/components/Footer/Footer';
 
 const LandingLayout = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [opened, { toggle, close }] = useDisclosure();
 
   return (
@@ -22,20 +24,11 @@ const LandingLayout = () => {
       >
         <Flex align="center" justify="space-between" h="100%" px="xl" maw={1400} mx="auto">
           <Group gap="md" style={{ flex: '0 0 auto' }}>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="md" size="sm" />
-            <Button variant="transparent" component={Link} to="/about" visibleFrom="md">
-              About us
-            </Button>
+            {/* <Burger opened={opened} onClick={toggle} hiddenFrom="md" size="sm" /> */}
+            <Logo />
           </Group>
 
-          <Box style={{ flex: '1 1 auto', display: 'flex', justifyContent: 'center' }}>
-            <Logo />
-          </Box>
-
           <Group gap="sm" style={{ flex: '0 0 auto' }}>
-            <Button variant="subtle" color="gray.3" component={Link} to="/login">
-              Sign In
-            </Button>
             <Button
               variant="gradient"
               gradient={{ from: 'citizenTeal.7', to: 'citizenNavy.7' }}
@@ -53,7 +46,7 @@ const LandingLayout = () => {
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <Stack gap="xs">
+        {/* <Stack gap="xs">
           <Button
             variant="subtle"
             component={Link}
@@ -84,14 +77,14 @@ const LandingLayout = () => {
           >
             Contact us
           </Button>
-        </Stack>
+        </Stack> */}
       </AppShell.Navbar>
 
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
       {/* TODO: Add footer */}
-      {/* <FooterCentered /> */}
+      <FooterCentered />
     </AppShell>
   );
 };

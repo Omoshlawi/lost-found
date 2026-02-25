@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Avatar,
@@ -22,7 +21,6 @@ import { UserSessionsList } from '../components';
 import BanUserForm from '../forms/BanUserForm';
 import SetRoleForm from '../forms/SetRoleForm';
 import { useUsers, useUsersApi } from '../hooks';
-import { User } from '../types';
 
 const UserDetailPage = () => {
   const { id } = useParams<{ id: string }>();
