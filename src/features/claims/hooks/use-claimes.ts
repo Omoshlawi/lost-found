@@ -47,6 +47,36 @@ const rejectClaim = async (claimId: string, data: RejectClaimFormData) => {
   return res.data;
 };
 
+const reviewClaim = async (claimId: string, data: VerifyClaimFormData) => {
+  const url = constructUrl(`/claim/${claimId}/review`);
+  const res = await apiFetch<Claim>(url, {
+    method: 'POST',
+    data,
+  });
+  mutate('/claim');
+  return res.data;
+};
+
+const verifyReviewedClaim = async (claimId: string, data: VerifyClaimFormData) => {
+  const url = constructUrl(`/claim/${claimId}/verify-reviewed`);
+  const res = await apiFetch<Claim>(url, {
+    method: 'POST',
+    data,
+  });
+  mutate('/claim');
+  return res.data;
+};
+
+const rejectReviewedClaim = async (claimId: string, data: RejectClaimFormData) => {
+  const url = constructUrl(`/claim/${claimId}/reject-reviewed`);
+  const res = await apiFetch<Claim>(url, {
+    method: 'POST',
+    data,
+  });
+  mutate('/claim');
+  return res.data;
+};
+
 export const useClaimApi = () => {
-  return { verifyClaim, rejectClaim };
+  return { verifyClaim, rejectClaim, reviewClaim, verifyReviewedClaim, rejectReviewedClaim };
 };

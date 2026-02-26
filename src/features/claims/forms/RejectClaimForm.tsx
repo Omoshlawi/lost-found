@@ -6,7 +6,7 @@ import { showNotification } from '@mantine/notifications';
 import { useTransitionReasons } from '@/features/status-transitions/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useClaimApi } from '../hooks';
-import { Claim, RejectClaimFormData } from '../types';
+import { Claim, ClaimStatus, RejectClaimFormData } from '../types';
 import { rejectClaimSchema } from '../utils/validation';
 
 type RejectClaimFormProps = {
@@ -24,7 +24,7 @@ const RejectClaimForm: FC<RejectClaimFormProps> = ({ claim, onClose, onSuccess }
   const { reasons } = useTransitionReasons({
     entityType: 'Claim',
     fromStatus: claim.status,
-    toStatus: 'REJECTED',
+    toStatus: ClaimStatus.REJECTED,
     auto: 'false',
   });
   const handleSubmit: SubmitHandler<RejectClaimFormData> = async (data) => {

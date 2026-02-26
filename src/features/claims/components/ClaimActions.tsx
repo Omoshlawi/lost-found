@@ -2,7 +2,13 @@ import { FC } from 'react';
 import { Button, Menu, Text } from '@mantine/core';
 import { openConfirmModal } from '@mantine/modals';
 import { launchWorkspace, SystemAuthorized, TablerIcon } from '@/components';
-import { RejectClaimForm, VerifyClaimForm } from '../forms';
+import {
+  RejectClaimForm,
+  RejectReviewForm,
+  ReviewClaimForm,
+  VerifyClaimForm,
+  VerifyReviewForm,
+} from '../forms';
 import { Claim, ClaimStatus } from '../types';
 
 type ClaimActionsProps = {
@@ -43,16 +49,24 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
       },
     });
   };
-  const verifyableStatuses: ClaimStatus[] = [
-    ClaimStatus.PENDING,
-    ClaimStatus.REJECTED,
-    ClaimStatus.DISPUTED,
-  ];
-  const rejectableStatuses: ClaimStatus[] = [
-    ClaimStatus.PENDING,
-    ClaimStatus.VERIFIED,
-    ClaimStatus.DISPUTED,
-  ];
+  const handleReview = () => {
+    const dismiss = launchWorkspace(<ReviewClaimForm claim={claim} onClose={() => dismiss()} />, {
+      title: 'Review Claim',
+    });
+  };
+  const handleApproveReviewedClaim = () => {
+    const dismiss = launchWorkspace(<VerifyReviewForm claim={claim} onClose={() => dismiss()} />, {
+      title: 'Approve Claim',
+    });
+  };
+  const handleRejectReviewedClaim = () => {
+    const dismiss = launchWorkspace(<RejectReviewForm claim={claim} onClose={() => dismiss()} />, {
+      title: 'Reject Claim',
+    });
+  };
+  const verifyableStatuses: ClaimStatus[] = [ClaimStatus.PENDING, ClaimStatus.REJECTED];
+  const rejectableStatuses: ClaimStatus[] = [ClaimStatus.PENDING, ClaimStatus.VERIFIED];
+
   return (
     <Menu shadow="md" width={200}>
       <Menu.Target>
@@ -69,6 +83,48 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
       <Menu.Dropdown>
         <Menu.Label>Actions</Menu.Label>
         <Menu.Divider />
+        {claim.status === ClaimStatus.DISPUTED && (
+          <SystemAuthorized
+            permissions={{ claim: ['review-dispute'] }}
+            unauthorizedAction={{ type: 'hide' }}
+          >
+            <Menu.Item
+              leftSection={<TablerIcon name="check" size={14} />}
+              onClick={handleReview}
+              color="green"
+            >
+              Review Dispute
+            </Menu.Item>
+          </SystemAuthorized>
+        )}
+        {claim.status === ClaimStatus.UNDER_REVIEW && (
+          <SystemAuthorized
+            permissions={{ claim: ['review-dispute'] }}
+            unauthorizedAction={{ type: 'hide' }}
+          >
+            <Menu.Item
+              leftSection={<TablerIcon name="check" size={14} />}
+              onClick={handleApproveReviewedClaim}
+              color="green"
+            >
+              Approve
+            </Menu.Item>
+          </SystemAuthorized>
+        )}
+        {claim.status === ClaimStatus.UNDER_REVIEW && (
+          <SystemAuthorized
+            permissions={{ claim: ['review-dispute'] }}
+            unauthorizedAction={{ type: 'hide' }}
+          >
+            <Menu.Item
+              leftSection={<TablerIcon name="x" size={14} />}
+              onClick={handleRejectReviewedClaim}
+              color="red"
+            >
+              Reject
+            </Menu.Item>
+          </SystemAuthorized>
+        )}
         {verifyableStatuses.includes(claim.status) && (
           <SystemAuthorized
             permissions={{ claim: ['verify'] }}

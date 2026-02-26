@@ -9,13 +9,13 @@ import { useClaimApi } from '../hooks';
 import { Claim, ClaimStatus, VerifyClaimFormData } from '../types';
 import { verifyClaimSchema } from '../utils/validation';
 
-type VerifyClaimFormProps = {
+type RejectReviewFormProps = {
   claim: Claim;
   onClose: () => void;
   onSuccess?: (claim: Claim) => void;
 };
 
-const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }) => {
+const RejectReviewForm: FC<RejectReviewFormProps> = ({ claim, onClose, onSuccess }) => {
   const form = useForm<VerifyClaimFormData>({
     defaultValues: {},
     resolver: zodResolver(verifyClaimSchema),
@@ -23,17 +23,17 @@ const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }
   const { reasons } = useTransitionReasons({
     entityType: 'Claim',
     fromStatus: claim.status,
-    toStatus: ClaimStatus.VERIFIED,
+    toStatus: ClaimStatus.REJECTED,
     auto: 'false',
   });
-  const { verifyClaim } = useClaimApi();
+  const { rejectReviewedClaim } = useClaimApi();
   const handleSubmit: SubmitHandler<VerifyClaimFormData> = async (data) => {
     try {
-      const updatedClaim = await verifyClaim(claim.id, data);
+      const updatedClaim = await rejectReviewedClaim(claim.id, data);
       onSuccess?.(updatedClaim);
       showNotification({
-        title: 'Claim verified',
-        message: 'Claim verified successfully',
+        title: 'Claim rejected',
+        message: 'Claim rejected successfully',
         color: 'green',
       });
       onClose();
@@ -41,7 +41,7 @@ const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }
       const e = handleApiErrors<VerifyClaimFormData>(error);
       if (e.detail) {
         showNotification({
-          title: `Error verifying claim`,
+          title: `Error rejecting claim`,
           message: e.detail,
           color: 'red',
           position: 'top-right',
@@ -114,4 +114,4 @@ const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }
   );
 };
 
-export default VerifyClaimForm;
+export default RejectReviewForm;

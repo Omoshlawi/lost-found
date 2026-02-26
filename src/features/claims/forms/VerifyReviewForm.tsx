@@ -9,13 +9,13 @@ import { useClaimApi } from '../hooks';
 import { Claim, ClaimStatus, VerifyClaimFormData } from '../types';
 import { verifyClaimSchema } from '../utils/validation';
 
-type VerifyClaimFormProps = {
+type ApproveReviewFormProps = {
   claim: Claim;
   onClose: () => void;
   onSuccess?: (claim: Claim) => void;
 };
 
-const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }) => {
+const VerifyReviewForm: FC<ApproveReviewFormProps> = ({ claim, onClose, onSuccess }) => {
   const form = useForm<VerifyClaimFormData>({
     defaultValues: {},
     resolver: zodResolver(verifyClaimSchema),
@@ -26,10 +26,10 @@ const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }
     toStatus: ClaimStatus.VERIFIED,
     auto: 'false',
   });
-  const { verifyClaim } = useClaimApi();
+  const { verifyReviewedClaim } = useClaimApi();
   const handleSubmit: SubmitHandler<VerifyClaimFormData> = async (data) => {
     try {
-      const updatedClaim = await verifyClaim(claim.id, data);
+      const updatedClaim = await verifyReviewedClaim(claim.id, data);
       onSuccess?.(updatedClaim);
       showNotification({
         title: 'Claim verified',
@@ -114,4 +114,4 @@ const VerifyClaimForm: FC<VerifyClaimFormProps> = ({ claim, onClose, onSuccess }
   );
 };
 
-export default VerifyClaimForm;
+export default VerifyReviewForm;

@@ -48,7 +48,7 @@ const ClaimDetailPage = () => {
     <Stack gap="xl">
       <DashboardPageHeader
         icon="filterQuestion"
-        title={`#CLM-2025-${claim?.claimNumber}`}
+        title={`${claim?.claimNumber}`}
         subTitle={() => (
           <Group gap="sm">
             <Text c="dimmed">Claim detail</Text>
