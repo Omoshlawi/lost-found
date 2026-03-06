@@ -21,7 +21,7 @@ import useCompareCases from '../hooks/use-compare-cases';
 
 const ClaimDetailPage = () => {
   const { claimId } = useParams<{ claimId: string }>();
-  const { claim, error, isLoading, comparisons, foundCase } = useCompareCases(claimId);
+  const { claim, error, isLoading, comparisons, foundCase, match } = useCompareCases(claimId);
   const attachments = useMemo(() => claim?.attachments ?? [], [claim]);
   const images = useMemo(() => foundCase?.case?.document?.images ?? [], [foundCase]);
   const [selectedimageIndex, setSelectedimageindex] = useState(0);
@@ -84,7 +84,7 @@ const ClaimDetailPage = () => {
                   <Table.Th>{question}</Table.Th>
                   <Table.Td>{response}</Table.Td>
                   <Table.Td>
-                    {foundCase?.securityQuestion?.find((q) => q.question === question)?.answer}
+                    {match?.securityQuestions?.find((q) => q.question === question)?.answer}
                   </Table.Td>
                 </Table.Tr>
               ))}

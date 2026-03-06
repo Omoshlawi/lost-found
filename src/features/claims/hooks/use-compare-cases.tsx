@@ -6,13 +6,29 @@ const useCompareCases = (claimId?: string) => {
   const { claim, error, isLoading } = useClaim(claimId);
   const foundCase = useMemo(() => claim?.foundDocumentCase, [claim]);
   const lostCase = useMemo(() => claim?.match?.lostDocumentCase, [claim]);
+  const match = useMemo(() => claim?.match, [claim]);
   const dateFomart = 'ddd DD MMM, YYYY';
   const comparisons = useMemo<Array<{ lost: ReactNode; found: ReactNode; field: string }>>(
     () => [
       {
-        field: 'Owner name',
-        found: foundCase?.case?.document?.ownerName,
-        lost: lostCase?.case?.document?.ownerName,
+        field: 'Case Number',
+        found: foundCase?.case?.caseNumber,
+        lost: lostCase?.case?.caseNumber,
+      },
+      {
+        field: 'surname',
+        found: foundCase?.case?.document?.surname,
+        lost: lostCase?.case?.document?.surname,
+      },
+      {
+        field: 'Full name',
+        found: foundCase?.case?.document?.fullName,
+        lost: lostCase?.case?.document?.fullName,
+      },
+      {
+        field: 'Address',
+        found: foundCase?.case?.document?.addressRaw,
+        lost: lostCase?.case?.document?.addressRaw,
       },
       {
         field: 'Document Type',
@@ -82,6 +98,22 @@ const useCompareCases = (claimId?: string) => {
           : 'N/A',
       },
       {
+        field: 'Photo Present',
+        found: foundCase?.case?.document?.photoPresent ? 'Yes' : 'No',
+        lost: lostCase?.case?.document?.photoPresent ? 'Yes' : 'No',
+      },
+
+      {
+        field: 'Fingerprint Present',
+        found: foundCase?.case?.document?.fingerprintPresent ? 'Yes' : 'No',
+        lost: lostCase?.case?.document?.fingerprintPresent ? 'Yes' : 'No',
+      },
+      {
+        field: 'Signature Present',
+        found: foundCase?.case?.document?.signaturePresent ? 'Yes' : 'No',
+        lost: lostCase?.case?.document?.signaturePresent ? 'Yes' : 'No',
+      },
+      {
         field: 'Case Tags',
         found: foundCase?.case?.tags?.join(',') ?? 'N/A',
         lost: lostCase?.case?.tags?.join(', ') ?? 'N/A',
@@ -96,6 +128,7 @@ const useCompareCases = (claimId?: string) => {
         found: foundCase?.status ?? 'N/A',
         lost: lostCase?.status ?? 'N/A',
       },
+
       {
         field: 'Additional Fields',
         found: foundCase?.case?.document?.additionalFields?.length ? (
@@ -124,7 +157,7 @@ const useCompareCases = (claimId?: string) => {
     ],
     [foundCase, lostCase]
   );
-  return { foundCase, lostCase, isLoading, claim, error, comparisons };
+  return { foundCase, lostCase, isLoading, claim, error, comparisons, match };
 };
 
 export default useCompareCases;

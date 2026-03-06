@@ -4,6 +4,7 @@ import { CaseDocumentSchema, FoundDocumentCaseSchema, LostDocumentCaseSchema } f
 
 export interface DocumentCase {
   id: string;
+  caseNumber: string;
   userId: string;
   addressId: string;
   address?: Address;
@@ -29,11 +30,6 @@ export enum FoundDocumentCaseStatus {
   VERIFIED = 'VERIFIED', // When the document is verified by the admin
   REJECTED = 'REJECTED', // When the document is rejected by the admin
   COMPLETED = 'COMPLETED', // When the document is reunited with the owner
-}
-
-export interface SecurityQuestion {
-  question: string;
-  answer: string;
 }
 
 export interface ImageAnalysisResult {
@@ -87,10 +83,8 @@ export interface FoundDocumentCase {
   createdAt: string;
   updatedAt: string;
   pointAwarded: number;
-  securityQuestion: Array<SecurityQuestion>;
   voided: boolean;
 }
-
 export interface DocumentField {
   id: string;
   documentId: string;
@@ -99,6 +93,11 @@ export interface DocumentField {
   fieldValue: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AddressComponent {
+  type: string;
+  value: string;
 }
 
 export interface Document {
@@ -116,7 +115,9 @@ export interface Document {
   placeOfIssue?: string;
   note?: string;
   issuer: string;
-  ownerName: string;
+  fullName: string;
+  surname: string;
+  givenNames: string[];
   typeId: string;
   reportId: string;
   issuanceDate: string;
@@ -124,8 +125,15 @@ export interface Document {
   createdAt: string;
   voided: boolean;
   type: Type;
-  images: Array<DocumentImage>;
-  additionalFields?: Array<DocumentField>;
+  images: DocumentImage[];
+  additionalFields?: DocumentField[];
+  addressRaw?: string;
+  addressCountry?: string;
+  addressComponents?: AddressComponent[];
+  photoPresent?: boolean;
+  fingerprintPresent?: boolean;
+  signaturePresent?: boolean;
+  isExpired?: boolean;
 }
 
 export interface DocumentImage {

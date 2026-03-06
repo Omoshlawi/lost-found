@@ -199,7 +199,7 @@ const columns: ColumnDef<DocumentCase>[] = [
   },
   {
     header: 'Owner name',
-    accessorKey: 'document.ownerName',
+    accessorKey: 'document.fullName',
   },
   {
     header: 'Document Type',

@@ -202,8 +202,8 @@ const columns: ColumnDef<DocumentCase>[] = [
   },
   {
     header: 'Owner name',
-    accessorKey: 'document.ownerName',
-    cell: ({ row: { original: docType } }) => docType.document?.ownerName ?? '--',
+    accessorKey: 'document.fullName',
+    cell: ({ row: { original: docType } }) => docType.document?.fullName ?? '--',
   },
   {
     header: 'Document Type',
