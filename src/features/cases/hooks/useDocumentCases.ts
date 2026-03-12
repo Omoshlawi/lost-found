@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { StatusTransitionReasonFormData } from '@/features/status-transitions/types';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
 import {
   CaseDocumentFormData,
@@ -157,18 +158,32 @@ const submitDocumentCase = async (caseId: string) => {
   return documentCase.data;
 };
 
-const verifyDocumentCase = async (caseId: string) => {
-  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/verify`, {
-    method: 'POST',
-  });
+const verifyfoundDocumentCase = async (
+  foundCaseId: string,
+  data: StatusTransitionReasonFormData
+) => {
+  const documentCase = await apiFetch<DocumentCase>(
+    `/documents/cases/found/${foundCaseId}/verify`,
+    {
+      method: 'POST',
+      data,
+    }
+  );
   mutate('/documents/cases');
   return documentCase.data;
 };
 
-const rejectDocumentCase = async (caseId: string) => {
-  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/reject`, {
-    method: 'POST',
-  });
+const rejectFoundDocumentCase = async (
+  foundCaseId: string,
+  data: StatusTransitionReasonFormData
+) => {
+  const documentCase = await apiFetch<DocumentCase>(
+    `/documents/cases/found/${foundCaseId}/reject`,
+    {
+      method: 'POST',
+      data,
+    }
+  );
   mutate('/documents/cases');
   return documentCase.data;
 };
@@ -185,7 +200,7 @@ export const useDocumentCaseApi = () => {
     updateCaseDocument,
     updateDocumentCase,
     submitDocumentCase,
-    verifyDocumentCase,
-    rejectDocumentCase,
+    verifyfoundDocumentCase,
+    rejectFoundDocumentCase,
   };
 };

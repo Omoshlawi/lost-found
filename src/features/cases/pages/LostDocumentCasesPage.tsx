@@ -201,6 +201,10 @@ const columns: ColumnDef<DocumentCase>[] = [
     enableHiding: false,
   },
   {
+    header: 'Case number',
+    accessorKey: 'caseNumber',
+  },
+  {
     header: 'Owner name',
     accessorKey: 'document.fullName',
     cell: ({ row: { original: docType } }) => docType.document?.fullName ?? '--',

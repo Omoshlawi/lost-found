@@ -13,6 +13,7 @@ import { launchWorkspace } from '@/components/Workspace';
 import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
+import { RejectFoundDocumentCaseForm, VerifyFoundDocumentCaseForm } from '../forms';
 import FoundDocumentCaseForm from '../forms/FoundDocumentCaseForm';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
 import { DocumentCase } from '../types';
@@ -23,46 +24,9 @@ const FoundDocumentCasesPage = () => {
     v: 'custom:include(foundDocumentCase,document:include(type),address)',
     caseType: 'FOUND',
   });
-  const { deleteDocumentCase, verifyDocumentCase, rejectDocumentCase } = useDocumentCaseApi();
+  const { deleteDocumentCase } = useDocumentCaseApi();
   const { bgColor } = useAppColors();
-  const handleVerify = async (caseId: string) => {
-    try {
-      await verifyDocumentCase(caseId);
-      showNotification({
-        title: 'Success',
-        message: 'Document case verified successfully',
-        color: 'teal',
-      });
-    } catch (error) {
-      const e = handleApiErrors<{ detail: string }>(error);
-      if (e.detail) {
-        showNotification({
-          title: 'Error verifying document case',
-          message: e.detail,
-          color: 'red',
-        });
-      }
-    }
-  };
-  const handleReject = async (caseId: string) => {
-    try {
-      await rejectDocumentCase(caseId);
-      showNotification({
-        title: 'Success',
-        message: 'Document case rejected successfully',
-        color: 'teal',
-      });
-    } catch (error) {
-      const e = handleApiErrors<{ detail: string }>(error);
-      if (e.detail) {
-        showNotification({
-          title: 'Error rejecting document case',
-          message: e.detail,
-          color: 'red',
-        });
-      }
-    }
-  };
+
   const handleDelete = (report: DocumentCase) => {
     modals.openConfirmModal({
       title: 'Delete your profile',
@@ -123,7 +87,7 @@ const FoundDocumentCasesPage = () => {
             ...columns,
             {
               id: 'actions',
-              cell: ({ row: { original: docType } }) => (
+              cell: ({ row: { original: docCase } }) => (
                 <Menu shadow="md" width={200}>
                   <Menu.Target>
                     <ActionIcon variant="transparent" aria-label="Settings">
@@ -140,7 +104,7 @@ const FoundDocumentCasesPage = () => {
                     <Menu.Item
                       leftSection={<TablerIcon name="eye" size={14} />}
                       component={Link}
-                      to={`${docType.id}`}
+                      to={`${docCase.id}`}
                     >
                       View Details
                     </Menu.Item>
@@ -150,7 +114,17 @@ const FoundDocumentCasesPage = () => {
                     >
                       <Menu.Item
                         leftSection={<TablerIcon name="check" size={14} />}
-                        onClick={() => handleVerify(docType.id)}
+                        onClick={() => {
+                          const dismiss = launchWorkspace(
+                            <VerifyFoundDocumentCaseForm
+                              documentCase={docCase}
+                              onClose={() => dismiss()}
+                            />,
+                            {
+                              title: 'Verify Found Document Case',
+                            }
+                          );
+                        }}
                         color="green"
                       >
                         Verify
@@ -162,7 +136,17 @@ const FoundDocumentCasesPage = () => {
                     >
                       <Menu.Item
                         leftSection={<TablerIcon name="x" size={14} />}
-                        onClick={() => handleReject(docType.id)}
+                        onClick={() => {
+                          const dismiss = launchWorkspace(
+                            <RejectFoundDocumentCaseForm
+                              documentCase={docCase}
+                              onClose={() => dismiss()}
+                            />,
+                            {
+                              title: 'Reject Found Document Case',
+                            }
+                          );
+                        }}
                         color="red"
                       >
                         Reject
@@ -171,7 +155,7 @@ const FoundDocumentCasesPage = () => {
                     <Menu.Item
                       leftSection={<TablerIcon name="trash" size={14} />}
                       color="red"
-                      onClick={() => handleDelete(docType)}
+                      onClick={() => handleDelete(docCase)}
                     >
                       Delete
                     </Menu.Item>
@@ -196,6 +180,10 @@ const columns: ColumnDef<DocumentCase>[] = [
     cell: ({ row, table }) => (table.getSortedRowModel().rows.indexOf(row) + 1).toString(),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    header: 'Case number',
+    accessorKey: 'caseNumber',
   },
   {
     header: 'Owner name',
