@@ -57,11 +57,11 @@ const ClaimDetailPage = () => {
         )}
         traiiling={<ClaimActions claim={claim!} />}
       />
-      <Tabs defaultValue="claim">
+      <Tabs defaultValue="cases">
         <Tabs.List>
-          <Tabs.Tab value="claim" leftSection={<TablerIcon name="userQuestion" size={12} />}>
+          {/* <Tabs.Tab value="claim" leftSection={<TablerIcon name="userQuestion" size={12} />}>
             User Claim
-          </Tabs.Tab>
+          </Tabs.Tab> */}
           <Tabs.Tab value="cases" leftSection={<TablerIcon name="briefcase" size={12} />}>
             Cases Comparison
           </Tabs.Tab>

@@ -1,19 +1,19 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   server: {
-    cors:true,
+    cors: true,
     // port: 3000,
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:2000',
+        // target: 'http://102.37.20.178:2000',
         changeOrigin: true,
         secure: false,
-        ws:true,
-
+        ws: true,
       },
       // Proxying websockets or socket.io:
       // ws://localhost:5173/socket.io
@@ -28,7 +28,7 @@ export default defineConfig({
     },
   },
   preview: {
-    allowedHosts: ["*"]
+    allowedHosts: ['*'],
   },
   test: {
     globals: true,

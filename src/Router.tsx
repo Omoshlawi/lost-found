@@ -20,6 +20,7 @@ import { DashboardLayout } from './features/dashboard/components';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
 import { SettingsPage } from './features/settings';
+import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
 import { UserDetailPage, UsersPage } from './features/users/pages';
 import { HomePage } from './pages/Home.page';
@@ -127,6 +128,14 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <UsersPage /> },
           { path: ':id', element: <UserDetailPage /> },
+        ],
+      },
+      {
+        path: 'templates',
+        element: <Outlet />,
+        children: [
+          { index: true, element: <TemplatesPage /> },
+          { path: ':id', element: <TemplateDetailPage /> },
         ],
       },
     ],

@@ -7,3 +7,5 @@ export * from './Workspace';
 export * from './Datatable';
 export * from './Dashboard';
 export * from './UserHasAccess';
+export * from './RichTextEditorInput';
+export * from './SectionTitle';

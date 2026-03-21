@@ -129,6 +129,13 @@ const data: Array<NavItem> = [
     children: [],
   },
   {
+    icon: 'clipboardText',
+    label: 'Templates',
+    description: 'Manage document templates',
+    href: 'templates',
+    children: [],
+  },
+  {
     icon: 'users',
     label: 'Users',
     href: 'users',
@@ -205,15 +212,6 @@ const data: Array<NavItem> = [
         icon: 'bell',
         label: 'Notifications',
       },
-    ],
-  },
-  {
-    icon: 'components',
-    label: 'Components',
-    href: 'components',
-    children: [
-      { children: [], href: 'inputs', icon: 'inputAi', label: 'Inputs' },
-      { children: [], href: 'table', icon: 'inputAi', label: 'Table' },
     ],
   },
 ];
