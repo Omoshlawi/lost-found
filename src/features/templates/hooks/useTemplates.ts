@@ -113,7 +113,7 @@ const createTemplate = async (data: TemplateFormData) => {
 };
 
 const updateTemplate = async (templateKey: string, data: Partial<TemplateFormData>) => {
-  const url = constructUrl(`/templates/${templateKey}`);
+  const url = constructUrl(`/templates/key/${templateKey}`);
 
   const res = await apiFetch<Template>(url, {
     method: 'PATCH',

@@ -70,8 +70,8 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
       }
       onSuccess?.(templateRes);
       showNotification({
-        title: 'Claim rejected',
-        message: 'Claim rejected successfully',
+        title: 'Sucess',
+        message: template ? 'Template updated sucesfully!' : 'Template created',
         color: 'green',
       });
       onClose();
@@ -79,7 +79,7 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
       const e = handleApiErrors<TemplateFormData>(error);
       if (e.detail) {
         showNotification({
-          title: `Error rejecting claim`,
+          title: `Error ${template ? 'Updating' : 'Creating'}`,
           message: e.detail,
           color: 'red',
           position: 'top-right',
