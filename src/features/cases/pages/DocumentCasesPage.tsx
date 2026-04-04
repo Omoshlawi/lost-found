@@ -37,6 +37,7 @@ import { DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '.
 type CaseTab = 'all' | 'lost' | 'found';
 
 const LOST_STATUS_OPTIONS = [
+  { label: 'Draft', value: LostDocumentCaseStatus.DRAFT },
   { label: 'Submitted', value: LostDocumentCaseStatus.SUBMITTED },
   { label: 'Completed', value: LostDocumentCaseStatus.COMPLETED },
 ];

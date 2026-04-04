@@ -20,6 +20,7 @@ export interface DocumentCase {
 }
 
 export enum LostDocumentCaseStatus {
+  DRAFT = 'DRAFT', // When the lost case is in draft status
   SUBMITTED = 'SUBMITTED', // When user submit lost document info
   COMPLETED = 'COMPLETED', // When the document is reunited with the owner
 }
