@@ -31,7 +31,7 @@ export function DataTable<TData, TValue>({
   data,
   renderExpandedRow,
   renderPaginator,
-  withColumnViewOptions = false,
+  withColumnViewOptions = true,
   renderActions,
   renderTable,
   title,

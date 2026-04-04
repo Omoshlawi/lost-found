@@ -84,10 +84,10 @@ const DocumentCasesPage = () => {
 
   const vParam =
     activeTab === 'found'
-      ? 'custom:include(foundDocumentCase,document:include(type),address)'
+      ? 'custom:include(foundDocumentCase,document:include(type),address,user,extraction)'
       : activeTab === 'lost'
-        ? 'custom:include(lostDocumentCase,document:include(type),address)'
-        : 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type),address)';
+        ? 'custom:include(lostDocumentCase,document:include(type),address,user,extraction)'
+        : 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type),address,user,extraction)';
 
   const documentCasesAsync = useDocumentCases({
     v: vParam,
@@ -173,6 +173,27 @@ const DocumentCasesPage = () => {
         cell: ({ row: { original } }) => original.document?.fullName ?? '—',
       },
       {
+        header: 'Reported By',
+        id: 'reportedBy',
+        cell: ({ row: { original } }) => {
+          const user = original.user;
+          if (!user) {
+            return (
+              <Text size="sm" c="dimmed">
+                —
+              </Text>
+            );
+          }
+          const display =
+            (user as any).displayUsername || (user as any).username || user.name || user.email;
+          return (
+            <Text size="sm" title={user.email}>
+              {display}
+            </Text>
+          );
+        },
+      },
+      {
         header: 'Document Type',
         accessorKey: 'document.type.name',
         cell: ({ row: { original } }) => original.document?.type?.name ?? '—',
@@ -189,6 +210,36 @@ const DocumentCasesPage = () => {
           const caseStatus =
             original.lostDocumentCase?.status ?? original.foundDocumentCase?.status;
           return <StatusBadge status={caseStatus} />;
+        },
+      },
+      {
+        header: 'AI Extraction',
+        id: 'extraction',
+        cell: ({ row: { original } }) => {
+          const extraction = original.extraction;
+          const isManualLost = !!original.lostDocumentCase && !original.lostDocumentCase.auto;
+          if (!extraction || isManualLost) {
+            return (
+              <Text size="sm" c="dimmed">
+                —
+              </Text>
+            );
+          }
+          const STEP_LABEL: Record<string, string> = {
+            VISION: 'Image Analysis',
+            TEXT: 'Data Extraction',
+            POST_PROCESSING: 'Post Processing',
+          };
+          return (
+            <Stack gap={2}>
+              <StatusBadge status={extraction.extractionStatus} />
+              {extraction.currentStep && (
+                <Text size="xs" c="dimmed">
+                  {STEP_LABEL[extraction.currentStep] ?? extraction.currentStep}
+                </Text>
+              )}
+            </Stack>
+          );
         },
       },
       {
@@ -227,8 +278,11 @@ const DocumentCasesPage = () => {
                   unauthorizedAction={{ type: 'hide' }}
                 >
                   <Menu.Item
-                    leftSection={<TablerIcon name="check" size={14} />}
+                    leftSection={<TablerIcon name="circleCheck" size={14} />}
                     color="green"
+                    disabled={
+                      report.foundDocumentCase?.status !== FoundDocumentCaseStatus.SUBMITTED
+                    }
                     onClick={() => {
                       const dismiss = launchWorkspace(
                         <VerifyFoundDocumentCaseForm
@@ -247,8 +301,11 @@ const DocumentCasesPage = () => {
                   unauthorizedAction={{ type: 'hide' }}
                 >
                   <Menu.Item
-                    leftSection={<TablerIcon name="x" size={14} />}
+                    leftSection={<TablerIcon name="circleX" size={14} />}
                     color="red"
+                    disabled={
+                      report.foundDocumentCase?.status !== FoundDocumentCaseStatus.SUBMITTED
+                    }
                     onClick={() => {
                       const dismiss = launchWorkspace(
                         <RejectFoundDocumentCaseForm

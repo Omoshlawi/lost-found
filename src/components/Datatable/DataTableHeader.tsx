@@ -14,7 +14,7 @@ const DataTableHeader = <TData,>({
   table,
   title,
   actions,
-  withColumnViewOptions = false,
+  withColumnViewOptions = true,
 }: DataTableHeaderProps<TData>) => {
   if (!title && !actions && !withColumnViewOptions) return null;
 

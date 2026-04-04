@@ -1,3 +1,4 @@
+import { User } from 'better-auth';
 import { z } from 'zod';
 import { Address } from '@/features/addresses/types';
 import { CaseDocumentSchema, FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
@@ -6,7 +7,9 @@ export interface DocumentCase {
   id: string;
   caseNumber: string;
   userId: string;
+  user?: User;
   addressId: string;
+  extraction?: AIExtraction;
   address?: Address;
   eventDate: string;
   tags: string[];
@@ -201,8 +204,14 @@ export interface ImageValidationEvent {
 
 export type ProgressEvent = ImageValidationEvent | AiInteractionProgressEvent;
 
-export interface Extraction {
+export interface AIExtraction {
   id: string;
+  extractionStatus: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  currentStep: 'VISION' | 'TEXT' | 'POST_PROCESSING' | null;
+  ocrConfidence?: number;
+  extractionConfidence?: number;
+  fallbackTriggered?: boolean;
+  createdAt: string;
 }
 
 export interface AdditionalField {

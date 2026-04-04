@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Badge, Group, Paper, Stack, Tabs, Text } from '@mantine/core';
+import { Alert, Badge, Group, Loader, Paper, Stack, Tabs, Text } from '@mantine/core';
 import { DashboardPageHeader, ErrorState, StatusBadge, TablerIcon, launchWorkspace } from '@/components';
 import { TablerIconName } from '@/components/TablerIcon';
 import {
@@ -13,8 +13,61 @@ import {
 } from '../components';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import { useDocumentCase } from '../hooks';
-import { CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { AIExtraction, CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
+
+const STEP_LABEL: Record<string, string> = {
+  VISION: 'Image Analysis',
+  TEXT: 'Data Extraction',
+  POST_PROCESSING: 'Post Processing',
+};
+
+interface ExtractionAlertProps {
+  extraction?: AIExtraction;
+  reportType: CaseType;
+  lostAuto?: boolean;
+}
+
+const ExtractionAlert = ({ extraction, reportType, lostAuto }: ExtractionAlertProps) => {
+  const hasExtraction = reportType === 'FOUND' || lostAuto;
+  if (!hasExtraction || !extraction) return null;
+
+  const { extractionStatus, currentStep } = extraction;
+  if (extractionStatus === 'COMPLETED') return null;
+
+  if (extractionStatus === 'FAILED') {
+    return (
+      <Alert
+        variant="light"
+        color="red"
+        icon={<TablerIcon name="alertTriangle" size={16} />}
+        title="AI Extraction Failed"
+      >
+        Document data could not be extracted automatically. Please review and complete the document
+        fields manually before submitting.
+      </Alert>
+    );
+  }
+
+  const stepLabel = currentStep ? STEP_LABEL[currentStep] : null;
+
+  return (
+    <Alert
+      variant="light"
+      color="civicBlue"
+      icon={<Loader size={14} />}
+      title={
+        extractionStatus === 'IN_PROGRESS'
+          ? `Extraction In Progress${stepLabel ? ` — ${stepLabel}` : ''}`
+          : 'Extraction Queued'
+      }
+    >
+      {extractionStatus === 'IN_PROGRESS'
+        ? 'The AI pipeline is processing this document. Fields will populate automatically once complete.'
+        : 'This document is queued for AI extraction. Fields may be incomplete until processing finishes.'}
+    </Alert>
+  );
+};
 
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
@@ -74,12 +127,15 @@ const DocumentCaseDetail = () => {
         traiiling={
           <DocumentCaseActions
             caseId={reportData.id}
+            documentCase={reportData}
             reportType={reportType}
             status={status}
             onUpdateReportDetails={handleUpdateReportDetails}
           />
         }
       />
+
+      <ExtractionAlert extraction={reportData.extraction} reportType={reportType} lostAuto={reportData.lostDocumentCase?.auto} />
 
       <Tabs defaultValue="document" variant="default">
         <Tabs.List>

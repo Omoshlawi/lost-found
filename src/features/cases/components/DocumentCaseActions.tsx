@@ -2,13 +2,17 @@ import React from 'react';
 import { Button, Menu, Text } from '@mantine/core';
 import { openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { TablerIcon } from '@/components';
+import { TablerIcon, launchWorkspace } from '@/components';
 import { handleApiErrors } from '@/lib/api';
+import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
+import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
+import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import { useDocumentCaseApi } from '../hooks/useDocumentCases';
-import { CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 
 interface DocumentCaseActionsProps {
   caseId: string;
+  documentCase: DocumentCase;
   reportType: CaseType;
   status: string;
   onUpdateReportDetails?: () => void;
@@ -16,11 +20,14 @@ interface DocumentCaseActionsProps {
 
 const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   caseId,
+  documentCase,
   reportType,
   status,
   onUpdateReportDetails,
 }) => {
   const { submitDocumentCase } = useDocumentCaseApi();
+  const { hasAccess: canVerify } = useUserHasSystemAccessSync({ documentCase: ['verify'] });
+  const { hasAccess: canReject } = useUserHasSystemAccessSync({ documentCase: ['reject'] });
 
   const handleSubmitDocumentCase = () => {
     openConfirmModal({
@@ -56,6 +63,28 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
     });
   };
 
+  const handleVerify = () => {
+    const closeWorkspace = launchWorkspace(
+      <VerifyFoundDocumentCaseForm
+        documentCase={documentCase}
+        onClose={() => closeWorkspace()}
+      />,
+      { title: 'Verify Found Document Case' }
+    );
+  };
+
+  const handleReject = () => {
+    const closeWorkspace = launchWorkspace(
+      <RejectFoundDocumentCaseForm
+        documentCase={documentCase}
+        onClose={() => closeWorkspace()}
+      />,
+      { title: 'Reject Found Document Case' }
+    );
+  };
+
+  const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
+
   return (
     <Menu shadow="md" position="bottom-end">
       <Menu.Target>
@@ -79,13 +108,36 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
           </Menu.Item>
         )}
         {reportType === 'FOUND' && (
-          <Menu.Item
-            leftSection={<TablerIcon name="check" size={14} />}
-            onClick={handleSubmitDocumentCase}
-            disabled={status !== FoundDocumentCaseStatus.DRAFT}
-          >
-            Submit Case
-          </Menu.Item>
+          <>
+            <Menu.Item
+              leftSection={<TablerIcon name="send" size={14} />}
+              onClick={handleSubmitDocumentCase}
+              disabled={status !== FoundDocumentCaseStatus.DRAFT}
+            >
+              Submit Case
+            </Menu.Item>
+            {(canVerify || canReject) && <Menu.Divider />}
+            {canVerify && (
+              <Menu.Item
+                leftSection={<TablerIcon name="circleCheck" size={14} />}
+                onClick={handleVerify}
+                disabled={!isSubmitted}
+                color="civicGreen"
+              >
+                Verify Case
+              </Menu.Item>
+            )}
+            {canReject && (
+              <Menu.Item
+                leftSection={<TablerIcon name="circleX" size={14} />}
+                onClick={handleReject}
+                disabled={!isSubmitted}
+                color="red"
+              >
+                Reject Case
+              </Menu.Item>
+            )}
+          </>
         )}
       </Menu.Dropdown>
     </Menu>
