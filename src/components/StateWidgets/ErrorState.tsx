@@ -20,7 +20,7 @@ function ErrorState({
   return (
     <Center py={60} {...props}>
       <Stack align="center" gap="md">
-        <ThemeIcon size={64} radius="xl" variant="light" color="red">
+        <ThemeIcon size={64} variant="light" color="red">
           <IconAlertCircle size={32} />
         </ThemeIcon>
         <Stack align="center" gap="xs">

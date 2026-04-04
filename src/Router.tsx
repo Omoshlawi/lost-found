@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import {
   AboutUsPage,
   ContactUsPage,
@@ -31,7 +31,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <LandingLayout />,
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <Navigate to="/login" replace /> },
       {
         path: '/about',
         element: <AboutUsPage />,
