@@ -5,8 +5,7 @@ import { ColorSchemeToggle, Logo } from '@/components';
 import { FooterCentered } from '@/components/Footer/Footer';
 
 const LandingLayout = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [opened, { toggle, close }] = useDisclosure();
+  const [opened] = useDisclosure();
 
   return (
     <AppShell

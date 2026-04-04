@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import React, { FC, ReactNode } from 'react';
-import { Box, Divider, Group, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { FC, ReactNode } from 'react';
+import { Box, Divider, Group, Stack, Text, Title } from '@mantine/core';
 import { TablerIcon, TablerIconName } from '../TablerIcon';
 
 type PageHeaderProps = {
@@ -13,30 +13,39 @@ type PageHeaderProps = {
 const DashboardPageHeader: FC<PageHeaderProps> = ({ icon, subTitle, title, traiiling }) => {
   return (
     <Box>
-      <Group align="flex-start" justify="space-between">
-        <Group>
-          <ThemeIcon radius={0} size={60} variant="light">
-            {typeof icon === 'string' && <TablerIcon name={icon} />}
-            {typeof icon === 'function' && <>{icon()}</>}
-          </ThemeIcon>
-          <Group h="100%" flex={1}>
-            <Stack gap={2} align="flex-start" h="100%">
-              <Title order={3}>{title}</Title>
-              {typeof subTitle === 'string' && (
-                <Text size="sm" c="dimmed">
-                  {subTitle}
-                </Text>
-              )}
-              {typeof subTitle === 'function' && <>{subTitle()}</>}
-            </Stack>
-          </Group>
+      <Group justify="space-between" align="center" mb="xs">
+        <Group gap="xs" align="center">
+          {typeof icon === 'string' && (
+            <TablerIcon
+              name={icon}
+              size={18}
+              stroke={1.75}
+              style={{ color: 'var(--mantine-color-civicBlue-6)', flexShrink: 0 }}
+            />
+          )}
+          {typeof icon === 'function' && icon()}
+          <Stack gap={0}>
+            <Title
+              order={4}
+              style={{ fontFamily: '"Plus Jakarta Sans", sans-serif', fontWeight: 700 }}
+            >
+              {title}
+            </Title>
+            {typeof subTitle === 'string' && (
+              <Text size="xs" c="dimmed">
+                {subTitle}
+              </Text>
+            )}
+            {typeof subTitle === 'function' && subTitle()}
+          </Stack>
         </Group>
-        {traiiling ? (
-          traiiling
-        ) : (
-          <Group gap="xs" visibleFrom="sm">
-            <TablerIcon name="calendar" size={20} />
-            <Text c="dimmed">{dayjs().format('ddd DD MMM, YYYY')}</Text>
+
+        {traiiling ?? (
+          <Group gap={6} visibleFrom="sm">
+            <TablerIcon name="calendar" size={14} style={{ color: 'var(--mantine-color-dimmed)' }} />
+            <Text size="xs" c="dimmed">
+              {dayjs().format('ddd DD MMM, YYYY')}
+            </Text>
           </Group>
         )}
       </Group>

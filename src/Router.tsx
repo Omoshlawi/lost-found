@@ -17,6 +17,7 @@ import { DocumentTypesPage } from './features/admin/pages';
 import { DocumentCaseDetail, FoundDocumentCasesPage, LostItemsPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import { DashboardLayout } from './features/dashboard/components';
+import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
 import { SettingsPage } from './features/settings';
@@ -75,7 +76,7 @@ const router = createBrowserRouter([
       </LoginRequired>
     ),
     children: [
-      { index: true, element: <div>Dashboard</div> },
+      { index: true, element: <DashboardPage /> },
       {
         path: 'lost-documents',
         element: <Outlet />,

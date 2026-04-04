@@ -1,14 +1,13 @@
 import { FC, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { ActionIcon, AppShell, Burger, Group, Modal, Stack } from '@mantine/core';
+import { AppShell, Box, Burger, Divider, Group, Modal, Text } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
-import { ColorSchemeToggle, Logo, TablerIcon } from '@/components';
+import { ColorSchemeToggle, Logo } from '@/components';
 import { useWorkspace } from '@/components/Workspace';
 import SideNav from './SideNav';
 import UserActionsMenu from './UserActionsMenu';
 
 const DashboardLayout: FC = () => {
-  const [opened] = useDisclosure();
   const [drawerOpened, { toggle: toggleOpenDrawer }] = useDisclosure();
 
   const { workspace, width } = useWorkspace();
@@ -25,66 +24,69 @@ const DashboardLayout: FC = () => {
     }
   }, [isMobile, workspace, modalClose, modalOpen]);
 
+  const hasWorkspace = Boolean(workspace?.component);
+
   return (
     <>
       <AppShell
         header={{ height: 60 }}
         navbar={{
-          width: 300,
+          width: 260,
           breakpoint: '50em',
           collapsed: { mobile: !drawerOpened },
         }}
-        aside={{ collapsed: { mobile: !opened }, breakpoint: '50em', width: width ?? 50 }}
+        aside={{
+          collapsed: { mobile: true, desktop: !hasWorkspace },
+          breakpoint: '50em',
+          width: width ?? 400,
+        }}
         styles={{
-          aside: {
-            transition: 'width 300ms ease',
-          },
+          aside: { transition: 'width 300ms ease' },
+          navbar: { borderRight: '1px solid var(--mantine-color-default-border)' },
+          header: { borderBottom: '1px solid var(--mantine-color-default-border)' },
         }}
         padding="md"
       >
         <AppShell.Header>
-          <Group justify="space-between" align="center" flex={1} px="xs" h="100%">
-            {isMobile && <Burger opened={drawerOpened} onClick={toggleOpenDrawer} size="sm" />}
-            <Logo />
-            <Group>
+          <Group justify="space-between" align="center" h="100%" px="md">
+            <Group gap="sm">
+              {isMobile && (
+                <Burger opened={drawerOpened} onClick={toggleOpenDrawer} size="sm" />
+              )}
+              <Logo />
+            </Group>
+            <Group gap="xs">
+              <Text
+                size="xs"
+                fw={500}
+                c="dimmed"
+                visibleFrom="sm"
+                style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
+              >
+                Staff Portal
+              </Text>
+              <Divider orientation="vertical" visibleFrom="sm" />
               <ColorSchemeToggle />
               <UserActionsMenu />
             </Group>
           </Group>
         </AppShell.Header>
-        <AppShell.Navbar p="md">
+
+        <AppShell.Navbar p={0}>
           <SideNav onClose={isMobile ? toggleOpenDrawer : undefined} />
         </AppShell.Navbar>
-        <AppShell.Aside>
-          {!workspace && (
-            <Stack align="center" py="sm">
-              <ActionIcon
-                size={35}
-                radius="50%"
-                variant="outline"
-                aria-label="ActionIcon with size as a number"
-              >
-                <TablerIcon name="plus" size={24} />
-              </ActionIcon>
-              <ActionIcon
-                size={35}
-                radius="50%"
-                variant="outline"
-                aria-label="ActionIcon with size as a number"
-              >
-                <TablerIcon name="bell" size={24} />
-              </ActionIcon>
-            </Stack>
-          )}
-          {workspace?.component}
-        </AppShell.Aside>
+
+        {hasWorkspace && (
+          <AppShell.Aside>
+            <Box h="100%">{workspace?.component}</Box>
+          </AppShell.Aside>
+        )}
+
         <AppShell.Main>
           <Outlet />
         </AppShell.Main>
-        {/* <AppShell.Footer>
-          <p>lorem impsum with some interesting staff bana</p>
-        </AppShell.Footer> */}
       </AppShell>
+
       <Modal
         opened={modalOpened}
         onClose={modalClose}

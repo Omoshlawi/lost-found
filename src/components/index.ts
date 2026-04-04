@@ -8,4 +8,5 @@ export * from './Datatable';
 export * from './Dashboard';
 export * from './UserHasAccess';
 export * from './RichTextEditorInput';
+export * from './StatusBadge';
 export * from './SectionTitle';

@@ -1,110 +1,194 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AppShell, Avatar, Group, NavLink, ScrollArea, Stack, Text, Title } from '@mantine/core';
+import { AppShell, Avatar, Box, NavLink, ScrollArea, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { TablerIcon, TablerIconName } from '@/components/TablerIcon';
 import { authClient } from '@/lib/api';
 import { getNameInitials } from '@/lib/utils';
 
-type SideNavProps = {
-  onClose?: () => void;
-};
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type NavItem = {
   icon: TablerIconName;
   label: string;
   href: string;
-  description?: string;
-  children: Array<NavItem>;
 };
+
+type NavGroup = {
+  type: 'group';
+  label: string;
+  items: NavItem[];
+};
+
+type NavStandalone = {
+  type: 'item';
+} & NavItem;
+
+type NavEntry = NavStandalone | NavGroup;
+
+// ─── Navigation config ───────────────────────────────────────────────────────
+
+const navConfig: NavEntry[] = [
+  { type: 'item', icon: 'gauge', label: 'Dashboard', href: '' },
+  {
+    type: 'group',
+    label: 'Case Management',
+    items: [
+      { icon: 'fileSearch', label: 'Lost Documents', href: 'lost-documents' },
+      { icon: 'fileCheck', label: 'Found Documents', href: 'found-documents' },
+      { icon: 'filterQuestion', label: 'Claims', href: 'claims' },
+    ],
+  },
+  {
+    type: 'group',
+    label: 'Configuration',
+    items: [
+      { icon: 'idBadge2', label: 'Document Types', href: 'document-types' },
+      { icon: 'template', label: 'Templates', href: 'templates' },
+      { icon: 'users', label: 'Users', href: 'users' },
+      { icon: 'layersLinked', label: 'Address Hierarchy', href: 'address-hierarchy' },
+      { icon: 'worldPin', label: 'Address Locales', href: 'address-locales' },
+      { icon: 'mapPin', label: 'Addresses', href: 'addresses' },
+    ],
+  },
+  { type: 'item', icon: 'settings', label: 'Settings', href: 'settings' },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function resolveHref(href: string) {
+  return href === '' ? '/dashboard' : `/dashboard/${href}`;
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+type SideNavProps = { onClose?: () => void };
 
 const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
   const location = useLocation();
-  const { data: user } = authClient.useSession();
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
 
-  const renderNavItems = (cases: NavItem[], parentPath = '') => {
-    return cases.map((item, index) => {
-      const fullPath = `${parentPath}${item.href ? `/${item.href}` : ''}`;
-      const dashboardPath = `/dashboard${fullPath}`;
+  function isActive(href: string) {
+    const path = resolveHref(href);
+    return href === ''
+      ? location.pathname === '/dashboard'
+      : location.pathname === path || location.pathname.startsWith(`${path}/`);
+  }
 
-      // Special handling for root dashboard item
-      const isActive =
-        item.href === ''
-          ? location.pathname === '/dashboard' // Exact match for root
-          : location.pathname.startsWith(dashboardPath) &&
-            (location.pathname === dashboardPath ||
-              location.pathname.startsWith(`${dashboardPath}/`));
-
-      if (item.children && item.children.length > 0) {
-        return (
-          <NavLink
-            key={`${index}-${item.href}`}
-            label={item.label}
-            description={item.description}
-            leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
-            rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
-            childrenOffset={28}
-            defaultOpened
-          >
-            {renderNavItems(item.children, fullPath)}
-          </NavLink>
-        );
-      }
-
-      return (
-        <NavLink
-          key={`${index}-${item.href}`}
-          component={Link}
-          to={`/dashboard${fullPath}`}
-          active={isActive}
-          label={item.label}
-          description={item.description}
-          leftSection={<TablerIcon name={item.icon} size={16} stroke={1.5} />}
-          // rightSection={<TablerIcon name={'chevronRight'} size={16} stroke={1.5} />}
-          onClick={onClose}
-        />
-      );
-    });
-  };
+  function renderItem(item: NavItem, index: number) {
+    const active = isActive(item.href);
+    return (
+      <NavLink
+        key={index}
+        component={Link}
+        to={resolveHref(item.href)}
+        active={active}
+        label={item.label}
+        color="civicBlue"
+        fw={active ? 600 : 400}
+        leftSection={<TablerIcon name={item.icon} size={15} stroke={active ? 2 : 1.5} />}
+        onClick={onClose}
+      />
+    );
+  }
 
   return (
     <>
+      {/* ── User profile ───────────────────────────────────── */}
       <AppShell.Section>
-        <Group align="center" gap={4} p="sm">
-          {user?.user && <Avatar size="lg">{getNameInitials(user?.user?.name)}</Avatar>}
-          <Stack gap={0}>
-            <Title order={4}>
-              <Text variant="gradient" fw="bold">
-                {user?.user.name}
-              </Text>
-            </Title>
-            <Text c="dimmed">{user?.user.email}</Text>
-          </Stack>
-        </Group>
+        <Box
+          px="sm"
+          py="xs"
+          style={{
+            background: 'var(--mantine-color-civicNavy-7)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.625rem',
+            minHeight: 60,
+          }}
+        >
+          <Avatar
+            size={36}
+            style={{
+              background: 'rgba(255,255,255,0.15)',
+              color: 'white',
+              fontWeight: 700,
+              flexShrink: 0,
+              fontFamily: '"Plus Jakarta Sans", sans-serif',
+            }}
+          >
+            {user ? getNameInitials(user.name) : '?'}
+          </Avatar>
+          <Box style={{ minWidth: 0 }}>
+            <Text
+              size="sm"
+              fw={600}
+              c="white"
+              truncate
+              style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}
+            >
+              {user?.name ?? '—'}
+            </Text>
+            <Text size="xs" truncate style={{ color: 'rgba(255,255,255,0.55)' }}>
+              {user?.email ?? '—'}
+            </Text>
+          </Box>
+        </Box>
       </AppShell.Section>
-      <AppShell.Section grow component={ScrollArea}>
-        {renderNavItems(data)}
+
+      {/* ── Navigation ─────────────────────────────────────── */}
+      <AppShell.Section grow component={ScrollArea} px={4}>
+        <Stack gap={0} pt={4}>
+          {navConfig.map((entry, i) => {
+            if (entry.type === 'item') {
+              return renderItem(entry, i);
+            }
+
+            // Check if any child is active (to keep group open by default)
+            const anyChildActive = entry.items.some((item) => isActive(item.href));
+
+            return (
+              <NavLink
+                key={i}
+                label={
+                  <Text size="xs" fw={600} tt="uppercase" style={{ letterSpacing: '0.06em' }}>
+                    {entry.label}
+                  </Text>
+                }
+                defaultOpened={anyChildActive || true}
+                childrenOffset={12}
+                style={{ marginTop: i > 0 ? 4 : 0 }}
+                styles={{
+                  root: { color: 'var(--mantine-color-dimmed)' },
+                  chevron: { color: 'var(--mantine-color-dimmed)' },
+                }}
+              >
+                {entry.items.map(renderItem)}
+              </NavLink>
+            );
+          })}
+        </Stack>
       </AppShell.Section>
-      <AppShell.Section>
+
+      {/* ── Sign out ───────────────────────────────────────── */}
+      <AppShell.Section px={4} pb="xs">
         <NavLink
-          label="Logout"
-          variant="light"
-          leftSection={<TablerIcon name="logout" size={18} stroke={1.5} />}
+          label="Sign out"
           color="red"
-          pb="lg"
-          active
-          rightSection={<TablerIcon name="chevronRight" size={16} stroke={1.5} />}
-          onClick={() => {
+          leftSection={<TablerIcon name="logout" size={15} stroke={1.5} />}
+          onClick={() =>
             modals.openConfirmModal({
-              title: 'Confirm logout',
-              children: <Text size="sm">are you sure you want to logout?</Text>,
-              labels: { confirm: 'Logout', cancel: 'Cancel' },
+              title: 'Sign out',
+              children: <Text size="sm">Are you sure you want to sign out?</Text>,
+              labels: { confirm: 'Sign out', cancel: 'Cancel' },
+              confirmProps: { color: 'red' },
               onConfirm: () => {
                 onClose?.();
                 authClient.signOut();
               },
-            });
-          }}
+            })
+          }
         />
       </AppShell.Section>
     </>
@@ -112,106 +196,3 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
 };
 
 export default SideNav;
-
-const data: Array<NavItem> = [
-  {
-    icon: 'gauge',
-    label: 'Dashboard',
-    // description: 'Item with description',
-    href: '',
-    children: [],
-  },
-  {
-    icon: 'clipboardText',
-    label: 'Document types',
-    // description: 'Manage Document types',
-    href: 'document-types',
-    children: [],
-  },
-  {
-    icon: 'clipboardText',
-    label: 'Templates',
-    description: 'Manage document templates',
-    href: 'templates',
-    children: [],
-  },
-  {
-    icon: 'users',
-    label: 'Users',
-    href: 'users',
-    description: 'Manage platform users',
-    children: [],
-  },
-  {
-    icon: 'layersLinked',
-    label: 'Address hierarchy',
-    href: 'address-hierarchy',
-    children: [],
-  },
-  {
-    icon: 'worldPin',
-    label: 'Address locales',
-    href: 'address-locales',
-    children: [],
-  },
-  {
-    icon: 'mapPin',
-    label: 'Addresses',
-    href: 'addresses',
-    children: [],
-  },
-  {
-    icon: 'license',
-    label: 'Document',
-    description: 'Report lost or found documents',
-    href: '',
-    children: [
-      {
-        icon: 'listNumbers',
-        label: 'Lost Document Cases',
-        href: 'lost-documents',
-        children: [],
-      },
-      {
-        icon: 'activity',
-        label: 'Found Document Cases',
-        href: 'found-documents',
-        children: [],
-      },
-    ],
-  },
-  {
-    icon: 'filterQuestion',
-    label: 'Claims',
-    href: 'claims',
-    children: [],
-  },
-  {
-    icon: 'settings',
-    label: 'Settings',
-    href: 'settings',
-    description: 'Account settings',
-
-    children: [
-      { children: [], href: 'profile', icon: 'user', label: 'Profile' },
-      {
-        children: [],
-        href: 'change-password',
-        icon: 'fingerprint',
-        label: 'Change Password',
-      },
-      {
-        children: [],
-        href: 'two-factor',
-        icon: 'lock',
-        label: 'Two factor authentication',
-      },
-      {
-        children: [],
-        href: 'notificaton',
-        icon: 'bell',
-        label: 'Notifications',
-      },
-    ],
-  },
-];

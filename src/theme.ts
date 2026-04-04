@@ -75,5 +75,5 @@ export const theme = createTheme({
     fontWeight: '700',
   },
 
-  defaultRadius: 'md',
+  defaultRadius: 0,
 });

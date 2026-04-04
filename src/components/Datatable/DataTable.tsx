@@ -61,7 +61,7 @@ export function DataTable<TData, TValue>({
   });
 
   const defaultRenderTable = (_table: T<TData>) => (
-    <Table striped highlightOnHover>
+    <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
       <Table.Thead>
         {_table.getHeaderGroups().map((headerGroup) => (
           <Table.Tr key={headerGroup.id}>
