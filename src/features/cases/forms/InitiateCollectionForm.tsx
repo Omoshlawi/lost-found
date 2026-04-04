@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Button, Group, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { Alert, Button, Group, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
@@ -59,13 +59,18 @@ const InitiateCollectionForm: React.FC<InitiateCollectionFormProps> = ({
           icon={<TablerIcon name="alertCircle" size={16} />}
           title="Verify document fields before initiating"
         >
-          Confirm the fields below match the physical document in hand. Only initiate collection once
-          everything is correct — the finder cannot edit after a code is issued.
+          Confirm the fields below match the physical document in hand. Only initiate collection
+          once everything is correct — the finder cannot edit after a code is issued.
         </Alert>
 
         <Stack gap="xs">
           {fields.map(({ label, value }) => (
-            <Group key={label} justify="space-between" py={6} style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}>
+            <Group
+              key={label}
+              justify="space-between"
+              py={6}
+              style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}
+            >
               <Text size="sm" c="dimmed">
                 {label}
               </Text>

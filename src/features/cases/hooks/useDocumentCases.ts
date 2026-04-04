@@ -1,10 +1,11 @@
 import dayjs from 'dayjs';
+import useSWR from 'swr';
 import { StatusTransitionReasonFormData } from '@/features/status-transitions/types';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
+  ActiveCollectionState,
   CaseDocumentFormData,
   DocumentCase,
-  DocumentCollection,
   DocumentImage,
   FoundDocumentCaseFormData,
   LostDocumentCaseFormData,
@@ -180,7 +181,7 @@ const initiateCollection = async (foundCaseId: string): Promise<{ collectionId: 
   return result.data;
 };
 
-const confirmCollection = async (foundCaseId: string, data: { collectionId: string; code: string }): Promise<DocumentCase> => {
+const confirmCollection = async (foundCaseId: string, data: { code: string }): Promise<DocumentCase> => {
   const result = await apiFetch<DocumentCase>(
     `/documents/cases/found/${foundCaseId}/collect/confirm`,
     { method: 'POST', data }
@@ -189,12 +190,26 @@ const confirmCollection = async (foundCaseId: string, data: { collectionId: stri
   return result.data;
 };
 
-const cancelCollection = async (foundCaseId: string, data: { collectionId: string; reason: string }): Promise<void> => {
+const cancelCollection = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
   await apiFetch(`/documents/cases/found/${foundCaseId}/collect/cancel`, {
     method: 'POST',
     data,
   });
   mutate('/documents/cases');
+};
+
+export const useActiveCollection = (foundCaseId?: string) => {
+  const { data, error, isLoading, mutate: swrMutate } = useSWR<APIFetchResponse<ActiveCollectionState>>(
+    foundCaseId ? `/documents/cases/found/${foundCaseId}/collect/active` : null,
+    { refreshInterval: (data) => (data?.data?.hasActiveCollection ? 4000 : 0) }
+  );
+  return {
+    collection: data?.data,
+    hasActiveCollection: data?.data?.hasActiveCollection ?? false,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
 };
 
 const verifyfoundDocumentCase = async (

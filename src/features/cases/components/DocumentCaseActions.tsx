@@ -1,21 +1,14 @@
 import React from 'react';
-import { Button, Menu } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
-import { TablerIcon, launchWorkspace } from '@/components';
-import { handleApiErrors } from '@/lib/api';
+import { Button, Group, Menu } from '@mantine/core';
+import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
 import CancelCollectionForm from '../forms/CancelCollectionForm';
 import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
 import InitiateCollectionForm from '../forms/InitiateCollectionForm';
-import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
-import {
-  CaseType,
-  DocumentCase,
-  DocumentCollectionStatus,
-  FoundDocumentCaseStatus,
-  LostDocumentCaseStatus,
-} from '../types';
+import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
+import { useActiveCollection } from '../hooks';
+import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 
 interface DocumentCaseActionsProps {
   caseId: string;
@@ -26,7 +19,6 @@ interface DocumentCaseActionsProps {
 }
 
 const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
-  caseId,
   documentCase,
   reportType,
   status,
@@ -39,141 +31,153 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
   const isDraft = status === FoundDocumentCaseStatus.DRAFT;
   const extractionComplete = documentCase.extraction?.extractionStatus === 'COMPLETED';
-  const activeCollection = documentCase.foundDocumentCase?.activeCollection;
-  const hasPendingCollection = activeCollection?.status === DocumentCollectionStatus.PENDING;
+  const { hasActiveCollection: hasPendingCollection } = useActiveCollection(
+    reportType === 'FOUND' ? documentCase.foundDocumentCase?.id : undefined
+  );
 
-  const handleInitiateCollection = () => {
+  const openInitiate = (title = 'Initiate Document Collection') => {
     const close = launchWorkspace(
-      <InitiateCollectionForm
-        documentCase={documentCase}
-        onClose={() => close()}
-      />,
-      { title: 'Initiate Document Collection' }
+      <InitiateCollectionForm documentCase={documentCase} onClose={() => close()} />,
+      { title }
     );
   };
 
-  const handleConfirmCollection = () => {
+  const openEnterCode = () => {
     const close = launchWorkspace(
-      <ConfirmCollectionForm
-        documentCase={documentCase}
-        onClose={() => close()}
-      />,
-      { title: 'Enter Handover Code' }
+      <ConfirmCollectionForm documentCase={documentCase} onClose={() => close()} />,
+      { title: 'Enter Finder Code' }
     );
   };
 
-  const handleCancelCollection = () => {
+  const openCancel = () => {
     const close = launchWorkspace(
-      <CancelCollectionForm
-        documentCase={documentCase}
-        onClose={() => close()}
-      />,
+      <CancelCollectionForm documentCase={documentCase} onClose={() => close()} />,
       { title: 'Cancel Collection' }
     );
   };
 
-  const handleVerify = () => {
-    const closeWorkspace = launchWorkspace(
-      <VerifyFoundDocumentCaseForm
-        documentCase={documentCase}
-        onClose={() => closeWorkspace()}
-      />,
+  const openVerify = () => {
+    const close = launchWorkspace(
+      <VerifyFoundDocumentCaseForm documentCase={documentCase} onClose={() => close()} />,
       { title: 'Verify Found Document Case' }
     );
   };
 
-  const handleReject = () => {
-    const closeWorkspace = launchWorkspace(
-      <RejectFoundDocumentCaseForm
-        documentCase={documentCase}
-        onClose={() => closeWorkspace()}
-      />,
+  const openReject = () => {
+    const close = launchWorkspace(
+      <RejectFoundDocumentCaseForm documentCase={documentCase} onClose={() => close()} />,
       { title: 'Reject Found Document Case' }
     );
   };
 
   return (
-    <Menu shadow="md" position="bottom-end">
-      <Menu.Target>
-        <Button leftSection={<TablerIcon name="dotsVertical" size={14} />} variant="light">
-          Actions
+    <Group gap="xs" wrap="nowrap">
+      {/* Prominent Enter Code button — only shown when a collection is pending */}
+      {reportType === 'FOUND' && canCollect && hasPendingCollection && (
+        <Button
+          leftSection={<TablerIcon name="keyframe" size={14} />}
+          color="teal"
+          variant="filled"
+          size="sm"
+          onClick={openEnterCode}
+        >
+          Enter Code
         </Button>
-      </Menu.Target>
-      <Menu.Dropdown>
-        <Menu.Label>Actions</Menu.Label>
-        <Menu.Divider />
-        {onUpdateReportDetails && (
-          <Menu.Item
-            leftSection={<TablerIcon name="edit" size={14} />}
-            onClick={onUpdateReportDetails}
-            disabled={
-              (reportType === 'FOUND' && (status !== FoundDocumentCaseStatus.DRAFT || hasPendingCollection)) ||
-              (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
-            }
-          >
-            Edit Case Details
-          </Menu.Item>
-        )}
-        {reportType === 'FOUND' && canCollect && (
-          <>
-            <Menu.Divider />
-            {!hasPendingCollection && (
-              <Menu.Item
-                leftSection={<TablerIcon name="packageImport" size={14} />}
-                onClick={handleInitiateCollection}
-                disabled={!isDraft || !extractionComplete}
-                color="civicBlue"
-              >
-                Initiate Collection
-              </Menu.Item>
-            )}
-            {hasPendingCollection && (
-              <>
+      )}
+
+      <Menu shadow="md" position="bottom-end">
+        <Menu.Target>
+          <Button leftSection={<TablerIcon name="dotsVertical" size={14} />} variant="light">
+            Actions
+          </Button>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Label>Actions</Menu.Label>
+          <Menu.Divider />
+
+          {onUpdateReportDetails && (
+            <Menu.Item
+              leftSection={<TablerIcon name="edit" size={14} />}
+              onClick={onUpdateReportDetails}
+              disabled={
+                (reportType === 'FOUND' &&
+                  (status !== FoundDocumentCaseStatus.DRAFT || hasPendingCollection)) ||
+                (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
+              }
+            >
+              Edit Case Details
+            </Menu.Item>
+          )}
+
+          {reportType === 'FOUND' && canCollect && (
+            <>
+              <Menu.Divider />
+              {hasPendingCollection ? (
+                <>
+                  {/* Code already sent — offer to enter, resend, or cancel */}
+                  <Menu.Item
+                    leftSection={<TablerIcon name="keyframe" size={14} />}
+                    onClick={openEnterCode}
+                    color="teal"
+                  >
+                    Enter Code
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="send" size={14} />}
+                    onClick={() => openInitiate('Resend Handover Code')}
+                    color="civicBlue"
+                  >
+                    Resend Code
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="circleX" size={14} />}
+                    onClick={openCancel}
+                    color="orange"
+                  >
+                    Cancel Collection
+                  </Menu.Item>
+                </>
+              ) : (
                 <Menu.Item
-                  leftSection={<TablerIcon name="keyframe" size={14} />}
-                  onClick={handleConfirmCollection}
+                  leftSection={<TablerIcon name="packageImport" size={14} />}
+                  onClick={() => openInitiate()}
+                  disabled={!isDraft || !extractionComplete}
+                  color="civicBlue"
+                >
+                  Collect
+                </Menu.Item>
+              )}
+            </>
+          )}
+
+          {reportType === 'FOUND' && (canVerify || canReject) && (
+            <>
+              <Menu.Divider />
+              {canVerify && (
+                <Menu.Item
+                  leftSection={<TablerIcon name="circleCheck" size={14} />}
+                  onClick={openVerify}
+                  disabled={!isSubmitted}
                   color="civicGreen"
                 >
-                  Enter Handover Code
+                  Verify Case
                 </Menu.Item>
+              )}
+              {canReject && (
                 <Menu.Item
                   leftSection={<TablerIcon name="circleX" size={14} />}
-                  onClick={handleCancelCollection}
-                  color="orange"
+                  onClick={openReject}
+                  disabled={!isSubmitted}
+                  color="red"
                 >
-                  Cancel Collection
+                  Reject Case
                 </Menu.Item>
-              </>
-            )}
-          </>
-        )}
-        {reportType === 'FOUND' && (canVerify || canReject) && (
-          <>
-            <Menu.Divider />
-            {canVerify && (
-              <Menu.Item
-                leftSection={<TablerIcon name="circleCheck" size={14} />}
-                onClick={handleVerify}
-                disabled={!isSubmitted}
-                color="civicGreen"
-              >
-                Verify Case
-              </Menu.Item>
-            )}
-            {canReject && (
-              <Menu.Item
-                leftSection={<TablerIcon name="circleX" size={14} />}
-                onClick={handleReject}
-                disabled={!isSubmitted}
-                color="red"
-              >
-                Reject Case
-              </Menu.Item>
-            )}
-          </>
-        )}
-      </Menu.Dropdown>
-    </Menu>
+              )}
+            </>
+          )}
+        </Menu.Dropdown>
+      </Menu>
+    </Group>
   );
 };
 

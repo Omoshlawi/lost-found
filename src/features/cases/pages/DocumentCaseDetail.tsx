@@ -1,6 +1,13 @@
 import { useParams } from 'react-router-dom';
-import { Alert, Badge, Group, Loader, Paper, Stack, Tabs, Text } from '@mantine/core';
-import { DashboardPageHeader, ErrorState, StatusBadge, TablerIcon, launchWorkspace } from '@/components';
+import { Alert, Badge, Button, Group, Loader, Paper, Stack, Tabs, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import {
+  DashboardPageHeader,
+  ErrorState,
+  launchWorkspace,
+  StatusBadge,
+  TablerIcon,
+} from '@/components';
 import { TablerIconName } from '@/components/TablerIcon';
 import {
   AdditionalDetails,
@@ -11,9 +18,10 @@ import {
   LocationInformation,
   ReportDetails,
 } from '../components';
+import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
-import { useDocumentCase } from '../hooks';
-import { AIExtraction, CaseType, DocumentCollectionStatus, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { useActiveCollection, useDocumentCase } from '../hooks';
+import { AIExtraction, CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const STEP_LABEL: Record<string, string> = {
@@ -30,10 +38,14 @@ interface ExtractionAlertProps {
 
 const ExtractionAlert = ({ extraction, reportType, lostAuto }: ExtractionAlertProps) => {
   const hasExtraction = reportType === 'FOUND' || lostAuto;
-  if (!hasExtraction || !extraction) return null;
+  if (!hasExtraction || !extraction) {
+    return null;
+  }
 
   const { extractionStatus, currentStep } = extraction;
-  if (extractionStatus === 'COMPLETED') return null;
+  if (extractionStatus === 'COMPLETED') {
+    return null;
+  }
 
   if (extractionStatus === 'FAILED') {
     return (
@@ -72,6 +84,10 @@ const ExtractionAlert = ({ extraction, reportType, lostAuto }: ExtractionAlertPr
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentCase(reportId);
+
+  // Must be before any early returns — SWR skips fetch when foundCaseId is undefined
+  const foundCaseId = reportData?.foundDocumentCase?.id;
+  const { hasActiveCollection } = useActiveCollection(foundCaseId);
 
   if (isLoading) {
     return <DocumentCaseDetailSkeleton />;
@@ -135,18 +151,46 @@ const DocumentCaseDetail = () => {
         }
       />
 
-      <ExtractionAlert extraction={reportData.extraction} reportType={reportType} lostAuto={reportData.lostDocumentCase?.auto} />
+      <ExtractionAlert
+        extraction={reportData.extraction}
+        reportType={reportType}
+        lostAuto={reportData.lostDocumentCase?.auto}
+      />
 
-      {reportData.foundDocumentCase?.activeCollection?.status === DocumentCollectionStatus.PENDING && (
+      {hasActiveCollection && (
         <Alert
           variant="light"
           color="teal"
           icon={<TablerIcon name="keyframe" size={16} />}
           title="Collection in progress — code issued to finder"
         >
-          A handover code has been sent to the finder. Ask them to share it, then use{' '}
-          <strong>Actions → Enter Handover Code</strong> to confirm. Case editing is locked until
-          the collection is confirmed or cancelled.
+          <Stack gap="sm">
+            <Text size="sm">
+              A handover code has been sent to the finder. Ask them to share it and enter it below
+              to confirm handover. Case editing is locked until confirmed or cancelled.
+            </Text>
+            <Group>
+              <Button
+                size="xs"
+                color="teal"
+                leftSection={<TablerIcon name="keyframe" size={13} />}
+                onClick={() => {
+                  const id = modals.open({
+                    title: 'Enter Finder Code',
+                    centered: true,
+                    children: (
+                      <ConfirmCollectionForm
+                        documentCase={reportData}
+                        onClose={() => modals.close(id)}
+                      />
+                    ),
+                  });
+                }}
+              >
+                Enter Code
+              </Button>
+            </Group>
+          </Stack>
         </Alert>
       )}
 

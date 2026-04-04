@@ -34,10 +34,7 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
 
   const handleSubmit: SubmitHandler<FormData> = async ({ reason }) => {
     try {
-      await cancelCollection(documentCase.foundDocumentCase!.id, {
-        collectionId: documentCase.foundDocumentCase!.activeCollection!.id,
-        reason,
-      });
+      await cancelCollection(documentCase.foundDocumentCase!.id, { reason });
       showNotification({
         title: 'Collection cancelled',
         message: 'The collection has been cancelled. Case editing is now unlocked.',

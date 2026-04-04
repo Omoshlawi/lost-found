@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { Alert, Button, Group, PinInput, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
-import { useDocumentCaseApi } from '../hooks';
+import { useActiveCollection, useDocumentCaseApi } from '../hooks';
 import { DocumentCase } from '../types';
 
 type ConfirmCollectionFormProps = {
@@ -22,18 +21,14 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { confirmCollection } = useDocumentCaseApi();
-
-  const activeCollection = documentCase.foundDocumentCase?.activeCollection;
+  const { collection } = useActiveCollection(documentCase.foundDocumentCase?.id);
 
   const handleConfirm = async () => {
     if (code.length !== 6) return;
     setError(null);
     setIsLoading(true);
     try {
-      await confirmCollection(documentCase.foundDocumentCase!.id, {
-        collectionId: activeCollection!.id,
-        code,
-      });
+      await confirmCollection(documentCase.foundDocumentCase!.id, { code });
       showNotification({
         title: 'Collection confirmed',
         message: 'Case submitted successfully. The finder has been notified.',
@@ -41,18 +36,18 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
       });
       onSuccess?.();
       onClose();
-    } catch (err) {
-      const e = handleApiErrors<{}>(err);
-      setError(e.detail ?? 'Incorrect code. Please try again.');
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? 'Incorrect code. Please try again.');
       setCode('');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const attemptsRemaining = activeCollection
-    ? activeCollection.maxAttempts - activeCollection.attempts
-    : null;
+  const attemptsRemaining =
+    collection?.maxAttempts != null && collection?.attempts != null
+      ? collection.maxAttempts - collection.attempts
+      : null;
 
   return (
     <Stack p="md" h="100%" justify="space-between">
@@ -62,10 +57,10 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
             Ask the finder to share the 6-digit code displayed in their app. Enter it below to
             confirm handover.
           </Text>
-          {activeCollection && (
+          {collection?.expiresAt && (
             <Text size="xs" c="dimmed">
-              Expires {formatDate(activeCollection.expiresAt)} · {attemptsRemaining} attempt
-              {attemptsRemaining !== 1 ? 's' : ''} remaining
+              Expires {formatDate(collection.expiresAt)}
+              {attemptsRemaining != null && ` · ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining`}
             </Text>
           )}
         </Stack>

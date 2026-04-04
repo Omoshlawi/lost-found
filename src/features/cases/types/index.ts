@@ -80,21 +80,14 @@ export interface LostDocumentCase {
   updatedAt: string;
   voided: boolean;
 }
-export enum DocumentCollectionStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  EXPIRED = 'EXPIRED',
-  CANCELLED = 'CANCELLED',
-}
-
-export interface DocumentCollection {
-  id: string;
-  status: DocumentCollectionStatus;
-  expiresAt: string;
-  code: string;
-  attempts: number;
-  maxAttempts: number;
-  createdAt: string;
+/** Response from GET /documents/cases/found/:id/collect/active */
+export interface ActiveCollectionState {
+  hasActiveCollection: boolean;
+  expiresAt?: string;
+  attempts?: number;
+  maxAttempts?: number;
+  /** Only present when the requesting user is the case owner (finder) */
+  code?: string;
 }
 
 export interface FoundDocumentCase {
@@ -106,7 +99,6 @@ export interface FoundDocumentCase {
   updatedAt: string;
   pointAwarded: number;
   voided: boolean;
-  activeCollection?: DocumentCollection | null;
 }
 export interface DocumentField {
   id: string;
