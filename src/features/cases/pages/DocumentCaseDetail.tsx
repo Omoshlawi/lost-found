@@ -1,14 +1,15 @@
 import { useParams } from 'react-router-dom';
-import { Stack, Tabs } from '@mantine/core';
-import { ErrorState, launchWorkspace, TablerIcon } from '@/components';
+import { Badge, Group, Paper, Stack, Tabs, Text } from '@mantine/core';
+import { DashboardPageHeader, ErrorState, StatusBadge, TablerIcon, launchWorkspace } from '@/components';
+import { TablerIconName } from '@/components/TablerIcon';
 import {
   AdditionalDetails,
   ContactFooter,
+  DocumentCaseActions,
   DocumentImages,
   DocumentInformation,
   LocationInformation,
   ReportDetails,
-  ReportHeader,
 } from '../components';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import { useDocumentCase } from '../hooks';
@@ -18,6 +19,7 @@ import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 const DocumentCaseDetail = () => {
   const { reportId } = useParams<{ reportId: string }>();
   const { error, isLoading, report: reportData } = useDocumentCase(reportId);
+
   if (isLoading) {
     return <DocumentCaseDetailSkeleton />;
   }
@@ -25,14 +27,14 @@ const DocumentCaseDetail = () => {
     return <ErrorState error={error} message="No report data available" title="Report Detail" />;
   }
 
-  // Determine report type - a report can't be both lost and found
+  // Determine report type — a report can't be both lost and found
   const isLostCase = !!reportData.lostDocumentCase;
   const reportType: CaseType = isLostCase ? 'LOST' : 'FOUND';
 
   // Extract common data
   const docType = reportData.document?.type?.name || 'Unknown';
   const docTypeIcon = reportData.document?.type?.icon || 'id';
-  const docId = reportData.id ? `${reportData.id.substring(0, 8)}...` : 'Unknown';
+  const caseNumber = reportData.caseNumber || 'Unknown';
 
   // Get status from the appropriate case type
   const status = isLostCase
@@ -40,6 +42,7 @@ const DocumentCaseDetail = () => {
     : reportData.foundDocumentCase?.status || FoundDocumentCaseStatus.DRAFT;
 
   const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
+
   const handleUpdateReportDetails = () => {
     const closeWorkspace = launchWorkspace(
       <UpdateCasedetailsForm documentCase={reportData} closeWorkspace={() => closeWorkspace()} />,
@@ -49,15 +52,33 @@ const DocumentCaseDetail = () => {
 
   return (
     <Stack gap="xl">
-      <ReportHeader
-        caseId={reportData.id}
-        docType={docType}
-        docId={docId}
-        status={status}
-        pointAwarded={pointAwarded}
-        docTypeIcon={docTypeIcon}
-        reportType={reportType}
-        onUpdateReportDetails={handleUpdateReportDetails}
+      <DashboardPageHeader
+        icon={docTypeIcon as TablerIconName}
+        title={`${docType} Report`}
+        subTitle={() => (
+          <Group gap="sm">
+            <Text size="sm" c="dimmed" ff="monospace">
+              {caseNumber}
+            </Text>
+            <Badge size="xs" variant="light">
+              {reportType === 'FOUND' ? 'Found Document' : 'Lost Document'}
+            </Badge>
+            <StatusBadge status={status} />
+            {reportType === 'FOUND' && pointAwarded > 0 && (
+              <Badge size="xs" color="civicGreen" variant="light">
+                {pointAwarded} pts
+              </Badge>
+            )}
+          </Group>
+        )}
+        traiiling={
+          <DocumentCaseActions
+            caseId={reportData.id}
+            reportType={reportType}
+            status={status}
+            onUpdateReportDetails={handleUpdateReportDetails}
+          />
+        }
       />
 
       <Tabs defaultValue="document" variant="default">
@@ -81,47 +102,67 @@ const DocumentCaseDetail = () => {
           </Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="document" pt="xl">
-          <DocumentInformation
-            document={reportData.document!}
-            reportType={reportType}
-            status={status}
-          />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="images" pt="xl">
-          <DocumentImages document={reportData.document!} reportType={reportType} status={status} />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="location" pt="xl">
-          <LocationInformation documentCase={reportData} reportType={reportType} status={status} />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="details" pt="xl">
-          <Stack gap="lg">
-            <ReportDetails
-              lostOrFoundDate={reportData.eventDate}
-              createdAt={reportData.createdAt}
-              description={reportData.description}
-              tags={reportData.tags}
-              lostDocumentCase={reportData.lostDocumentCase}
-              foundDocumentCase={reportData.foundDocumentCase}
-              onUpdateCaseDetails={handleUpdateReportDetails}
-            />
-            <ContactFooter
+        <Tabs.Panel value="document" pt="md">
+          <Paper withBorder p="lg">
+            <DocumentInformation
+              document={reportData.document!}
               reportType={reportType}
-              foundDocumentCase={reportData.foundDocumentCase}
+              status={status}
             />
-          </Stack>
+          </Paper>
         </Tabs.Panel>
 
-        <Tabs.Panel value="additional" pt="xl">
-          <AdditionalDetails
-            createdAt={reportData.createdAt}
-            updatedAt={reportData.updatedAt}
-            status={status}
-            document={reportData.document}
-          />
+        <Tabs.Panel value="images" pt="md">
+          <Paper withBorder p="lg">
+            <DocumentImages
+              document={reportData.document!}
+              reportType={reportType}
+              status={status}
+            />
+          </Paper>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="location" pt="md">
+          <Paper withBorder p="lg">
+            <LocationInformation
+              documentCase={reportData}
+              reportType={reportType}
+              status={status}
+            />
+          </Paper>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="details" pt="md">
+          <Paper withBorder p="lg">
+            <Stack gap="lg">
+              <ReportDetails
+                lostOrFoundDate={reportData.eventDate}
+                createdAt={reportData.createdAt}
+                description={reportData.description}
+                tags={reportData.tags}
+                lostDocumentCase={reportData.lostDocumentCase}
+                foundDocumentCase={reportData.foundDocumentCase}
+                onUpdateCaseDetails={handleUpdateReportDetails}
+              />
+              <ContactFooter
+                reportType={reportType}
+                foundDocumentCase={reportData.foundDocumentCase}
+              />
+            </Stack>
+          </Paper>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="additional" pt="md">
+          <Paper withBorder p="lg">
+            <AdditionalDetails
+              caseId={reportData.id}
+              caseNumber={reportData.caseNumber}
+              reportType={reportType}
+              status={status}
+              document={reportData.document}
+              lostDocumentCase={reportData.lostDocumentCase}
+            />
+          </Paper>
         </Tabs.Panel>
       </Tabs>
     </Stack>

@@ -1,5 +1,5 @@
 // index.ts - Export all components for easy imports
-export { default as ReportHeader } from './ReportHeader';
+export { default as DocumentCaseActions } from './DocumentCaseActions';
 export { default as DocumentInformation } from './DocumentInformation';
 export { default as LocationInformation } from './LocationInformation';
 export { default as ReportDetails } from './ReportDetails';

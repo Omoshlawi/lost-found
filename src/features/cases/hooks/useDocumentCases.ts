@@ -38,6 +38,23 @@ export const useDocumentCase = (reportId?: string) => {
   };
 };
 
+export interface CaseTimelineEvent {
+  key: string;
+  timestamp: string | null;
+  status: 'done' | 'active' | 'pending';
+}
+
+export const useDocumentCaseTimeline = (caseId?: string) => {
+  const { data, error, isLoading } = useApi<APIFetchResponse<{ events: CaseTimelineEvent[] }>>(
+    caseId ? `/documents/cases/${caseId}/timeline` : null
+  );
+  return {
+    events: data?.data?.events ?? [],
+    isLoading,
+    error,
+  };
+};
+
 export const createFoundDocumentCase = async (payload: FoundDocumentCaseFormData) => {
   const foundDocumentCase = await apiFetch<DocumentCase>('/documents/cases/found', {
     method: 'POST',

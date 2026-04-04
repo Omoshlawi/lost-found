@@ -1,6 +1,6 @@
 import React from 'react';
-import { ActionIcon, Grid, Group, Stack, Text, Title } from '@mantine/core';
-import { launchWorkspace, TablerIcon } from '@/components';
+import { ActionIcon, Grid, Group, Stack, Text } from '@mantine/core';
+import { SectionTitle, TablerIcon, launchWorkspace } from '@/components';
 import UpdateCaseAddressForm from '../forms/UpdateCaseAddressForm';
 import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 
@@ -17,72 +17,71 @@ const LocationInformation: React.FC<LocationProps> = ({ documentCase, reportType
       { title: 'Update Address' }
     );
   };
+
   const address = documentCase.address;
+  const isEditDisabled =
+    (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+    (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED);
+
+  const getLevel = (level: string) =>
+    address?.locale?.formatSpec?.levels?.find((l) => l.level === level)?.label ??
+    `Administrative Level ${level.replace('level', '')}`;
 
   return (
-    <div>
-      <Group mb="md" justify="space-between">
-        <Stack>
-          <Title order={4}>Location Information</Title>
-          <Text size="sm" c="dimmed" mb={4}>
-            Location details where the document was lost or found
-          </Text>
-        </Stack>
-        <ActionIcon
-          onClick={handleUpdateAddress}
-          disabled={
-            (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
-            (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
-          }
-        >
+    <Stack gap="lg">
+      <Group justify="space-between" align="center">
+        <SectionTitle label="Location Information" />
+        <ActionIcon variant="subtle" onClick={handleUpdateAddress} disabled={isEditDisabled}>
           <TablerIcon name="edit" size={20} />
         </ActionIcon>
       </Group>
 
+      {/* Administrative Levels */}
+      <SectionTitle label="Administrative Area" />
       <Grid>
         {address?.country && (
           <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
             <Text size="sm" fw={600} c="dimmed" mb={4}>
               Country
             </Text>
-            <Text>{address?.country}</Text>
+            <Text>{address.country}</Text>
           </Grid.Col>
         )}
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {address?.locale?.formatSpec?.levels?.find((level) => level.level === 'level1')
-              ?.label ?? 'Administrative Level 1'}
+            {getLevel('level1')}
           </Text>
           <Text>{address?.level1 || 'N/A'}</Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {address?.locale?.formatSpec?.levels?.find((level) => level.level === 'level2')
-              ?.label ?? 'Administrative Level 2'}
+            {getLevel('level2')}
           </Text>
           <Text>{address?.level2 || 'N/A'}</Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {address?.locale?.formatSpec?.levels?.find((level) => level.level === 'level3')
-              ?.label ?? 'Administrative Level 3'}
+            {getLevel('level3')}
           </Text>
           <Text>{address?.level3 || 'N/A'}</Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {address?.locale?.formatSpec?.levels?.find((level) => level.level === 'level4')
-              ?.label ?? 'Administrative Level 4'}
+            {getLevel('level4')}
           </Text>
           <Text>{address?.level4 || 'N/A'}</Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            {address?.locale?.formatSpec?.levels?.find((level) => level.level === 'level5')
-              ?.label ?? 'Administrative Level 5'}
+            {getLevel('level5')}
           </Text>
           <Text>{address?.level5 || 'N/A'}</Text>
         </Grid.Col>
+      </Grid>
+
+      {/* Street Address */}
+      <SectionTitle label="Street Address" />
+      <Grid>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
             Address 1
@@ -102,7 +101,7 @@ const LocationInformation: React.FC<LocationProps> = ({ documentCase, reportType
           <Text>{address?.landmark || 'N/A'}</Text>
         </Grid.Col>
       </Grid>
-    </div>
+    </Stack>
   );
 };
 

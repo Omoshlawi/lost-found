@@ -1,6 +1,6 @@
 import React from 'react';
-import { ActionIcon, Grid, Group, Stack, Text, Title } from '@mantine/core';
-import { TablerIcon } from '@/components';
+import { ActionIcon, Grid, Group, Stack, Text } from '@mantine/core';
+import { SectionTitle, TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import { CaseType, Document, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
@@ -20,26 +20,22 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, st
       { width: 'wide' }
     );
   };
+
+  const isEditDisabled =
+    (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+    (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED);
+
   return (
-    <div>
-      <Group mb="md" justify="space-between" align="start">
-        <Stack>
-          <Title order={4}>Document Information</Title>
-          <Text size="sm" c="dimmed" mb={4}>
-            Information about the document
-          </Text>
-        </Stack>
-        <ActionIcon
-          onClick={handleUpdateDocument}
-          disabled={
-            (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
-            (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
-          }
-        >
+    <Stack gap="lg">
+      <Group justify="space-between" align="center">
+        <SectionTitle label="Document Information" />
+        <ActionIcon variant="subtle" onClick={handleUpdateDocument} disabled={isEditDisabled}>
           <TablerIcon name="edit" size={16} />
         </ActionIcon>
       </Group>
 
+      {/* Identity */}
+      <SectionTitle label="Identity" />
       <Grid>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
@@ -53,6 +49,35 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, st
           </Text>
           <Text>{document?.type?.name || 'Unknown'}</Text>
         </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Gender
+          </Text>
+          <Text>{document?.gender || 'Unknown'}</Text>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Nationality
+          </Text>
+          <Text>{document?.nationality || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Place of Birth
+          </Text>
+          <Text>{document?.placeOfBirth || 'N/A'}</Text>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
+          <Text size="sm" fw={600} c="dimmed" mb={4}>
+            Date of Birth
+          </Text>
+          <Text>{formatDate(document?.dateOfBirth)}</Text>
+        </Grid.Col>
+      </Grid>
+
+      {/* Document Numbers */}
+      <SectionTitle label="Document Numbers" />
+      <Grid>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
             Serial Number
@@ -71,24 +96,11 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, st
           </Text>
           <Text>{document?.batchNumber || 'Not available'}</Text>
         </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Gender
-          </Text>
-          <Text>{document?.gender || 'Unknown'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Place of Birth
-          </Text>
-          <Text>{document?.placeOfBirth || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Date of Birth
-          </Text>
-          <Text>{formatDate(document?.dateOfBirth)}</Text>
-        </Grid.Col>
+      </Grid>
+
+      {/* Issuance */}
+      <SectionTitle label="Issuance" />
+      <Grid>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
             Issuer
@@ -103,12 +115,6 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, st
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Nationality
-          </Text>
-          <Text>{document?.nationality || 'N/A'}</Text>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-          <Text size="sm" fw={600} c="dimmed" mb={4}>
             Issuance Date
           </Text>
           <Text>{formatDate(document?.issuanceDate)}</Text>
@@ -119,25 +125,33 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, st
           </Text>
           <Text>{formatDate(document?.expiryDate)}</Text>
         </Grid.Col>
-        {document?.additionalFields?.map((field, i) => (
-          <Grid.Col span={{ base: 12, sm: 6, md: 4 }} key={i}>
-            <Text size="sm" fw={600} c="dimmed" mb={4}>
-              {field.fieldName}
-            </Text>
-            <Text>{field.fieldValue}</Text>
-          </Grid.Col>
-        ))}
-
-        {document?.note && (
-          <Grid.Col span={12}>
-            <Text size="sm" fw={600} c="dimmed" mb={4}>
-              Additional Notes
-            </Text>
-            <Text>{document.note}</Text>
-          </Grid.Col>
-        )}
       </Grid>
-    </div>
+
+      {/* Additional Fields */}
+      {(document?.additionalFields?.length > 0 || document?.note) && (
+        <>
+          <SectionTitle label="Additional" />
+          <Grid>
+            {document?.additionalFields?.map((field, i) => (
+              <Grid.Col span={{ base: 12, sm: 6, md: 4 }} key={i}>
+                <Text size="sm" fw={600} c="dimmed" mb={4}>
+                  {field.fieldName}
+                </Text>
+                <Text>{field.fieldValue}</Text>
+              </Grid.Col>
+            ))}
+            {document?.note && (
+              <Grid.Col span={12}>
+                <Text size="sm" fw={600} c="dimmed" mb={4}>
+                  Additional Notes
+                </Text>
+                <Text>{document.note}</Text>
+              </Grid.Col>
+            )}
+          </Grid>
+        </>
+      )}
+    </Stack>
   );
 };
 

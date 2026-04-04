@@ -72,6 +72,7 @@ export interface LostDocumentCase {
   caseId: string;
   case?: DocumentCase;
   status: LostDocumentCaseStatus;
+  auto?: boolean;
   createdAt: string;
   updatedAt: string;
   voided: boolean;

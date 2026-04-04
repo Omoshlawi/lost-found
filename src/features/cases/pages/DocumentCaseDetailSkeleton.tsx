@@ -1,33 +1,55 @@
 import React from 'react';
-import { Card, Divider, Group, Skeleton, Stack } from '@mantine/core';
+import { Box, Grid, Group, Paper, Skeleton, Stack } from '@mantine/core';
 
 const DocumentCaseDetailSkeleton = () => {
   return (
-    <Card shadow="sm" padding="xl" radius="md" withBorder>
-      <Stack>
-        <Stack gap={0}>
-          <Group align="center">
-            <Skeleton height={90} radius="xs" mb="xl" width={90} />
-            <Stack justify="center" flex={1}>
-              <Skeleton height={30} radius="sm" width="20%" />
-              <Skeleton height={8} mt={6} radius="sm" width="20%" />
+    <Stack gap="xl">
+      {/* Header — mirrors DashboardPageHeader structure */}
+      <Box pb="md">
+        <Group justify="space-between" align="center" mb="sm">
+          <Group gap="sm">
+            <Skeleton height={42} width={42} />
+            <Stack gap={4}>
+              <Skeleton height={22} width={200} />
+              <Skeleton height={14} width={320} />
             </Stack>
           </Group>
-          <Group justify="space-between">
-            <Group flex={1}>
-              <Skeleton height={30} mt={6} width="80px" radius="xl" />
-              <Skeleton height={30} mt={6} width="80px" radius="xl" />
-            </Group>
-            <Skeleton height={40} mt={6} width="150px" radius="sm" />
-          </Group>
+          <Skeleton height={36} width={110} />
+        </Group>
+        <Skeleton height={1} />
+      </Box>
+
+      {/* Tab list */}
+      <Group gap={2}>
+        {[100, 100, 100, 140, 110].map((w, i) => (
+          <Skeleton key={i} height={36} width={w} />
+        ))}
+      </Group>
+
+      {/* Tab panel */}
+      <Paper withBorder p="lg">
+        <Stack gap="lg">
+          <Skeleton height={14} width="25%" />
+          <Grid>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Grid.Col span={{ base: 12, sm: 6, md: 4 }} key={i}>
+                <Skeleton height={10} width="40%" mb={6} />
+                <Skeleton height={16} width="65%" />
+              </Grid.Col>
+            ))}
+          </Grid>
+          <Skeleton height={14} width="20%" />
+          <Grid>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Grid.Col span={{ base: 12, sm: 6, md: 4 }} key={i}>
+                <Skeleton height={10} width="40%" mb={6} />
+                <Skeleton height={16} width="65%" />
+              </Grid.Col>
+            ))}
+          </Grid>
         </Stack>
-        <Divider my="md" />
-        <Skeleton w="100%" h="240" />
-        <Skeleton w="100%" h="240" />
-        <Skeleton w="100%" h="240" />
-        <Skeleton w="100%" h="240" />
-      </Stack>
-    </Card>
+      </Paper>
+    </Stack>
   );
 };
 
