@@ -13,7 +13,7 @@ import {
 } from '../components';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import { useDocumentCase } from '../hooks';
-import { AIExtraction, CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { AIExtraction, CaseType, DocumentCollectionStatus, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const STEP_LABEL: Record<string, string> = {
@@ -136,6 +136,19 @@ const DocumentCaseDetail = () => {
       />
 
       <ExtractionAlert extraction={reportData.extraction} reportType={reportType} lostAuto={reportData.lostDocumentCase?.auto} />
+
+      {reportData.foundDocumentCase?.activeCollection?.status === DocumentCollectionStatus.PENDING && (
+        <Alert
+          variant="light"
+          color="teal"
+          icon={<TablerIcon name="keyframe" size={16} />}
+          title="Collection in progress — code issued to finder"
+        >
+          A handover code has been sent to the finder. Ask them to share it, then use{' '}
+          <strong>Actions → Enter Handover Code</strong> to confirm. Case editing is locked until
+          the collection is confirmed or cancelled.
+        </Alert>
+      )}
 
       <Tabs defaultValue="document" variant="default">
         <Tabs.List>

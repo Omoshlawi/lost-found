@@ -4,6 +4,7 @@ import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi
 import {
   CaseDocumentFormData,
   DocumentCase,
+  DocumentCollection,
   DocumentImage,
   FoundDocumentCaseFormData,
   LostDocumentCaseFormData,
@@ -170,12 +171,30 @@ const updateDocumentCase = async (caseId: string, payload: Partial<FoundDocument
   return documentCase.data;
 };
 
-const submitDocumentCase = async (caseId: string) => {
-  const documentCase = await apiFetch<DocumentCase>(`/documents/cases/${caseId}/submit`, {
+const initiateCollection = async (foundCaseId: string): Promise<{ collectionId: string; expiresAt: string }> => {
+  const result = await apiFetch<{ collectionId: string; expiresAt: string }>(
+    `/documents/cases/found/${foundCaseId}/collect/initiate`,
+    { method: 'POST' }
+  );
+  mutate('/documents/cases');
+  return result.data;
+};
+
+const confirmCollection = async (foundCaseId: string, data: { collectionId: string; code: string }): Promise<DocumentCase> => {
+  const result = await apiFetch<DocumentCase>(
+    `/documents/cases/found/${foundCaseId}/collect/confirm`,
+    { method: 'POST', data }
+  );
+  mutate('/documents/cases');
+  return result.data;
+};
+
+const cancelCollection = async (foundCaseId: string, data: { collectionId: string; reason: string }): Promise<void> => {
+  await apiFetch(`/documents/cases/found/${foundCaseId}/collect/cancel`, {
     method: 'POST',
+    data,
   });
   mutate('/documents/cases');
-  return documentCase.data;
 };
 
 const verifyfoundDocumentCase = async (
@@ -219,7 +238,9 @@ export const useDocumentCaseApi = () => {
     uploadDocumentImage,
     updateCaseDocument,
     updateDocumentCase,
-    submitDocumentCase,
+    initiateCollection,
+    confirmCollection,
+    cancelCollection,
     verifyfoundDocumentCase,
     rejectFoundDocumentCase,
   };

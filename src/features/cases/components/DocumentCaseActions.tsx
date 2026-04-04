@@ -1,14 +1,21 @@
 import React from 'react';
-import { Button, Menu, Text } from '@mantine/core';
-import { openConfirmModal } from '@mantine/modals';
+import { Button, Menu } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon, launchWorkspace } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
+import CancelCollectionForm from '../forms/CancelCollectionForm';
+import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
+import InitiateCollectionForm from '../forms/InitiateCollectionForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
-import { useDocumentCaseApi } from '../hooks/useDocumentCases';
-import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import {
+  CaseType,
+  DocumentCase,
+  DocumentCollectionStatus,
+  FoundDocumentCaseStatus,
+  LostDocumentCaseStatus,
+} from '../types';
 
 interface DocumentCaseActionsProps {
   caseId: string;
@@ -25,42 +32,44 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   status,
   onUpdateReportDetails,
 }) => {
-  const { submitDocumentCase } = useDocumentCaseApi();
+  const { hasAccess: canCollect } = useUserHasSystemAccessSync({ documentCase: ['collect'] });
   const { hasAccess: canVerify } = useUserHasSystemAccessSync({ documentCase: ['verify'] });
   const { hasAccess: canReject } = useUserHasSystemAccessSync({ documentCase: ['reject'] });
 
-  const handleSubmitDocumentCase = () => {
-    openConfirmModal({
-      title: 'Submit Document Case',
-      children: (
-        <Text>
-          Are you sure you want to submit this document case? By submitting you verify that all case
-          details are correct. You will not be able to edit the case details after submitting.
-        </Text>
-      ),
-      labels: { confirm: 'Submit', cancel: 'Cancel' },
-      confirmProps: { color: 'teal' },
-      cancelProps: { color: 'red' },
-      onConfirm: async () => {
-        try {
-          await submitDocumentCase(caseId);
-          showNotification({
-            title: 'Success',
-            message: 'Document case submitted successfully',
-            color: 'green',
-          });
-        } catch (error) {
-          const e = handleApiErrors<{}>(error);
-          if (e.detail) {
-            showNotification({
-              title: 'Error submitting document case',
-              message: e.detail,
-              color: 'red',
-            });
-          }
-        }
-      },
-    });
+  const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
+  const isDraft = status === FoundDocumentCaseStatus.DRAFT;
+  const extractionComplete = documentCase.extraction?.extractionStatus === 'COMPLETED';
+  const activeCollection = documentCase.foundDocumentCase?.activeCollection;
+  const hasPendingCollection = activeCollection?.status === DocumentCollectionStatus.PENDING;
+
+  const handleInitiateCollection = () => {
+    const close = launchWorkspace(
+      <InitiateCollectionForm
+        documentCase={documentCase}
+        onClose={() => close()}
+      />,
+      { title: 'Initiate Document Collection' }
+    );
+  };
+
+  const handleConfirmCollection = () => {
+    const close = launchWorkspace(
+      <ConfirmCollectionForm
+        documentCase={documentCase}
+        onClose={() => close()}
+      />,
+      { title: 'Enter Handover Code' }
+    );
+  };
+
+  const handleCancelCollection = () => {
+    const close = launchWorkspace(
+      <CancelCollectionForm
+        documentCase={documentCase}
+        onClose={() => close()}
+      />,
+      { title: 'Cancel Collection' }
+    );
   };
 
   const handleVerify = () => {
@@ -83,8 +92,6 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
     );
   };
 
-  const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
-
   return (
     <Menu shadow="md" position="bottom-end">
       <Menu.Target>
@@ -100,23 +107,49 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
             leftSection={<TablerIcon name="edit" size={14} />}
             onClick={onUpdateReportDetails}
             disabled={
-              (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
+              (reportType === 'FOUND' && (status !== FoundDocumentCaseStatus.DRAFT || hasPendingCollection)) ||
               (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
             }
           >
             Edit Case Details
           </Menu.Item>
         )}
-        {reportType === 'FOUND' && (
+        {reportType === 'FOUND' && canCollect && (
           <>
-            <Menu.Item
-              leftSection={<TablerIcon name="send" size={14} />}
-              onClick={handleSubmitDocumentCase}
-              disabled={status !== FoundDocumentCaseStatus.DRAFT}
-            >
-              Submit Case
-            </Menu.Item>
-            {(canVerify || canReject) && <Menu.Divider />}
+            <Menu.Divider />
+            {!hasPendingCollection && (
+              <Menu.Item
+                leftSection={<TablerIcon name="packageImport" size={14} />}
+                onClick={handleInitiateCollection}
+                disabled={!isDraft || !extractionComplete}
+                color="civicBlue"
+              >
+                Initiate Collection
+              </Menu.Item>
+            )}
+            {hasPendingCollection && (
+              <>
+                <Menu.Item
+                  leftSection={<TablerIcon name="keyframe" size={14} />}
+                  onClick={handleConfirmCollection}
+                  color="civicGreen"
+                >
+                  Enter Handover Code
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<TablerIcon name="circleX" size={14} />}
+                  onClick={handleCancelCollection}
+                  color="orange"
+                >
+                  Cancel Collection
+                </Menu.Item>
+              </>
+            )}
+          </>
+        )}
+        {reportType === 'FOUND' && (canVerify || canReject) && (
+          <>
+            <Menu.Divider />
             {canVerify && (
               <Menu.Item
                 leftSection={<TablerIcon name="circleCheck" size={14} />}

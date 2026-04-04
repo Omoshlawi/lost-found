@@ -27,6 +27,7 @@ import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
 import {
   FoundDocumentCaseForm,
+  InitiateCollectionForm,
   LostDocumentCaseForm,
   RejectFoundDocumentCaseForm,
   VerifyFoundDocumentCaseForm,
@@ -273,6 +274,30 @@ const DocumentCasesPage = () => {
             </Menu.Item>
             {isFound && (
               <>
+                <SystemAuthorized
+                  permissions={{ documentCase: ['collect'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
+                  <Menu.Item
+                    leftSection={<TablerIcon name="packageImport" size={14} />}
+                    color="teal"
+                    disabled={
+                      report.foundDocumentCase?.status !== FoundDocumentCaseStatus.DRAFT ||
+                      report.extraction?.extractionStatus !== 'COMPLETED'
+                    }
+                    onClick={() => {
+                      const dismiss = launchWorkspace(
+                        <InitiateCollectionForm
+                          documentCase={report}
+                          onClose={() => dismiss()}
+                        />,
+                        { title: 'Initiate Collection' }
+                      );
+                    }}
+                  >
+                    Collect
+                  </Menu.Item>
+                </SystemAuthorized>
                 <SystemAuthorized
                   permissions={{ documentCase: ['verify'] }}
                   unauthorizedAction={{ type: 'hide' }}
