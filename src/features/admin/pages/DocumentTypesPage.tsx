@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Menu, Stack, Text } from '@mantine/core';
+import { ActionIcon, Menu, Paper, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
@@ -10,6 +10,7 @@ import {
   TablerIcon,
   TablerIconName,
 } from '@/components';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { handleApiErrors } from '@/lib/api';
 import { DocumentTypeForm } from '../forms';
@@ -17,7 +18,8 @@ import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
 import { DocumentType } from '../types';
 
 const DocumentTypesPage = () => {
-  const documentTypesAsync = useDocumentTypes();
+  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
+  const documentTypesAsync = useDocumentTypes({ page, limit: pageSize });
   const { deleteDocumentType, mutateDocumentTypes } = useDocumentTypesApi();
   const { hasAccess } = useUserHasSystemAccess({ documentType: ['create'] });
   const handleDelete = (documentType: DocumentType) => {
@@ -139,6 +141,13 @@ const DocumentTypesPage = () => {
             },
           ]}
           onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
+          pagination={{
+            totalCount: documentTypesAsync.totalCount,
+            currentPage: page,
+            pageSize,
+            onChange: setPage,
+            onPageSizeChange: setPageSize,
+          }}
         />
     </Stack>
   );

@@ -3,13 +3,15 @@ import { ActionIcon, Badge, Group, Menu, Paper, SimpleGrid, Stack, Text } from '
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { AddressLocaleForm } from '../forms';
 import { useAddressLocales, useAddressLocalesApi } from '../hooks';
 import { AddressLocale, AddressLocaleFormData } from '../types';
 
 const AddressLocalesPage = () => {
-  const localeQuery = useAddressLocales();
+  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
+  const localeQuery = useAddressLocales({ page, limit: pageSize });
   const { deleteAddressLocale, restoreAddressLocale, mutateAddressLocales } = useAddressLocalesApi();
 
   const handleLaunchForm = (locale?: AddressLocale) => {
@@ -98,6 +100,13 @@ const AddressLocalesPage = () => {
         nothingFoundMessage="No locales found. Click add to create one."
         renderExpandedRow={({ original }) => <AddressLocaleDetails locale={original} />}
         onAdd={() => handleLaunchForm()}
+        pagination={{
+          totalCount: localeQuery.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </Stack>
   );

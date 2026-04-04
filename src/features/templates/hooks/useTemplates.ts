@@ -12,11 +12,18 @@ import {
   TemplateType,
 } from '../types';
 
-export const useTemplates = () => {
-  const url = constructUrl('/templates');
-  const { data, error, isLoading } = useSWR<APIFetchResponse<{ results: Array<Template> }>>(url);
+type TemplateFilters = Record<string, string | number | boolean | undefined>;
+
+export const useTemplates = (filters: TemplateFilters = {}) => {
+  const url = constructUrl('/templates', filters);
+  const { data, error, isLoading } = useSWR<
+    APIFetchResponse<{ results: Array<Template>; totalCount: number; currentPage: number; pageSize: number }>
+  >(url);
   return {
-    templates: data?.data?.results || [],
+    templates: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 12,
     isLoading,
     error,
   };

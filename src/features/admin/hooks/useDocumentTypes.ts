@@ -1,13 +1,16 @@
-import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import { DocumentType, DocumentTypeFormData } from '../types';
 
-// lists all document types
-export const useDocumentTypes = () => {
-  const url = constructUrl('/documents/types', { limit: 100, includeVoided: true });
+// lists document types — defaults keep existing callers (dropdowns) working unchanged
+export const useDocumentTypes = (filters: Record<string, any> = {}) => {
+  const url = constructUrl('/documents/types', { includeVoided: true, limit: 100, ...filters });
   const { data, error, isLoading, mutate } =
-    useApi<APIFetchResponse<{ results: Array<DocumentType> }>>(url);
+    useApi<APIFetchResponse<PaginatedData<DocumentType>>>(url);
   return {
     documentTypes: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 12,
     error,
     isLoading,
     mutate,

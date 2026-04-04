@@ -1,4 +1,4 @@
-import { authClient } from '@/lib/api';
+import { authClient, constructUrl } from '@/lib/api';
 import { apiFetch } from '@/lib/api/apiFetch';
 import useApi from '@/lib/api/useApi';
 import { BanUserPayload, User, UserRolePayload, UserSession } from '../types';
@@ -51,16 +51,19 @@ export const useUsersApi = () => {
   };
 };
 
-export const useUsers = () => {
-  const { getUsers } = useUsersApi();
-  const fetcher = async (_url: string) => {
-    const res = await getUsers();
+type UserFilters = { limit?: number; offset?: number; searchValue?: string };
+
+export const useUsers = (filters: UserFilters = {}) => {
+  const url = constructUrl('/auth/admin/list-users', filters as Record<string, string | number | undefined>);
+  const fetcher = async (fetchUrl: string) => {
+    const res = await apiFetch<{ users: User[]; total: number }>(fetchUrl);
     return res.data;
   };
-  const { data, ...rest } = useApi<{ users: User[] }>('/auth/admin/list-users', fetcher);
+  const { data, ...rest } = useApi<{ users: User[]; total: number }>(url, fetcher);
 
   return {
-    users: data?.users || [],
+    users: data?.users ?? [],
+    totalCount: data?.total ?? 0,
     ...rest,
   };
 };

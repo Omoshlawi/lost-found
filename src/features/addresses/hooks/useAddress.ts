@@ -1,4 +1,4 @@
-import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
   Address,
   AddressFormData,
@@ -16,13 +16,15 @@ export const useAddresses = (filters: AddressFilters = {}) => {
     error,
     isLoading,
     mutate: swrMutate,
-  } = useApi<APIFetchResponse<{ results: Address[] }>>(url);
+  } = useApi<APIFetchResponse<PaginatedData<Address>>>(url);
   return {
     addresses: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 12,
     isLoading,
     error,
     mutate: swrMutate,
-    pagination: (data?.data as any)?.pagination,
   };
 };
 
@@ -89,9 +91,12 @@ export const useAddressHierarchy = (filters: AddressFilters = {}) => {
     error,
     isLoading,
     mutate: swrMutate,
-  } = useApi<APIFetchResponse<{ results: AddressHierarchyNode[] }>>(url);
+  } = useApi<APIFetchResponse<PaginatedData<AddressHierarchyNode>>>(url);
   return {
     hierarchy: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 12,
     error,
     isLoading,
     mutate: swrMutate,

@@ -119,16 +119,12 @@ export function DataTable<TData, TValue>({
         withColumnViewOptions={withColumnViewOptions}
         actions={renderActions?.(table)}
       />
-      <Paper withBorder style={{ overflow: 'auto' }} component={Stack}>
-        {render(table)}
-        {renderPaginator && <>{renderPaginator(table)}</>}
-        {/* {table.getFilteredSelectedRowModel()?.rows?.length > 0 && (
-          <Text c={"dimmed"} size="sm" flex={1} fw={"bold"}>
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </Text>
-        )} */}
-      </Paper>
+      <Stack gap={0}>
+        <Paper withBorder style={{ overflow: 'auto' }}>
+          {render(table)}
+        </Paper>
+        {renderPaginator?.(table)}
+      </Stack>
     </Stack>
   );
 }

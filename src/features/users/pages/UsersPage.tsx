@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
 import { ActionIcon, Badge, Box, Divider, Group, Menu, Stack, Text, TextInput } from '@mantine/core';
@@ -12,18 +11,11 @@ import { useUsers, useUsersApi } from '../hooks';
 import { User } from '../types';
 
 const UsersPage = () => {
-  const usersAsync = useUsers();
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } = useTableUrlFilters({ searchDebounce: 200 });
+  const offset = (page - 1) * pageSize;
+  const usersAsync = useUsers({ limit: pageSize, offset, ...(search && { searchValue: search }) });
   const { removeUser, revokeAllUserSessions } = useUsersApi();
   const navigate = useNavigate();
-  const { search, searchInput, setSearchInput } = useTableUrlFilters({ searchDebounce: 200 });
-
-  const filteredUsers = useMemo(() => {
-    if (!search) { return usersAsync.users; }
-    const q = search.toLowerCase();
-    return usersAsync.users.filter(
-      (u) => u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
-    );
-  }, [usersAsync.users, search]);
 
   const handleRemove = (user: User) => {
     modals.openConfirmModal({
@@ -132,7 +124,7 @@ const UsersPage = () => {
       />
       <StateFullDataTable
           {...usersAsync}
-          data={filteredUsers}
+          data={usersAsync.users}
           renderActions={() => (
             <TextInput
               placeholder="Search by name or email..."
@@ -198,6 +190,13 @@ const UsersPage = () => {
               </Group>
             </Box>
           )}
+          pagination={{
+            totalCount: usersAsync.totalCount,
+            currentPage: page,
+            pageSize,
+            onChange: setPage,
+            onPageSizeChange: setPageSize,
+          }}
           columns={[
             ...columns,
             {

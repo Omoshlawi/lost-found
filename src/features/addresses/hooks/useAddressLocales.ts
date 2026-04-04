@@ -1,4 +1,4 @@
-import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
   AddressLocale,
   AddressLocaleFormData,
@@ -17,14 +17,16 @@ export const useAddressLocales = (filters: AddressLocaleFilters = {}) => {
     error,
     isLoading,
     mutate: swrMutate,
-  } = useApi<APIFetchResponse<{ results: AddressLocale[] }>>(url);
+  } = useApi<APIFetchResponse<PaginatedData<AddressLocale>>>(url);
 
   return {
     locales: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 12,
     error,
     isLoading,
     mutate: swrMutate,
-    pagination: (data?.data as any)?.pagination,
   };
 };
 

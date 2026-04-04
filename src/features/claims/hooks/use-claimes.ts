@@ -10,9 +10,9 @@ export const useClaims = (paras: Record<string, any> = {}) => {
   const { data, error, isLoading } = useSWR<APIFetchResponse<PaginatedData<Claim>>>(url);
   return {
     claims: data?.data?.results ?? [],
-    total: data?.data?.total ?? 0,
-    page: data?.data?.page ?? 1,
-    limit: data?.data?.limit ?? 20,
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 20,
     error,
     isLoading,
   };

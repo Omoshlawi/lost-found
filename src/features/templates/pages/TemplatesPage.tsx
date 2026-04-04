@@ -8,13 +8,15 @@ import {
   SystemAuthorized,
   TablerIcon,
 } from '@/components';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { formatDate } from '@/lib/utils';
 import TemplateForm from '../forms/TemplateForm';
 import { useTemplates } from '../hooks';
 import { Template } from '../types';
 
 const TemplatesPage = () => {
-  const templatesAsync = useTemplates();
+  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
+  const templatesAsync = useTemplates({ page, limit: pageSize });
 
   const handleLaunchTemplateForm = (template?: Template) => {
     const close = launchWorkspace(<TemplateForm template={template} onClose={() => close()} />, {
@@ -97,6 +99,13 @@ const TemplatesPage = () => {
             </Button>
           </SystemAuthorized>
         )}
+        pagination={{
+          totalCount: templatesAsync.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </Stack>
   );

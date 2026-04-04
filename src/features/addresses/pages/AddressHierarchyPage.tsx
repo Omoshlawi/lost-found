@@ -4,12 +4,14 @@ import { ActionIcon, Badge, Menu, SimpleGrid, Stack, Text } from '@mantine/core'
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { useAddressHierarchy, useAddressHierarchyApi } from '../hooks';
 import { AddressHierarchyNode } from '../types';
 
 const AddressHierarchyPage = () => {
-  const hierarchyQuery = useAddressHierarchy();
+  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
+  const hierarchyQuery = useAddressHierarchy({ page, limit: pageSize });
   const { deleteHierarchyNode, restoreHierarchyNode, mutateAddressHierarchy } =
     useAddressHierarchyApi();
 
@@ -82,6 +84,13 @@ const AddressHierarchyPage = () => {
         nothingFoundMessage="No hierarchy entries available."
         columns={hierarchyColumns}
         renderExpandedRow={({ original }) => <HierarchyDetails node={original} />}
+        pagination={{
+          totalCount: hierarchyQuery.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </Stack>
   );

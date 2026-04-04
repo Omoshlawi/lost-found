@@ -7,7 +7,6 @@ import { formatDate } from '@/lib/utils';
 import { useClaims } from '../hooks';
 import { Claim, ClaimStatus } from '../types';
 
-const PAGE_SIZE = 20;
 
 const STATUS_OPTIONS = [
   { label: 'Pending', value: ClaimStatus.PENDING },
@@ -19,11 +18,11 @@ const STATUS_OPTIONS = [
 ];
 
 const ClaimsPage = () => {
-  const { page, status, setStatus, setPage } = useTableUrlFilters();
+  const { page, pageSize, status, setStatus, setPage, setPageSize } = useTableUrlFilters();
 
   const claimsAsync = useClaims({
     page,
-    limit: PAGE_SIZE,
+    limit: pageSize,
     ...(status && { status }),
   });
 
@@ -67,10 +66,11 @@ const ClaimsPage = () => {
           />
         )}
         pagination={{
-          total: claimsAsync.total,
-          page,
-          limit: PAGE_SIZE,
+          totalCount: claimsAsync.totalCount,
+          currentPage: page,
+          pageSize,
           onChange: setPage,
+          onPageSizeChange: setPageSize,
         }}
       />
     </Stack>

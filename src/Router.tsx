@@ -15,7 +15,7 @@ import {
   AddressLocalesPage,
 } from './features/addresses/pages';
 import { DocumentTypesPage } from './features/admin/pages';
-import { DocumentCaseDetail, FoundDocumentCasesPage, LostItemsPage } from './features/cases/pages';
+import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
@@ -25,7 +25,6 @@ import { SettingsPage } from './features/settings';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
 import { UserDetailPage, UsersPage } from './features/users/pages';
-import { HomePage } from './pages/Home.page';
 
 const router = createBrowserRouter([
   {
@@ -83,18 +82,10 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       {
-        path: 'lost-documents',
+        path: 'cases',
         element: <Outlet />,
         children: [
-          { index: true, element: <LostItemsPage /> },
-          { path: ':reportId', element: <DocumentCaseDetail /> },
-        ],
-      },
-      {
-        path: 'found-documents',
-        element: <Outlet />,
-        children: [
-          { index: true, element: <FoundDocumentCasesPage /> },
+          { index: true, element: <DocumentCasesPage /> },
           { path: ':reportId', element: <DocumentCaseDetail /> },
         ],
       },

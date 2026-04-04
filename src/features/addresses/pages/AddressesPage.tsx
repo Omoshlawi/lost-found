@@ -5,13 +5,15 @@ import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { AddressForm } from '../forms';
 import { useAddresses, useAddressesApi } from '../hooks';
 import { Address, AddressFormData } from '../types';
 
 const AddressesPage = () => {
-  const addressQuery = useAddresses();
+  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
+  const addressQuery = useAddresses({ page, limit: pageSize });
   const { deleteAddress, restoreAddress, mutateAddresses } = useAddressesApi();
 
   const handleLaunchForm = (address?: Address) => {
@@ -100,6 +102,13 @@ const AddressesPage = () => {
         renderExpandedRow={({ original }) => <AddressDetails address={original} />}
         columns={addressColumns}
         onAdd={() => handleLaunchForm()}
+        pagination={{
+          totalCount: addressQuery.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
       />
     </Stack>
   );

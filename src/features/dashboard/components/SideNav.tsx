@@ -34,8 +34,7 @@ const navConfig: NavEntry[] = [
     type: 'group',
     label: 'Case Management',
     items: [
-      { icon: 'fileSearch', label: 'Lost Documents', href: 'lost-documents' },
-      { icon: 'fileCheck', label: 'Found Documents', href: 'found-documents' },
+      { icon: 'files', label: 'Cases', href: 'cases' },
       { icon: 'filterQuestion', label: 'Claims', href: 'claims' },
     ],
   },

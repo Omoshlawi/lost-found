@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { Table } from '@tanstack/react-table';
-import { Button, Group, Pagination, SegmentedControl, Text } from '@mantine/core';
+import { Box, Button, Group, Pagination, SegmentedControl, Select, Text } from '@mantine/core';
+import { PAGE_SIZE_OPTIONS } from '@/hooks/useTableUrlFilters';
 import { TableSkeleton } from '../ComponentSkeletons';
 import { EmptyState, ErrorState } from '../StateWidgets';
 import { DataTable, DataTableProps } from './DataTable';
 
 export interface PaginationConfig {
-  total: number;
-  page: number;
-  limit: number;
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
   onChange: (page: number) => void;
+  onPageSizeChange: (pageSize: number) => void;
 }
 
 interface StateFullDataTableProps<TData, TValue>
@@ -65,9 +67,9 @@ const StateFullDataTable = <TData, TValue>({
     return undefined;
   };
 
-  const totalPages = pagination ? Math.ceil(pagination.total / pagination.limit) : 0;
-  const rangeStart = pagination ? (pagination.page - 1) * pagination.limit + 1 : 0;
-  const rangeEnd = pagination ? Math.min(pagination.page * pagination.limit, pagination.total) : 0;
+  const totalPages = pagination ? Math.ceil(pagination.totalCount / pagination.pageSize) : 0;
+  const rangeStart = pagination ? (pagination.currentPage - 1) * pagination.pageSize + 1 : 0;
+  const rangeEnd = pagination ? Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount) : 0;
 
   return (
     <>
@@ -95,21 +97,55 @@ const StateFullDataTable = <TData, TValue>({
             )}
           </>
         )}
+        renderPaginator={
+          pagination && pagination.totalCount > 0
+            ? () => (
+                <Box
+                  style={{
+                    borderLeft: '1px solid var(--mantine-color-default-border)',
+                    borderRight: '1px solid var(--mantine-color-default-border)',
+                    borderBottom: '1px solid var(--mantine-color-default-border)',
+                    background: 'light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    minHeight: 48,
+                    paddingLeft: 'var(--mantine-spacing-md)',
+                    paddingRight: 'var(--mantine-spacing-sm)',
+                  }}
+                >
+                  <Group gap={6} align="center">
+                    <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                      Items per page
+                    </Text>
+                    <Select
+                      size="xs"
+                      data={PAGE_SIZE_OPTIONS.map((n) => ({ value: String(n), label: String(n) }))}
+                      value={String(pagination.pageSize)}
+                      onChange={(v) => v && pagination.onPageSizeChange(Number(v))}
+                      w={60}
+                      allowDeselect={false}
+                    />
+                  </Group>
+                  <Group gap="sm" align="center">
+                    <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                      {rangeStart}–{rangeEnd} of {pagination.totalCount} items
+                    </Text>
+                    {totalPages > 1 && (
+                      <Pagination
+                        total={totalPages}
+                        value={pagination.currentPage}
+                        onChange={pagination.onChange}
+                        size="xs"
+                        withEdges
+                      />
+                    )}
+                  </Group>
+                </Box>
+              )
+            : undefined
+        }
       />
-      {pagination && totalPages > 1 && (
-        <Group justify="space-between" align="center" pt="sm">
-          <Text size="xs" c="dimmed">
-            {rangeStart}–{rangeEnd} of {pagination.total} records
-          </Text>
-          <Pagination
-            total={totalPages}
-            value={pagination.page}
-            onChange={pagination.onChange}
-            size="sm"
-            withEdges
-          />
-        </Group>
-      )}
     </>
   );
 };
