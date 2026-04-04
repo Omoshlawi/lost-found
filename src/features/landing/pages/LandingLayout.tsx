@@ -31,7 +31,7 @@ const LandingLayout = () => {
           <Group gap="sm" style={{ flex: '0 0 auto' }}>
             <Button
               variant="gradient"
-              gradient={{ from: 'citizenTeal.7', to: 'citizenNavy.7' }}
+              gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
               component={Link}
               to="/register"
               radius="xl"

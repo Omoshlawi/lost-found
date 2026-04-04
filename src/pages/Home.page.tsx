@@ -127,7 +127,7 @@ export function HomePage() {
                 size="lg"
                 radius="xl"
                 variant="gradient"
-                gradient={{ from: 'cyan', to: 'indigo' }}
+                gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
                 leftSection={<TablerIcon name="sparkles" size={14} />}
               >
                 AI-Native Document Recovery
@@ -149,7 +149,7 @@ export function HomePage() {
               <Text
                 component="span"
                 variant="gradient"
-                gradient={{ from: 'cyan', to: 'indigo' }}
+                gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
                 inherit
               >
                 Found.
@@ -177,7 +177,7 @@ export function HomePage() {
                 size="xl"
                 radius="xl"
                 variant="gradient"
-                gradient={{ from: 'cyan', to: 'indigo' }}
+                gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
               >
                 Get Started Free
               </Button>
@@ -291,7 +291,7 @@ export function HomePage() {
                   size={52}
                   radius="xl"
                   variant="gradient"
-                  gradient={{ from: 'cyan', to: 'indigo' }}
+                  gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
                 >
                   <TablerIcon name={step.icon as any} size={26} stroke={1.5} />
                 </ThemeIcon>
@@ -355,7 +355,7 @@ export function HomePage() {
                 size={56}
                 radius="xl"
                 variant="gradient"
-                gradient={{ from: 'cyan', to: 'indigo' }}
+                gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
                 mb="lg"
               >
                 <TablerIcon name={feature.icon as any} size={28} stroke={1.5} />
@@ -449,7 +449,7 @@ export function HomePage() {
             size={64}
             radius="xl"
             variant="gradient"
-            gradient={{ from: 'cyan', to: 'indigo' }}
+            gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
             mx="auto"
             mb="lg"
           >
@@ -469,7 +469,7 @@ export function HomePage() {
               size="lg"
               radius="xl"
               variant="gradient"
-              gradient={{ from: 'cyan', to: 'indigo' }}
+              gradient={{ from: 'civicBlue.6', to: 'civicNavy.7' }}
             >
               Create Free Account
             </Button>

@@ -23,7 +23,7 @@ const AuthLayout = () => {
             span={{ base: 12, md: 5, lg: 6 }}
             style={{
               background:
-                'linear-gradient(135deg, var(--mantine-color-citizenNavy-7) 0%, var(--mantine-color-citizenNavy-9) 100%)',
+                'linear-gradient(135deg, var(--mantine-color-civicNavy-7) 0%, var(--mantine-color-civicNavy-9) 100%)',
               color: 'white',
               position: 'relative',
               display: 'flex',
@@ -43,7 +43,7 @@ const AuthLayout = () => {
                 height: rem(600),
                 borderRadius: '50%',
                 background:
-                  'radial-gradient(circle, var(--mantine-color-citizenTeal-7) 0%, transparent 70%)',
+                  'radial-gradient(circle, var(--mantine-color-civicBlue-4) 0%, transparent 70%)',
                 opacity: 0.15,
                 zIndex: 0,
               }}
@@ -67,7 +67,7 @@ const AuthLayout = () => {
                 <Text
                   component="span"
                   inherit
-                  style={{ color: 'var(--mantine-color-citizenTeal-7)' }}
+                  style={{ color: 'var(--mantine-color-civicGold-5)' }}
                 >
                   Management.
                 </Text>

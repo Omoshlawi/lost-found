@@ -676,6 +676,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/inter@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource/inter@npm:5.2.8"
+  checksum: 10c0/f737dd50005e4809887ba55ae0c9b7174216d6d14875d17a4fbb9a0ad75dec4265928b805a43fe16a23f14a878f1974a398bbfc84ad65c79fc4d4b9c3ea154e1
+  languageName: node
+  linkType: hard
+
+"@fontsource/plus-jakarta-sans@npm:^5.2.8":
+  version: 5.2.8
+  resolution: "@fontsource/plus-jakarta-sans@npm:5.2.8"
+  checksum: 10c0/c16b0dcb5d5f7eeaa6cbc6a0824c0bb59bf70f58e3997c5bf95eb08cd46117b660bec61e7c3fdc7f517dd847e568449c468edfe936c51783e4b9438e52a39ff8
+  languageName: node
+  linkType: hard
+
 "@hexagon/base64@npm:^1.1.27":
   version: 1.1.28
   resolution: "@hexagon/base64@npm:1.1.28"
@@ -3030,6 +3044,8 @@ __metadata:
   resolution: "citizen-link-admin@workspace:."
   dependencies:
     "@eslint/js": "npm:^9.23.0"
+    "@fontsource/inter": "npm:^5.2.8"
+    "@fontsource/plus-jakarta-sans": "npm:^5.2.8"
     "@hookform/resolvers": "npm:^5.0.1"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.1"
     "@mantine/carousel": "npm:^8.0.0"
