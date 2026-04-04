@@ -18,7 +18,7 @@ const UsersPage = () => {
   const { search, searchInput, setSearchInput } = useTableUrlFilters({ searchDebounce: 200 });
 
   const filteredUsers = useMemo(() => {
-    if (!search) return usersAsync.users;
+    if (!search) { return usersAsync.users; }
     const q = search.toLowerCase();
     return usersAsync.users.filter(
       (u) => u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)

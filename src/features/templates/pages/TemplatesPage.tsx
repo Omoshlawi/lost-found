@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Anchor, Badge, Box, Button, Menu, Paper, Stack } from '@mantine/core';
+import { ActionIcon, Anchor, Badge, Button, Menu, Stack } from '@mantine/core';
 import {
   DashboardPageHeader,
   launchWorkspace,
@@ -8,7 +8,6 @@ import {
   SystemAuthorized,
   TablerIcon,
 } from '@/components';
-import { useAppColors } from '@/hooks/useAppColors';
 import { formatDate } from '@/lib/utils';
 import TemplateForm from '../forms/TemplateForm';
 import { useTemplates } from '../hooks';
@@ -16,9 +15,8 @@ import { Template } from '../types';
 
 const TemplatesPage = () => {
   const templatesAsync = useTemplates();
-  const { bgColor } = useAppColors();
 
-  const handleLauchTemplateForm = (template?: Template) => {
+  const handleLaunchTemplateForm = (template?: Template) => {
     const close = launchWorkspace(<TemplateForm template={template} onClose={() => close()} />, {
       title: template ? `Edit Template: ${template.name}` : 'Create Template',
       expandable: true,
@@ -27,102 +25,85 @@ const TemplatesPage = () => {
   };
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Templates"
-          subTitle={`
-          Manage templates`}
-          icon="listNumbers"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
-          {...templatesAsync}
-          data={templatesAsync.templates}
-          columns={[
-            ...columns,
-            {
-              id: 'actions',
-              cell: ({ row: { original: template } }) => (
-                <Menu shadow="md" width={200}>
-                  <Menu.Target>
-                    <ActionIcon variant="transparent" aria-label="Settings">
-                      <TablerIcon
-                        name="dots"
-                        style={{ width: '70%', height: '70%' }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Label>Actions</Menu.Label>
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Templates"
+        subTitle="Manage notification and prompt templates"
+        icon="listNumbers"
+      />
+      <StateFullDataTable
+        {...templatesAsync}
+        data={templatesAsync.templates}
+        columns={[
+          ...columns,
+          {
+            id: 'actions',
+            size: 40,
+            cell: ({ row: { original: template } }) => (
+              <Menu position="bottom-end" width={200}>
+                <Menu.Target>
+                  <ActionIcon variant="subtle" size="sm" aria-label="Row actions">
+                    <TablerIcon name="dots" size={14} stroke={1.5} />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="eye" size={14} />}
+                    component={Link}
+                    to={`${template.id}`}
+                  >
+                    View Details
+                  </Menu.Item>
+                  <SystemAuthorized
+                    permissions={{ templates: ['update'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
+                    <Menu.Item
+                      leftSection={<TablerIcon name="edit" size={14} />}
+                      onClick={() => handleLaunchTemplateForm(template)}
+                    >
+                      Edit
+                    </Menu.Item>
+                  </SystemAuthorized>
+                  <SystemAuthorized
+                    permissions={{ templates: ['delete'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
                     <Menu.Divider />
                     <Menu.Item
-                      leftSection={<TablerIcon name="eye" size={14} />}
-                      component={Link}
-                      to={`${template.id}`}
+                      leftSection={<TablerIcon name="trash" size={14} />}
+                      color="red"
                     >
-                      View Details
+                      Delete
                     </Menu.Item>
-                    <SystemAuthorized
-                      permissions={{ templates: ['update'] }}
-                      unauthorizedAction={{ type: 'hide' }}
-                    >
-                      <Menu.Item
-                        leftSection={<TablerIcon name="check" size={14} />}
-                        onClick={() => handleLauchTemplateForm(template)}
-                        color="green"
-                      >
-                        Update
-                      </Menu.Item>
-                    </SystemAuthorized>
-                    <SystemAuthorized
-                      permissions={{ templates: ['delete'] }}
-                      unauthorizedAction={{ type: 'hide' }}
-                    >
-                      <Menu.Item
-                        leftSection={<TablerIcon name="x" size={14} />}
-                        // onClick={() => {
-                        //   const dismiss = launchWorkspace(
-                        //     <RejectFoundDocumentCaseForm
-                        //       documentCase={docCase}
-                        //       onClose={() => dismiss()}
-                        //     />,
-                        //     {
-                        //       title: 'Reject Found Document Case',
-                        //     }
-                        //   );
-                        // }}
-                        color="red"
-                      >
-                        Delete
-                      </Menu.Item>
-                    </SystemAuthorized>
-                  </Menu.Dropdown>
-                </Menu>
-              ),
-            },
-          ]}
-          renderActions={() => (
-            <>
-              <SystemAuthorized
-                permissions={{ templates: ['create'] }}
-                unauthorizedAction={{ type: 'hide' }}
-              >
-                <Button variant="light" onClick={() => handleLauchTemplateForm()}>
-                  Create Template
-                </Button>
-              </SystemAuthorized>
-            </>
-          )}
-        />
-      </Paper>
+                  </SystemAuthorized>
+                </Menu.Dropdown>
+              </Menu>
+            ),
+          },
+        ]}
+        renderActions={() => (
+          <SystemAuthorized
+            permissions={{ templates: ['create'] }}
+            unauthorizedAction={{ type: 'hide' }}
+          >
+            <Button
+              variant="light"
+              size="xs"
+              leftSection={<TablerIcon name="plus" size={14} />}
+              onClick={() => handleLaunchTemplateForm()}
+            >
+              Add
+            </Button>
+          </SystemAuthorized>
+        )}
+      />
     </Stack>
   );
 };
 
 export default TemplatesPage;
+
 const columns: ColumnDef<Template>[] = [
   {
     header: '#',
@@ -153,11 +134,7 @@ const columns: ColumnDef<Template>[] = [
         variant="light"
         size="xs"
         color={
-          original.type === 'notification'
-            ? 'blue'
-            : original.type === 'prompt'
-              ? 'yellow'
-              : 'green'
+          original.type === 'notification' ? 'blue' : original.type === 'prompt' ? 'yellow' : 'green'
         }
       >
         {original.type}
@@ -170,12 +147,12 @@ const columns: ColumnDef<Template>[] = [
     cell: ({ row: { original } }) => original.version,
   },
   {
-    header: 'Created at',
+    header: 'Created',
     accessorKey: 'createdAt',
     cell: ({ row: { original } }) => formatDate(original.createdAt),
   },
   {
-    header: 'Updated at',
+    header: 'Updated',
     accessorKey: 'updatedAt',
     cell: ({ row: { original } }) => formatDate(original.updatedAt),
   },

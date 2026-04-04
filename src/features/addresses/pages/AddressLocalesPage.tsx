@@ -1,24 +1,8 @@
 import { ColumnDef } from '@tanstack/react-table';
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Group,
-  Menu,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-} from '@mantine/core';
+import { ActionIcon, Badge, Group, Menu, Paper, SimpleGrid, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import {
-  DashboardPageHeader,
-  launchWorkspace,
-  StateFullDataTable,
-  TablerIcon,
-} from '@/components';
-import { useAppColors } from '@/hooks/useAppColors';
+import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { AddressLocaleForm } from '../forms';
 import { useAddressLocales, useAddressLocalesApi } from '../hooks';
@@ -27,7 +11,6 @@ import { AddressLocale, AddressLocaleFormData } from '../types';
 const AddressLocalesPage = () => {
   const localeQuery = useAddressLocales();
   const { deleteAddressLocale, restoreAddressLocale, mutateAddressLocales } = useAddressLocalesApi();
-  const { bgColor } = useAppColors();
 
   const handleLaunchForm = (locale?: AddressLocale) => {
     const dispose = launchWorkspace(
@@ -102,25 +85,20 @@ const AddressLocalesPage = () => {
   });
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Address locales"
-          subTitle="Define reusable locale formats per country/region"
-          icon="worldPin"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
-          {...localeQuery}
-          data={localeQuery.locales}
-          title="Address locales"
-          columns={columns}
-          nothingFoundMessage="No locales found. Click add to create one."
-          renderExpandedRow={({ original }) => <AddressLocaleDetails locale={original} />}
-          onAdd={() => handleLaunchForm()}
-        />
-      </Paper>
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Address Locales"
+        subTitle="Define reusable locale formats per country/region"
+        icon="worldPin"
+      />
+      <StateFullDataTable
+        {...localeQuery}
+        data={localeQuery.locales}
+        columns={columns}
+        nothingFoundMessage="No locales found. Click add to create one."
+        renderExpandedRow={({ original }) => <AddressLocaleDetails locale={original} />}
+        onAdd={() => handleLaunchForm()}
+      />
     </Stack>
   );
 };

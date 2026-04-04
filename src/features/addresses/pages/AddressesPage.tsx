@@ -1,11 +1,10 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Badge, Box, Menu, Paper, SimpleGrid, Stack, Text } from '@mantine/core';
+import { ActionIcon, Badge, Menu, SimpleGrid, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
-import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
 import { AddressForm } from '../forms';
 import { useAddresses, useAddressesApi } from '../hooks';
@@ -14,7 +13,6 @@ import { Address, AddressFormData } from '../types';
 const AddressesPage = () => {
   const addressQuery = useAddresses();
   const { deleteAddress, restoreAddress, mutateAddresses } = useAddressesApi();
-  const { bgColor } = useAppColors();
 
   const handleLaunchForm = (address?: Address) => {
     const dispose = launchWorkspace(
@@ -89,25 +87,20 @@ const AddressesPage = () => {
   });
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Addresses"
-          subTitle="Manage user addresses and locale formats"
-          icon="mapPin"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
-          {...addressQuery}
-          data={addressQuery.addresses}
-          title="Addresses"
-          nothingFoundMessage="No addresses found. Click add to create one."
-          renderExpandedRow={({ original }) => <AddressDetails address={original} />}
-          columns={addressColumns}
-          onAdd={() => handleLaunchForm()}
-        />
-      </Paper>
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Addresses"
+        subTitle="Manage user addresses and locale formats"
+        icon="mapPin"
+      />
+      <StateFullDataTable
+        {...addressQuery}
+        data={addressQuery.addresses}
+        nothingFoundMessage="No addresses found. Click add to create one."
+        renderExpandedRow={({ original }) => <AddressDetails address={original} />}
+        columns={addressColumns}
+        onAdd={() => handleLaunchForm()}
+      />
     </Stack>
   );
 };

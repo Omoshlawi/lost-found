@@ -1,19 +1,9 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Menu,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-} from '@mantine/core';
+import { ActionIcon, Badge, Menu, SimpleGrid, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
-import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
 import { useAddressHierarchy, useAddressHierarchyApi } from '../hooks';
 import { AddressHierarchyNode } from '../types';
@@ -22,7 +12,6 @@ const AddressHierarchyPage = () => {
   const hierarchyQuery = useAddressHierarchy();
   const { deleteHierarchyNode, restoreHierarchyNode, mutateAddressHierarchy } =
     useAddressHierarchyApi();
-  const { bgColor } = useAppColors();
 
   const handleDeleteHierarchy = (node: AddressHierarchyNode) => {
     modals.openConfirmModal({
@@ -81,24 +70,19 @@ const AddressHierarchyPage = () => {
   });
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Address hierarchy"
-          subTitle="Manage locale-specific address labels"
-          icon="layersLinked"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
-          {...hierarchyQuery}
-          data={hierarchyQuery.hierarchy}
-          title="Hierarchy labels"
-          nothingFoundMessage="No hierarchy entries available."
-          columns={hierarchyColumns}
-          renderExpandedRow={({ original }) => <HierarchyDetails node={original} />}
-        />
-      </Paper>
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Address Hierarchy"
+        subTitle="Manage locale-specific address labels"
+        icon="layersLinked"
+      />
+      <StateFullDataTable
+        {...hierarchyQuery}
+        data={hierarchyQuery.hierarchy}
+        nothingFoundMessage="No hierarchy entries available."
+        columns={hierarchyColumns}
+        renderExpandedRow={({ original }) => <HierarchyDetails node={original} />}
+      />
     </Stack>
   );
 };
