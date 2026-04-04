@@ -69,7 +69,9 @@ const StateFullDataTable = <TData, TValue>({
 
   const totalPages = pagination ? Math.ceil(pagination.totalCount / pagination.pageSize) : 0;
   const rangeStart = pagination ? (pagination.currentPage - 1) * pagination.pageSize + 1 : 0;
-  const rangeEnd = pagination ? Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount) : 0;
+  const rangeEnd = pagination
+    ? Math.min(pagination.currentPage * pagination.pageSize, pagination.totalCount)
+    : 0;
 
   return (
     <>
@@ -79,7 +81,12 @@ const StateFullDataTable = <TData, TValue>({
         renderActions={(table) => (
           <>
             {typeof onAdd === 'function' && (
-              <Button leftSection={<IconPlus size={14} />} variant="light" size="xs" onClick={onAdd}>
+              <Button
+                leftSection={<IconPlus size={14} />}
+                variant="light"
+                size="xs"
+                onClick={onAdd}
+              >
                 Add
               </Button>
             )}
@@ -105,7 +112,8 @@ const StateFullDataTable = <TData, TValue>({
                     borderLeft: '1px solid var(--mantine-color-default-border)',
                     borderRight: '1px solid var(--mantine-color-default-border)',
                     borderBottom: '1px solid var(--mantine-color-default-border)',
-                    background: 'light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))',
+                    background:
+                      'light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',

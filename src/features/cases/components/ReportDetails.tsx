@@ -1,7 +1,11 @@
 import React from 'react';
-import { ActionIcon, Badge, Grid, Group, Stack, Text } from '@mantine/core';
-import { SectionTitle, StatusBadge, TablerIcon } from '@/components';
+import { ActionIcon, Badge, Button, Grid, Group, Stack, Text } from '@mantine/core';
+import { SectionTitle, StatusBadge, TablerIcon, launchWorkspace } from '@/components';
+import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
+import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
+import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import {
+  DocumentCase,
   FoundDocumentCase,
   FoundDocumentCaseStatus,
   LostDocumentCase,
@@ -16,6 +20,7 @@ interface ReportDetailsProps {
   tags?: string[];
   lostDocumentCase?: LostDocumentCase;
   foundDocumentCase?: FoundDocumentCase;
+  documentCase?: DocumentCase;
   onUpdateCaseDetails?: () => void;
 }
 
@@ -26,8 +31,12 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   tags,
   lostDocumentCase,
   foundDocumentCase,
+  documentCase,
   onUpdateCaseDetails,
 }) => {
+  const { hasAccess: canVerify } = useUserHasSystemAccessSync({ documentCase: ['verify'] });
+  const { hasAccess: canReject } = useUserHasSystemAccessSync({ documentCase: ['reject'] });
+
   const isLostReport = !!lostDocumentCase;
   const isFoundReport = !!foundDocumentCase;
 
@@ -70,17 +79,16 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   );
 
   if (isLostReport) {
+    const lostStatus = lostDocumentCase?.status;
     return (
       <Stack gap="lg">
         <Group justify="space-between" align="center">
           <SectionTitle label="Lost Report Details" />
-          <ActionIcon
-            variant="subtle"
-            onClick={onUpdateCaseDetails}
-            disabled={lostDocumentCase?.status !== LostDocumentCaseStatus.SUBMITTED}
-          >
-            <TablerIcon name="edit" size={20} />
-          </ActionIcon>
+          {lostStatus === LostDocumentCaseStatus.SUBMITTED && (
+            <ActionIcon variant="subtle" onClick={onUpdateCaseDetails}>
+              <TablerIcon name="edit" size={20} />
+            </ActionIcon>
+          )}
         </Group>
         <Grid>
           <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
@@ -102,17 +110,50 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   }
 
   if (isFoundReport) {
+    const foundStatus = foundDocumentCase?.status;
     return (
       <Stack gap="lg">
         <Group justify="space-between" align="center">
           <SectionTitle label="Found Report Details" />
-          <ActionIcon
-            variant="subtle"
-            onClick={onUpdateCaseDetails}
-            disabled={foundDocumentCase?.status !== FoundDocumentCaseStatus.DRAFT}
-          >
-            <TablerIcon name="edit" size={20} />
-          </ActionIcon>
+          <Group gap="xs">
+            {foundStatus === FoundDocumentCaseStatus.DRAFT && (
+              <ActionIcon variant="subtle" onClick={onUpdateCaseDetails}>
+                <TablerIcon name="edit" size={20} />
+              </ActionIcon>
+            )}
+            {foundStatus === FoundDocumentCaseStatus.SUBMITTED && canVerify && documentCase && (
+              <Button
+                size="xs"
+                variant="light"
+                color="civicGreen"
+                leftSection={<TablerIcon name="circleCheck" size={14} />}
+                onClick={() => {
+                  const dismiss = launchWorkspace(
+                    <VerifyFoundDocumentCaseForm documentCase={documentCase} onClose={() => dismiss()} />,
+                    { title: 'Verify Found Document Case' }
+                  );
+                }}
+              >
+                Verify
+              </Button>
+            )}
+            {foundStatus === FoundDocumentCaseStatus.SUBMITTED && canReject && documentCase && (
+              <Button
+                size="xs"
+                variant="light"
+                color="red"
+                leftSection={<TablerIcon name="circleX" size={14} />}
+                onClick={() => {
+                  const dismiss = launchWorkspace(
+                    <RejectFoundDocumentCaseForm documentCase={documentCase} onClose={() => dismiss()} />,
+                    { title: 'Reject Found Document Case' }
+                  );
+                }}
+              >
+                Reject
+              </Button>
+            )}
+          </Group>
         </Group>
         <Grid>
           <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>

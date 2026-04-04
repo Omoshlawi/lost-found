@@ -198,6 +198,7 @@ const DocumentCaseDetail = () => {
                 tags={reportData.tags}
                 lostDocumentCase={reportData.lostDocumentCase}
                 foundDocumentCase={reportData.foundDocumentCase}
+                documentCase={reportData}
                 onUpdateCaseDetails={handleUpdateReportDetails}
               />
               <ContactFooter
@@ -217,6 +218,7 @@ const DocumentCaseDetail = () => {
               status={status}
               document={reportData.document}
               lostDocumentCase={reportData.lostDocumentCase}
+              extraction={reportData.extraction}
             />
           </Paper>
         </Tabs.Panel>
