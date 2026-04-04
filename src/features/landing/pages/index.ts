@@ -6,3 +6,4 @@ export { default as LandingLayout } from './LandingLayout';
 export { default as AboutUsPage } from './AboutUsPage';
 export { default as HowItWorksPage } from './HowItWorksPage';
 export { default as ContactUsPage } from './ContactUsPage';
+export { default as TwoFactorVerifyPage } from './TwoFactorVerifyPage';

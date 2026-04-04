@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -8,115 +8,169 @@ import {
   Box,
   Button,
   Code,
+  CopyButton,
   Divider,
   Group,
   Loader,
   Modal,
   PasswordInput,
+  PinInput,
   Stack,
+  Stepper,
   Text,
-  TextInput,
   ThemeIcon,
+  Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
-import { TablerIcon } from '@/components';
+import QRCode from 'qrcode';
 import { authClient } from '@/lib/api';
+import { TablerIcon } from '@/components';
 
-const TotpSchema = z.object({
-  code: z.string().length(6, 'TOTP Code must be 6 digits'),
-  password: z.string().min(1, 'Password is required to confirm'),
+// ─── Schemas ─────────────────────────────────────────────────────────────────
+
+const PasswordSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
 });
 
-const DisableTotpSchema = z.object({
-  password: z.string().min(1, 'Password is required to disable'),
+const DisableSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
 });
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function extractSecret(uri: string): string {
+  try {
+    return new URL(uri).searchParams.get('secret') ?? uri;
+  } catch {
+    return uri;
+  }
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const TwoFactorSettings = () => {
   const { data: session, refetch: refetchSession } = authClient.useSession();
   const user = session?.user;
 
-  const [opened, { open, close }] = useDisclosure(false);
-  const [disableOpened, { open: openDisable, close: closeDisable }] = useDisclosure(false);
+  // Enable modal state
+  const [enableOpened, { open: openEnable, close: closeEnableRaw }] = useDisclosure(false);
+  const [step, setStep] = useState(0); // 0=password, 1=scan, 2=verify
   const [totpUri, setTotpUri] = useState<string | null>(null);
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [isLoadingSetup, setIsLoadingSetup] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [totpCode, setTotpCode] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  const enableForm = useForm<z.infer<typeof TotpSchema>>({
-    resolver: zodResolver(TotpSchema),
-    defaultValues: { code: '', password: '' },
-  });
+  // Disable modal state
+  const [disableOpened, { open: openDisable, close: closeDisable }] = useDisclosure(false);
 
-  const disableForm = useForm<z.infer<typeof DisableTotpSchema>>({
-    resolver: zodResolver(DisableTotpSchema),
+  const passwordForm = useForm<z.infer<typeof PasswordSchema>>({
+    resolver: zodResolver(PasswordSchema),
     defaultValues: { password: '' },
   });
 
-  const handleStartSetup = async () => {
-    setIsLoadingSetup(true);
-    open();
-    try {
-      const { data, error } = await (authClient as any).twoFactor.enable({
-        password: 'password',
-      });
-      if (error) {
-        throw new Error(error.message);
-      }
-      setTotpUri((data as any)?.totpURI || 'otpauth://totp/CitizenLink?secret=MOCKSECRET');
-      setBackupCodes((data as any)?.backupCodes || ['12345-67890', '09876-54321']);
-    } catch (error: any) {
-      showNotification({
-        title: 'Setup failed',
-        message: error.message || 'Failed to initiate 2FA setup.',
-        color: 'red',
-      });
-      close();
-    } finally {
-      setIsLoadingSetup(false);
-    }
+  const disableForm = useForm<z.infer<typeof DisableSchema>>({
+    resolver: zodResolver(DisableSchema),
+    defaultValues: { password: '' },
+  });
+
+  // Generate QR code whenever totpUri changes
+  useEffect(() => {
+    if (!totpUri) { return; }
+    QRCode.toDataURL(totpUri, { width: 200, margin: 2 })
+      .then(setQrDataUrl)
+      .catch(() => { setQrDataUrl(null); });
+  }, [totpUri]);
+
+  const resetEnableState = () => {
+    setStep(0);
+    setTotpUri(null);
+    setBackupCodes([]);
+    setQrDataUrl(null);
+    setTotpCode('');
+    setVerifyError('');
+    passwordForm.reset();
   };
 
-  const onVerifyEnable = async (_data: z.infer<typeof TotpSchema>) => {
+  const handleCloseEnable = () => {
+    closeEnableRaw();
+    resetEnableState();
+  };
+
+  // Step 0 → 1: verify password, get TOTP URI + backup codes
+  const onSubmitPassword = async (data: z.infer<typeof PasswordSchema>) => {
+    const result = await authClient.twoFactor.enable({
+      password: data.password,
+      issuer: 'CitizenLink',
+    });
+    if (result.error) {
+      passwordForm.setError('password', {
+        message: result.error.message ?? 'Incorrect password.',
+      });
+      return;
+    }
+    setTotpUri(result.data!.totpURI);
+    setBackupCodes(result.data!.backupCodes);
+    setStep(1);
+  };
+
+  // Step 1 → 2
+  const onProceedToVerify = () => {
+    setStep(2);
+  };
+
+  // Step 2: verify TOTP code → actually enables 2FA
+  const onVerifyCode = async (code: string) => {
+    if (code.length !== 6) { return; }
+    setIsVerifying(true);
+    setVerifyError('');
     try {
+      const result = await (authClient.twoFactor as any).verifyTotp({ code });
+      if (result?.error) {
+        setVerifyError(result.error.message ?? 'Invalid code. Please try again.');
+        setTotpCode('');
+        return;
+      }
+      // 2FA is now active — refresh session and close
+      refetchSession();
+      handleCloseEnable();
       showNotification({
         title: '2FA enabled',
         message: 'Two-factor authentication is now active on your account.',
         color: 'green',
       });
-      refetchSession();
-      close();
-      enableForm.reset();
-    } catch (error: any) {
-      enableForm.setError('code', { message: 'Invalid code or password.' });
+    } catch (err: any) {
+      setVerifyError(err?.message ?? 'Invalid code. Please try again.');
+      setTotpCode('');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
-  const onDisable = async (data: z.infer<typeof DisableTotpSchema>) => {
-    try {
-      const { error } = await (authClient as any).twoFactor.disable({
-        password: data.password,
+  const onDisable = async (data: z.infer<typeof DisableSchema>) => {
+    const result = await authClient.twoFactor.disable({ password: data.password });
+    if (result.error) {
+      disableForm.setError('password', {
+        message: result.error.message ?? 'Incorrect password.',
       });
-      if (error) {
-        throw new Error(error.message);
-      }
-      showNotification({
-        title: '2FA disabled',
-        message: 'Two-factor authentication has been removed from your account.',
-        color: 'orange',
-      });
-      refetchSession();
-      closeDisable();
-      disableForm.reset();
-    } catch (error: any) {
-      disableForm.setError('password', { message: 'Invalid password.' });
+      return;
     }
+    showNotification({
+      title: '2FA disabled',
+      message: 'Two-factor authentication has been removed from your account.',
+      color: 'orange',
+    });
+    refetchSession();
+    closeDisable();
+    disableForm.reset();
   };
 
-  if (!user) {
-    return <Loader size="sm" />;
-  }
+  if (!user) { return <Loader size="sm" />; }
 
-  const isEnabled = (user as any).twoFactorEnabled;
+  const isEnabled = (user as any).twoFactorEnabled as boolean;
+  const secret = totpUri ? extractSecret(totpUri) : null;
 
   return (
     <Stack gap="lg">
@@ -131,7 +185,7 @@ const TwoFactorSettings = () => {
         </Alert>
       )}
 
-      {/* 2FA status card */}
+      {/* Status card */}
       <Box
         style={{
           border: '1px solid var(--mantine-color-default-border)',
@@ -156,8 +210,8 @@ const TwoFactorSettings = () => {
                 </Badge>
               </Group>
               <Text size="xs" c="dimmed" maw={400}>
-                Use an authenticator app like Google Authenticator or Authy to generate one-time
-                security codes at sign-in.
+                Use an authenticator app like Google Authenticator or Authy to generate
+                one-time security codes at sign-in.
               </Text>
             </Box>
           </Group>
@@ -176,8 +230,7 @@ const TwoFactorSettings = () => {
             ) : (
               <Button
                 size="sm"
-                onClick={handleStartSetup}
-                loading={isLoadingSetup}
+                onClick={openEnable}
                 leftSection={<TablerIcon name="shieldCheck" size={15} stroke={2} />}
               >
                 Enable 2FA
@@ -187,110 +240,243 @@ const TwoFactorSettings = () => {
         </Group>
       </Box>
 
-      {/* Enable Modal */}
+      {/* ── Enable Modal ─────────────────────────────────────────────── */}
       <Modal
-        opened={opened}
-        onClose={close}
+        opened={enableOpened}
+        onClose={handleCloseEnable}
         title={
           <Group gap="sm">
             <ThemeIcon size={26} color="civicBlue" variant="light">
               <TablerIcon name="shieldLock" size={14} stroke={1.5} />
             </ThemeIcon>
             <Text fw={700} size="md">
-              Setup Two-Factor Authentication
+              Enable Two-Factor Authentication
             </Text>
           </Group>
         }
         size="lg"
+        closeOnClickOutside={false}
       >
-        <Stack gap="lg">
-          <Text size="sm" c="dimmed">
-            Scan the QR code below with your authenticator app, or enter the key manually.
-          </Text>
+        <Stepper active={step} size="xs" mb="xl" styles={{ separator: { marginInline: 4 } }}>
+          <Stepper.Step label="Confirm" description="Verify identity" />
+          <Stepper.Step label="Scan" description="Set up your app" />
+          <Stepper.Step label="Verify" description="Confirm it works" />
+        </Stepper>
 
-          <Box
-            style={{
-              border: '1px solid var(--mantine-color-default-border)',
-              backgroundColor: 'var(--mantine-color-default-hover)',
-              padding: 'var(--mantine-spacing-lg)',
-              textAlign: 'center',
-            }}
-          >
-            <Text
-              size="xs"
-              fw={600}
-              tt="uppercase"
-              c="dimmed"
-              mb="sm"
-              style={{ letterSpacing: '0.06em' }}
-            >
-              Manual entry code
-            </Text>
-            <Code block fz="sm" fw={600} p="md">
-              {totpUri || 'Loading…'}
-            </Code>
-          </Box>
-
-          <Box>
-            <Group gap="xs" mb="xs">
-              <TablerIcon
-                name="key"
-                size={15}
-                stroke={1.5}
-                color="var(--mantine-color-civicNavy-7)"
-              />
-              <Text size="sm" fw={600} c="civicNavy.7">
-                Backup Codes
-              </Text>
-            </Group>
-            <Text size="xs" c="dimmed" mb="sm">
-              Store these in a secure location — they are shown only once and can recover your
-              account if you lose your device.
-            </Text>
-            <Code block fz="sm" p="md" color="orange">
-              {backupCodes.join('\n')}
-            </Code>
-          </Box>
-
-          <Divider />
-
-          <Box component="form" onSubmit={enableForm.handleSubmit(onVerifyEnable)}>
+        {/* ── Step 0: Password ── */}
+        {step === 0 && (
+          <Box component="form" onSubmit={passwordForm.handleSubmit(onSubmitPassword)}>
             <Stack gap="md">
-              <TextInput
-                label="Confirmation Code"
-                description="Enter the 6-digit code from your authenticator app."
-                placeholder="000 000"
-                size="md"
-                {...enableForm.register('code')}
-                error={enableForm.formState.errors.code?.message}
-              />
+              <Text size="sm" c="dimmed">
+                Confirm your password to start the 2FA setup process.
+              </Text>
               <PasswordInput
-                label="Account Password"
-                description="Confirm your identity to activate 2FA."
+                label="Current Password"
                 placeholder="Your current password"
                 size="md"
-                {...enableForm.register('password')}
-                error={enableForm.formState.errors.password?.message}
+                autoFocus
+                {...passwordForm.register('password')}
+                error={passwordForm.formState.errors.password?.message}
               />
               <Group justify="flex-end" mt="xs">
-                <Button variant="default" size="md" onClick={close}>
+                <Button variant="default" size="md" onClick={handleCloseEnable}>
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   size="md"
-                  loading={enableForm.formState.isSubmitting}
-                  leftSection={<TablerIcon name="check" size={16} stroke={2} />}
+                  loading={passwordForm.formState.isSubmitting}
+                  rightSection={<TablerIcon name="arrowRight" size={16} stroke={2} />}
                 >
-                  Verify & Enable
+                  Continue
                 </Button>
               </Group>
             </Stack>
           </Box>
-        </Stack>
+        )}
+
+        {/* ── Step 1: Scan QR + backup codes ── */}
+        {step === 1 && totpUri && (
+          <Stack gap="lg">
+            <Text size="sm" c="dimmed">
+              Open your authenticator app and scan the QR code below, or enter the secret
+              key manually. Then save your backup codes somewhere safe before continuing.
+            </Text>
+
+            {/* QR code */}
+            <Box
+              style={{
+                border: '1px solid var(--mantine-color-default-border)',
+                backgroundColor: 'var(--mantine-color-default-hover)',
+                padding: 'var(--mantine-spacing-lg)',
+                textAlign: 'center',
+              }}
+            >
+              <Text
+                size="xs"
+                fw={600}
+                tt="uppercase"
+                c="dimmed"
+                mb="md"
+                style={{ letterSpacing: '0.06em' }}
+              >
+                Scan with your authenticator app
+              </Text>
+
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt="TOTP QR Code"
+                  style={{
+                    display: 'block',
+                    margin: '0 auto',
+                    imageRendering: 'pixelated',
+                    background: 'white',
+                    padding: 8,
+                  }}
+                  width={200}
+                  height={200}
+                />
+              ) : (
+                <Box style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Loader size="sm" />
+                </Box>
+              )}
+
+              {secret && (
+                <Box mt="md">
+                  <Text size="xs" c="dimmed" mb={6}>
+                    Can't scan? Enter this key manually:
+                  </Text>
+                  <CopyButton value={secret}>
+                    {({ copied, copy }) => (
+                      <Tooltip label={copied ? 'Copied!' : 'Click to copy'} withArrow>
+                        <Code
+                          block
+                          fz="sm"
+                          fw={700}
+                          p="sm"
+                          onClick={copy}
+                          style={{ cursor: 'pointer', letterSpacing: '0.1em', userSelect: 'all' }}
+                        >
+                          {secret}
+                        </Code>
+                      </Tooltip>
+                    )}
+                  </CopyButton>
+                </Box>
+              )}
+            </Box>
+
+            <Divider label="Backup Codes" labelPosition="left" />
+
+            <Box>
+              <Group gap="xs" mb="xs" justify="space-between" align="center">
+                <Text size="xs" c="dimmed">
+                  Save these codes — they can restore access if you lose your device.
+                  Each code can only be used once.
+                </Text>
+                <CopyButton value={backupCodes.join('\n')}>
+                  {({ copied, copy }) => (
+                    <Button
+                      variant="subtle"
+                      size="compact-xs"
+                      color={copied ? 'civicGreen' : 'civicBlue'}
+                      leftSection={<TablerIcon name={copied ? 'check' : 'copy'} size={12} stroke={2} />}
+                      onClick={copy}
+                      style={{ flexShrink: 0 }}
+                    >
+                      {copied ? 'Copied' : 'Copy all'}
+                    </Button>
+                  )}
+                </CopyButton>
+              </Group>
+
+              <Box
+                style={{
+                  border: '1px solid var(--mantine-color-orange-3)',
+                  padding: 'var(--mantine-spacing-md)',
+                }}
+              >
+                <Group gap="md" wrap="wrap">
+                  {backupCodes.map((code) => (
+                    <Code key={code} fz="sm" fw={600}>
+                      {code}
+                    </Code>
+                  ))}
+                </Group>
+              </Box>
+            </Box>
+
+            <Group justify="flex-end" mt="xs">
+              <Button
+                size="md"
+                onClick={onProceedToVerify}
+                rightSection={<TablerIcon name="arrowRight" size={16} stroke={2} />}
+              >
+                I've scanned the code and saved my backup codes
+              </Button>
+            </Group>
+          </Stack>
+        )}
+
+        {/* ── Step 2: Verify code ── */}
+        {step === 2 && (
+          <Stack gap="lg" align="center">
+            <ThemeIcon size={64} radius={0} variant="light" color="civicBlue" mx="auto">
+              <TablerIcon name="deviceMobile" size={32} stroke={1.5} />
+            </ThemeIcon>
+
+            <Box ta="center">
+              <Text fw={600} size="md" c="civicNavy.7" mb={4}>
+                Enter the code from your app
+              </Text>
+              <Text size="sm" c="dimmed">
+                Open your authenticator app and enter the 6-digit code shown for CitizenLink.
+              </Text>
+            </Box>
+
+            <PinInput
+              length={6}
+              type="number"
+              size="lg"
+              value={totpCode}
+              onChange={(val) => {
+                setTotpCode(val);
+                setVerifyError('');
+              }}
+              onComplete={onVerifyCode}
+              disabled={isVerifying}
+              error={!!verifyError}
+              autoFocus
+              oneTimeCode
+            />
+
+            {verifyError && (
+              <Text size="sm" c="red.6" ta="center">
+                {verifyError}
+              </Text>
+            )}
+
+            <Button
+              size="md"
+              fullWidth
+              loading={isVerifying}
+              disabled={totpCode.length !== 6}
+              onClick={() => { onVerifyCode(totpCode); }}
+              leftSection={!isVerifying && <TablerIcon name="shieldCheck" size={16} stroke={2} />}
+            >
+              Verify & Enable 2FA
+            </Button>
+
+            <Button variant="subtle" size="sm" onClick={() => { setStep(1); setTotpCode(''); setVerifyError(''); }}>
+              ← Back
+            </Button>
+          </Stack>
+        )}
       </Modal>
 
-      {/* Disable Modal */}
+      {/* ── Disable Modal ────────────────────────────────────────────── */}
       <Modal
         opened={disableOpened}
         onClose={closeDisable}
@@ -319,6 +505,7 @@ const TwoFactorSettings = () => {
               description="Confirm your identity to disable 2FA."
               placeholder="Your current password"
               size="md"
+              autoFocus
               {...disableForm.register('password')}
               error={disableForm.formState.errors.password?.message}
             />

@@ -22,11 +22,19 @@ const LoginForm = () => {
     },
     resolver: zodResolver(LoginValidationSchema),
   });
+
   const handleSubmit: SubmitHandler<LoginFormData> = async (values) => {
     try {
-      const { error } = await authClient.signIn.email({ ...values });
+      const { data: signInData, error } = await authClient.signIn.email({ ...values });
       if (error) {
         throw error;
+      }
+      if ((signInData as any)?.twoFactorRedirect) {
+        const destination = callbackUrl
+          ? `/two-factor-verify?callbackUrl=${encodeURIComponent(callbackUrl)}`
+          : '/two-factor-verify';
+        navigate(destination, { replace: true });
+        return;
       }
       showNotification({
         title: 'Login successful',
@@ -34,8 +42,11 @@ const LoginForm = () => {
         color: 'green',
         position: 'top-right',
       });
-      if (callbackUrl) navigate(callbackUrl, { replace: true });
-      else navigate('/dashboard');
+      if (callbackUrl) {
+        navigate(callbackUrl, { replace: true });
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       const e = handleApiErrors<LoginFormData>(error);
       if (e.detail) {
@@ -55,19 +66,22 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (data) {
-      if (callbackUrl) navigate(callbackUrl, { replace: true });
-      else navigate('/dashboard');
+      if (callbackUrl) {
+        navigate(callbackUrl, { replace: true });
+      } else {
+        navigate('/dashboard');
+      }
     }
   }, [data, navigate]);
 
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)}>
-      <Stack gap={'md'}>
+      <Stack gap="md">
         <Box>
           <Text variant="gradient" size="xl" mb="md" style={{ textWrap: 'wrap' }} fw={700}>
             Sign In
           </Text>
-          <Text c={'gray'}>Enter your email below to login to your account</Text>
+          <Text c="gray">Enter your email below to login to your account</Text>
         </Box>
         <Controller
           control={form.control}
@@ -113,8 +127,8 @@ const LoginForm = () => {
           Login
         </Button>
         <Flex
-          justify={'space-between'}
-          align={'center'}
+          justify="space-between"
+          align="center"
           direction={{ base: 'column', sm: 'row' }}
           gap="sm"
         >
@@ -123,12 +137,12 @@ const LoginForm = () => {
               Forgot password?
             </Text>
           </Link>
-          <Flex justify={'flex-end'} align={'center'}>
+          <Flex justify="flex-end" align="center">
             <Text size="sm">Don't have an account?</Text>
             <Link
-              to={`/register${callbackUrl ? '?callbackUrl=' + encodeURIComponent(callbackUrl) : ''}`}
+              to={callbackUrl ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}` : '/register'}
             >
-              <Button variant="transparent" p={'xs'}>
+              <Button variant="transparent" p="xs">
                 Sign up
               </Button>
             </Link>

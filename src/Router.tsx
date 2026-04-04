@@ -7,6 +7,7 @@ import {
   LoginPage,
   RegisterPage,
   ResetPasswordPage,
+  TwoFactorVerifyPage,
 } from '@/features/landing/pages';
 import {
   AddressesPage,
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
       {
         path: '/reset-password',
         element: <ResetPasswordPage />,
+      },
+      {
+        path: '/two-factor-verify',
+        element: <TwoFactorVerifyPage />,
       },
     ],
   },
