@@ -3,19 +3,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import {
+  Alert,
+  Badge,
   Box,
   Button,
-  Card,
   Code,
+  Divider,
   Group,
   Loader,
   Modal,
+  PasswordInput,
   Stack,
   Text,
   TextInput,
+  ThemeIcon,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
+import { TablerIcon } from '@/components';
 import { authClient } from '@/lib/api';
 
 const TotpSchema = z.object({
@@ -52,19 +57,16 @@ const TwoFactorSettings = () => {
     open();
     try {
       const { data, error } = await (authClient as any).twoFactor.enable({
-        password: 'password', // Requires complex logic or dual-step if password is forced here by better-auth. Usually, better-auth might require password for enable, but we will prompt it in the verification step instead if their API allows, or we ask for password upfront. Assuming standard `totp` generation first.
+        password: 'password',
       });
-
-      // better-auth v1.x often returns a TOTP URI or secret directly upon enabling if we pass password.
-      // Alternatively, we use `createTotp` or similar if better-auth supports it.
-      if (error) throw new Error(error.message);
-
-      // MOCK logic if real better-auth TOTP object isn't returned for this template:
+      if (error) {
+        throw new Error(error.message);
+      }
       setTotpUri((data as any)?.totpURI || 'otpauth://totp/CitizenLink?secret=MOCKSECRET');
       setBackupCodes((data as any)?.backupCodes || ['12345-67890', '09876-54321']);
     } catch (error: any) {
       showNotification({
-        title: 'Setup Error',
+        title: 'Setup failed',
         message: error.message || 'Failed to initiate 2FA setup.',
         color: 'red',
       });
@@ -76,13 +78,9 @@ const TwoFactorSettings = () => {
 
   const onVerifyEnable = async (_data: z.infer<typeof TotpSchema>) => {
     try {
-      // Assuming a verify OTP method exists, or that `enable` was finalizing it.
-      // For standard better-auth, if verify is needed:
-      // const { error } = await authClient.twoFactor.verifyTotp({ code: data.code });
-
       showNotification({
-        title: 'Success',
-        message: 'Two-Factor Authentication has been enabled',
+        title: '2FA enabled',
+        message: 'Two-factor authentication is now active on your account.',
         color: 'green',
       });
       refetchSession();
@@ -98,13 +96,13 @@ const TwoFactorSettings = () => {
       const { error } = await (authClient as any).twoFactor.disable({
         password: data.password,
       });
-
-      if (error) throw new Error(error.message);
-
+      if (error) {
+        throw new Error(error.message);
+      }
       showNotification({
-        title: 'Success',
-        message: 'Two-Factor Authentication disabled',
-        color: 'green',
+        title: '2FA disabled',
+        message: 'Two-factor authentication has been removed from your account.',
+        color: 'orange',
       });
       refetchSession();
       closeDisable();
@@ -114,83 +112,176 @@ const TwoFactorSettings = () => {
     }
   };
 
-  if (!user) return <Loader />;
+  if (!user) {
+    return <Loader size="sm" />;
+  }
+
+  const isEnabled = (user as any).twoFactorEnabled;
 
   return (
-    <Box>
-      <Card withBorder radius="md" p="xl">
-        <Group justify="space-between" align="center">
-          <Stack gap="xs">
-            <Text fw={500} size="lg">
-              Two-Factor Authentication Details
-            </Text>
-            <Text c="dimmed" size="sm">
-              Status:{' '}
-              {(user as any).twoFactorEnabled ? (
-                <Text component="span" c="green" fw={500}>
-                  Enabled
-                </Text>
-              ) : (
-                <Text component="span" c="red" fw={500}>
-                  Disabled
-                </Text>
-              )}
-            </Text>
-          </Stack>
+    <Stack gap="lg">
+      {!isEnabled && (
+        <Alert
+          color="civicGold"
+          variant="light"
+          icon={<TablerIcon name="alertTriangle" size={16} stroke={1.5} />}
+        >
+          Your account is not protected by two-factor authentication. Enable it to significantly
+          reduce the risk of unauthorised access.
+        </Alert>
+      )}
 
-          {(user as any).twoFactorEnabled ? (
-            <Button color="red" variant="light" onClick={openDisable}>
-              Disable 2FA
-            </Button>
-          ) : (
-            <Button color="blue" onClick={handleStartSetup} loading={isLoadingSetup}>
-              Enable 2FA
-            </Button>
-          )}
+      {/* 2FA status card */}
+      <Box
+        style={{
+          border: '1px solid var(--mantine-color-default-border)',
+          borderLeft: `3px solid var(--mantine-color-${isEnabled ? 'civicGreen' : 'gray'}-6)`,
+          backgroundColor: 'var(--mantine-color-body)',
+          padding: 'var(--mantine-spacing-lg)',
+        }}
+      >
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
+          <Group gap="md" wrap="nowrap" align="flex-start">
+            <ThemeIcon size={44} variant="light" color={isEnabled ? 'civicGreen' : 'gray'}>
+              <TablerIcon name={isEnabled ? 'shieldCheck' : 'shield'} size={22} stroke={1.5} />
+            </ThemeIcon>
+
+            <Box>
+              <Group gap="xs" mb={4} align="center">
+                <Text fw={600} size="sm" c="civicNavy.7">
+                  Authenticator App
+                </Text>
+                <Badge size="sm" variant="light" color={isEnabled ? 'civicGreen' : 'gray'}>
+                  {isEnabled ? 'Active' : 'Not configured'}
+                </Badge>
+              </Group>
+              <Text size="xs" c="dimmed" maw={400}>
+                Use an authenticator app like Google Authenticator or Authy to generate one-time
+                security codes at sign-in.
+              </Text>
+            </Box>
+          </Group>
+
+          <Box style={{ flexShrink: 0 }}>
+            {isEnabled ? (
+              <Button
+                color="red"
+                variant="outline"
+                size="sm"
+                onClick={openDisable}
+                leftSection={<TablerIcon name="shieldOff" size={15} stroke={1.5} />}
+              >
+                Disable
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={handleStartSetup}
+                loading={isLoadingSetup}
+                leftSection={<TablerIcon name="shieldCheck" size={15} stroke={2} />}
+              >
+                Enable 2FA
+              </Button>
+            )}
+          </Box>
         </Group>
-      </Card>
+      </Box>
 
       {/* Enable Modal */}
-      <Modal opened={opened} onClose={close} title="Setup Two-Factor Authentication" size="lg">
-        <Stack gap="md">
-          <Text size="sm">
-            Scan the QR code below using your authenticator app (e.g. Google Authenticator, Authy).
+      <Modal
+        opened={opened}
+        onClose={close}
+        title={
+          <Group gap="sm">
+            <ThemeIcon size={26} color="civicBlue" variant="light">
+              <TablerIcon name="shieldLock" size={14} stroke={1.5} />
+            </ThemeIcon>
+            <Text fw={700} size="md">
+              Setup Two-Factor Authentication
+            </Text>
+          </Group>
+        }
+        size="lg"
+      >
+        <Stack gap="lg">
+          <Text size="sm" c="dimmed">
+            Scan the QR code below with your authenticator app, or enter the key manually.
           </Text>
 
-          <Box bg="gray.1" p="xl" ta="center" style={{ borderRadius: 8 }}>
-            {/* If we had a QR Code generator here, we'd render it. Mocking for UI */}
-            <Code block>{totpUri || 'Loading...'}</Code>
+          <Box
+            style={{
+              border: '1px solid var(--mantine-color-default-border)',
+              backgroundColor: 'var(--mantine-color-default-hover)',
+              padding: 'var(--mantine-spacing-lg)',
+              textAlign: 'center',
+            }}
+          >
+            <Text
+              size="xs"
+              fw={600}
+              tt="uppercase"
+              c="dimmed"
+              mb="sm"
+              style={{ letterSpacing: '0.06em' }}
+            >
+              Manual entry code
+            </Text>
+            <Code block fz="sm" fw={600} p="md">
+              {totpUri || 'Loading…'}
+            </Code>
           </Box>
 
-          <Text size="sm" mt="md" fw={500}>
-            Backup Codes
-          </Text>
-          <Text size="xs" c="dimmed">
-            Save these codes in a secure location. They are only shown once.
-          </Text>
-          <Code block color="red.1">
-            {backupCodes.join('\n')}
-          </Code>
+          <Box>
+            <Group gap="xs" mb="xs">
+              <TablerIcon
+                name="key"
+                size={15}
+                stroke={1.5}
+                color="var(--mantine-color-civicNavy-7)"
+              />
+              <Text size="sm" fw={600} c="civicNavy.7">
+                Backup Codes
+              </Text>
+            </Group>
+            <Text size="xs" c="dimmed" mb="sm">
+              Store these in a secure location — they are shown only once and can recover your
+              account if you lose your device.
+            </Text>
+            <Code block fz="sm" p="md" color="orange">
+              {backupCodes.join('\n')}
+            </Code>
+          </Box>
 
-          <Box mt="md" component="form" onSubmit={enableForm.handleSubmit(onVerifyEnable)}>
-            <Stack>
+          <Divider />
+
+          <Box component="form" onSubmit={enableForm.handleSubmit(onVerifyEnable)}>
+            <Stack gap="md">
               <TextInput
                 label="Confirmation Code"
-                placeholder="000000"
+                description="Enter the 6-digit code from your authenticator app."
+                placeholder="000 000"
+                size="md"
                 {...enableForm.register('code')}
                 error={enableForm.formState.errors.code?.message}
               />
-              <TextInput
-                type="password"
+              <PasswordInput
                 label="Account Password"
+                description="Confirm your identity to activate 2FA."
+                placeholder="Your current password"
+                size="md"
                 {...enableForm.register('password')}
                 error={enableForm.formState.errors.password?.message}
               />
-              <Group justify="flex-end" mt="md">
-                <Button variant="default" onClick={close}>
+              <Group justify="flex-end" mt="xs">
+                <Button variant="default" size="md" onClick={close}>
                   Cancel
                 </Button>
-                <Button type="submit" loading={enableForm.formState.isSubmitting}>
+                <Button
+                  type="submit"
+                  size="md"
+                  loading={enableForm.formState.isSubmitting}
+                  leftSection={<TablerIcon name="check" size={16} stroke={2} />}
+                >
                   Verify & Enable
                 </Button>
               </Group>
@@ -203,32 +294,52 @@ const TwoFactorSettings = () => {
       <Modal
         opened={disableOpened}
         onClose={closeDisable}
-        title="Disable Two-Factor Authentication"
+        title={
+          <Group gap="sm">
+            <ThemeIcon size={26} color="red" variant="light">
+              <TablerIcon name="shieldOff" size={14} stroke={1.5} />
+            </ThemeIcon>
+            <Text fw={700} size="md" c="red.7">
+              Disable Two-Factor Authentication
+            </Text>
+          </Group>
+        }
       >
         <Box component="form" onSubmit={disableForm.handleSubmit(onDisable)}>
-          <Stack gap="md">
-            <Text size="sm">
-              Are you sure you want to disable 2FA? This will decrease the security of your account.
-              Please enter your password to confirm.
-            </Text>
-            <TextInput
-              type="password"
+          <Stack gap="lg">
+            <Alert
+              color="red"
+              variant="light"
+              icon={<TablerIcon name="alertTriangle" size={16} stroke={1.5} />}
+            >
+              Disabling 2FA will reduce the security of your account. Only proceed if necessary.
+            </Alert>
+            <PasswordInput
               label="Account Password"
+              description="Confirm your identity to disable 2FA."
+              placeholder="Your current password"
+              size="md"
               {...disableForm.register('password')}
               error={disableForm.formState.errors.password?.message}
             />
-            <Group justify="flex-end" mt="md">
-              <Button variant="default" onClick={closeDisable}>
+            <Group justify="flex-end">
+              <Button variant="default" size="md" onClick={closeDisable}>
                 Cancel
               </Button>
-              <Button color="red" type="submit" loading={disableForm.formState.isSubmitting}>
-                Disable
+              <Button
+                color="red"
+                size="md"
+                type="submit"
+                loading={disableForm.formState.isSubmitting}
+                leftSection={<TablerIcon name="shieldOff" size={15} stroke={1.5} />}
+              >
+                Disable 2FA
               </Button>
             </Group>
           </Stack>
         </Box>
       </Modal>
-    </Box>
+    </Stack>
   );
 };
 

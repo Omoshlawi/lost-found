@@ -1,13 +1,12 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Container, Group, Paper, Stack, Tabs, Text, Title } from '@mantine/core';
+import { Link, useLocation } from 'react-router-dom';
+import { Box, Divider, Grid, NavLink, Stack, Text, Title } from '@mantine/core';
 import { DashboardPageHeader, TablerIcon } from '@/components';
 import PasswordSettings from '../components/PasswordSettings';
 import ProfileSettings from '../components/ProfileSettings';
 import TwoFactorSettings from '../components/TwoFactorSettings';
 
 const SettingsPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
 
   const getActiveTab = () => {
@@ -18,74 +17,109 @@ const SettingsPage = () => {
 
   const activeTab = getActiveTab();
 
-  const handleTabChange = (value: string | null) => {
-    if (!value) return;
-    if (value === 'profile') navigate('/dashboard/settings/profile');
-    if (value === 'password') navigate('/dashboard/settings/change-password');
-    if (value === 'security') navigate('/dashboard/settings/two-factor');
+  const navItems = [
+    {
+      value: 'profile',
+      label: 'Profile',
+      icon: 'user',
+      href: '/dashboard/settings/profile',
+    },
+    {
+      value: 'password',
+      label: 'Password',
+      icon: 'key',
+      href: '/dashboard/settings/change-password',
+    },
+    {
+      value: 'security',
+      label: 'Two-Factor Auth',
+      icon: 'shieldLock',
+      href: '/dashboard/settings/two-factor',
+    },
+  ] as const;
+
+  const sections: Record<string, { title: string; description: string }> = {
+    profile: {
+      title: 'Profile Information',
+      description: 'Update your name and view your account details.',
+    },
+    password: {
+      title: 'Change Password',
+      description: 'Ensure your account is secured with a strong, unique password.',
+    },
+    security: {
+      title: 'Two-Factor Authentication',
+      description: 'Add an extra layer of protection to your account.',
+    },
   };
+
+  const current = sections[activeTab];
 
   return (
     <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Account Settings"
-          subTitle="Manage your personal information, security, and preferences"
-          icon="settings"
-        />
-      </Box>
+      <DashboardPageHeader
+        title="Account Settings"
+        subTitle="Manage your personal information, security, and preferences"
+        icon="settings"
+      />
 
-      <Paper p="md" radius="md" withBorder>
-        <Tabs value={activeTab} onChange={handleTabChange} variant="outline" radius="md">
-          <Tabs.List mb="xl">
-            <Tabs.Tab value="profile" leftSection={<TablerIcon name="user" size={16} />}>
-              Profile Information
-            </Tabs.Tab>
-            <Tabs.Tab value="password" leftSection={<TablerIcon name="fingerprint" size={16} />}>
-              Change Password
-            </Tabs.Tab>
-            <Tabs.Tab value="security" leftSection={<TablerIcon name="lock" size={16} />}>
-              Two-Factor Authentication
-            </Tabs.Tab>
-          </Tabs.List>
+      <Grid gutter={32}>
+        {/* ── Sidebar nav ──────────────────────────────────── */}
+        <Grid.Col span={{ base: 12, md: 3 }}>
+          <Box style={{ borderRight: '1px solid var(--mantine-color-default-border)' }} h="100%">
+            <Text
+              size="xs"
+              fw={600}
+              tt="uppercase"
+              c="dimmed"
+              px="sm"
+              pb="xs"
+              mb={4}
+              style={{ letterSpacing: '0.06em' }}
+            >
+              Settings
+            </Text>
+            <Stack gap={0}>
+              {navItems.map(({ value, label, icon, href }) => {
+                const active = activeTab === value;
+                return (
+                  <NavLink
+                    key={value}
+                    component={Link}
+                    to={href}
+                    label={label}
+                    active={active}
+                    color="civicBlue"
+                    fw={active ? 600 : 400}
+                    leftSection={
+                      <TablerIcon name={icon} size={16} stroke={active ? 2 : 1.5} />
+                    }
+                  />
+                );
+              })}
+            </Stack>
+          </Box>
+        </Grid.Col>
 
-          <Tabs.Panel value="profile">
-            <Container size="sm" p={0} m={0}>
-              <Title order={3} mb="sm">
-                Profile Information
+        {/* ── Content area ─────────────────────────────────── */}
+        <Grid.Col span={{ base: 12, md: 9 }}>
+          <Stack gap="lg">
+            <Box>
+              <Title order={3} mb={4}>
+                {current.title}
               </Title>
-              <Text c="dimmed" mb="xl">
-                Update your account's profile information and email address.
+              <Text size="sm" c="dimmed">
+                {current.description}
               </Text>
-              <ProfileSettings />
-            </Container>
-          </Tabs.Panel>
+              <Divider mt="sm" />
+            </Box>
 
-          <Tabs.Panel value="password">
-            <Container size="sm" p={0} m={0}>
-              <Title order={3} mb="sm">
-                Change Password
-              </Title>
-              <Text c="dimmed" mb="xl">
-                Ensure your account is using a long, random password to stay secure.
-              </Text>
-              <PasswordSettings />
-            </Container>
-          </Tabs.Panel>
-
-          <Tabs.Panel value="security">
-            <Container size="sm" p={0} m={0}>
-              <Title order={3} mb="sm">
-                Two Factor Authentication
-              </Title>
-              <Text c="dimmed" mb="xl">
-                Add additional security to your account using two factor authentication.
-              </Text>
-              <TwoFactorSettings />
-            </Container>
-          </Tabs.Panel>
-        </Tabs>
-      </Paper>
+            {activeTab === 'profile' && <ProfileSettings />}
+            {activeTab === 'password' && <PasswordSettings />}
+            {activeTab === 'security' && <TwoFactorSettings />}
+          </Stack>
+        </Grid.Col>
+      </Grid>
     </Stack>
   );
 };
