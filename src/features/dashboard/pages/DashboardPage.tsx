@@ -86,15 +86,20 @@ export function DashboardPage() {
   const foundSubmitted = useDocumentCases({
     caseType: 'FOUND',
     status: FoundDocumentCaseStatus.SUBMITTED,
-    limit: 100,
+    limit: 1,
+  });
+  const foundDraft = useDocumentCases({
+    caseType: 'FOUND',
+    status: FoundDocumentCaseStatus.DRAFT,
+    limit: 1,
   });
   const lostActive = useDocumentCases({
     caseType: 'LOST',
     status: LostDocumentCaseStatus.SUBMITTED,
-    limit: 100,
+    limit: 1,
   });
-  const claimsPending = useClaims({ status: ClaimStatus.PENDING, limit: 100 });
-  const claimsUnderReview = useClaims({ status: ClaimStatus.UNDER_REVIEW, limit: 100 });
+  const claimsPending = useClaims({ status: ClaimStatus.PENDING, limit: 1 });
+  const claimsUnderReview = useClaims({ status: ClaimStatus.UNDER_REVIEW, limit: 1 });
 
   return (
     <Stack gap="xl">
@@ -120,39 +125,39 @@ export function DashboardPage() {
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
         <KpiCard
           label="Awaiting Verification"
-          description="Found docs submitted by finders"
+          description="Found cases submitted, pending staff review"
           icon="fileCheck"
           color="civicBlue"
-          count={foundSubmitted.reports.length}
+          count={foundSubmitted.totalCount}
           isLoading={foundSubmitted.isLoading}
-          linkTo="/dashboard/found-documents"
+          linkTo="/dashboard/cases?type=found&status=SUBMITTED"
+        />
+        <KpiCard
+          label="Pending Collection"
+          description="Found cases in draft awaiting collection"
+          icon="packageImport"
+          color="teal"
+          count={foundDraft.totalCount}
+          isLoading={foundDraft.isLoading}
+          linkTo="/dashboard/cases?type=found&status=DRAFT"
         />
         <KpiCard
           label="Active Lost Cases"
           description="Open lost document reports"
           icon="fileSearch"
           color="civicNavy"
-          count={lostActive.reports.length}
+          count={lostActive.totalCount}
           isLoading={lostActive.isLoading}
-          linkTo="/dashboard/lost-documents"
+          linkTo="/dashboard/cases?type=lost&status=SUBMITTED"
         />
         <KpiCard
           label="Claims Pending"
           description="Claims awaiting staff review"
           icon="filterQuestion"
           color="civicGold"
-          count={claimsPending.claims.length}
+          count={claimsPending.totalCount}
           isLoading={claimsPending.isLoading}
-          linkTo="/dashboard/claims"
-        />
-        <KpiCard
-          label="Under Review"
-          description="Claims currently being reviewed"
-          icon="clock"
-          color="orange"
-          count={claimsUnderReview.claims.length}
-          isLoading={claimsUnderReview.isLoading}
-          linkTo="/dashboard/claims"
+          linkTo="/dashboard/claims?status=PENDING"
         />
       </SimpleGrid>
     </Stack>
