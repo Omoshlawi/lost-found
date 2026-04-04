@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { StatusTransitionReasonFormData } from '@/features/status-transitions/types';
-import { apiFetch, APIFetchResponse, constructUrl, mutate, useApi } from '@/lib/api';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
   CaseDocumentFormData,
   DocumentCase,
@@ -12,9 +12,12 @@ import {
 export const useDocumentCases = (params: Record<string, any> = {}) => {
   const url = constructUrl(`/documents/cases`, params);
   const { data, error, mutate, isLoading } =
-    useApi<APIFetchResponse<{ results: Array<DocumentCase> }>>(url);
+    useApi<APIFetchResponse<PaginatedData<DocumentCase>>>(url);
   return {
     reports: data?.data?.results ?? [],
+    total: data?.data?.total ?? 0,
+    page: data?.data?.page ?? 1,
+    limit: data?.data?.limit ?? 20,
     isLoading,
     error,
     mutate,

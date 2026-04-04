@@ -1,172 +1,192 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Badge, Box, Menu, Paper, Stack, Text } from '@mantine/core';
+import { ActionIcon, Menu, Select, Stack, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
   DashboardPageHeader,
   StateFullDataTable,
+  StatusBadge,
   SystemAuthorized,
   TablerIcon,
 } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
-import { useAppColors } from '@/hooks/useAppColors';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
 import { RejectFoundDocumentCaseForm, VerifyFoundDocumentCaseForm } from '../forms';
 import FoundDocumentCaseForm from '../forms/FoundDocumentCaseForm';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
-import { DocumentCase } from '../types';
-import { getStatusColor } from '../utils';
+import { DocumentCase, FoundDocumentCaseStatus } from '../types';
+
+const PAGE_SIZE = 20;
+
+const STATUS_OPTIONS = [
+  { label: 'Draft', value: FoundDocumentCaseStatus.DRAFT },
+  { label: 'Submitted', value: FoundDocumentCaseStatus.SUBMITTED },
+  { label: 'Verified', value: FoundDocumentCaseStatus.VERIFIED },
+  { label: 'Rejected', value: FoundDocumentCaseStatus.REJECTED },
+  { label: 'Completed', value: FoundDocumentCaseStatus.COMPLETED },
+];
 
 const FoundDocumentCasesPage = () => {
-  const documentreportAsync = useDocumentCases({
+  const { page, status, search, searchInput, setSearchInput, setStatus, setPage } =
+    useTableUrlFilters();
+
+  const documentCasesAsync = useDocumentCases({
     v: 'custom:include(foundDocumentCase,document:include(type),address)',
     caseType: 'FOUND',
+    page,
+    limit: PAGE_SIZE,
+    ...(search && { search }),
+    ...(status && { status }),
   });
+
   const { deleteDocumentCase } = useDocumentCaseApi();
-  const { bgColor } = useAppColors();
 
   const handleDelete = (report: DocumentCase) => {
     modals.openConfirmModal({
-      title: 'Delete your profile',
-      centered: true,
+      title: 'Delete Case',
       children: (
         <Text size="sm">
-          Are you sure you want to delete document report? This action is destructive and can only
-          be reveredby admin users
+          Are you sure you want to delete this case? This action is destructive and can only be
+          reversed by an admin.
         </Text>
       ),
-      labels: { confirm: 'Delete', cancel: "No don't delete it" },
+      labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
       onConfirm: async () => {
         try {
           await deleteDocumentCase(report.id);
-          showNotification({
-            title: 'success',
-            message: 'Document type deleted succesfully!',
-            color: 'green',
-          });
+          showNotification({ title: 'Deleted', message: 'Case deleted.', color: 'green' });
         } catch (error) {
           const e = handleApiErrors<{}>(error);
-          if (e.detail) {
-            showNotification({
-              title: 'Error deleting document type',
-              message: e.detail,
-              color: 'red',
-              position: 'top-right',
-            });
-          }
+          if (e.detail) showNotification({ title: 'Error', message: e.detail, color: 'red' });
         }
       },
     });
   };
-  const handleLaunchReportForm = () => {
+
+  const handleAdd = () => {
     const close = launchWorkspace(<FoundDocumentCaseForm closeWorkspace={() => close()} />, {
       expandable: true,
       width: 'wide',
-      title: 'Found Document Case Form',
+      title: 'Report Found Document',
     });
   };
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Found Documents"
-          subTitle={`
-          Manage found documents`}
-          icon="listNumbers"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
-          {...documentreportAsync}
-          data={documentreportAsync.reports}
-          columns={[
-            ...columns,
-            {
-              id: 'actions',
-              cell: ({ row: { original: docCase } }) => (
-                <Menu shadow="md" width={200}>
-                  <Menu.Target>
-                    <ActionIcon variant="transparent" aria-label="Settings">
-                      <TablerIcon
-                        name="dots"
-                        style={{ width: '70%', height: '70%' }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Label>Actions</Menu.Label>
-                    <Menu.Divider />
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Found Documents"
+        subTitle="Verify and manage found document reports"
+        icon="fileCheck"
+      />
+      <StateFullDataTable
+        {...documentCasesAsync}
+        data={documentCasesAsync.reports}
+        columns={[
+          ...columns,
+          {
+            id: 'actions',
+            size: 40,
+            cell: ({ row: { original: report } }) => (
+              <Menu position="bottom-end" width={200}>
+                <Menu.Target>
+                  <ActionIcon variant="subtle" size="sm" aria-label="Row actions">
+                    <TablerIcon name="dots" size={14} stroke={1.5} />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="eye" size={14} />}
+                    component={Link}
+                    to={`${report.id}`}
+                  >
+                    View Details
+                  </Menu.Item>
+                  <SystemAuthorized
+                    permissions={{ documentCase: ['verify'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
                     <Menu.Item
-                      leftSection={<TablerIcon name="eye" size={14} />}
-                      component={Link}
-                      to={`${docCase.id}`}
+                      leftSection={<TablerIcon name="check" size={14} />}
+                      color="green"
+                      onClick={() => {
+                        const dismiss = launchWorkspace(
+                          <VerifyFoundDocumentCaseForm
+                            documentCase={report}
+                            onClose={() => dismiss()}
+                          />,
+                          { title: 'Verify Found Document Case' }
+                        );
+                      }}
                     >
-                      View Details
+                      Verify
                     </Menu.Item>
-                    <SystemAuthorized
-                      permissions={{ documentCase: ['verify'] }}
-                      unauthorizedAction={{ type: 'hide' }}
-                    >
-                      <Menu.Item
-                        leftSection={<TablerIcon name="check" size={14} />}
-                        onClick={() => {
-                          const dismiss = launchWorkspace(
-                            <VerifyFoundDocumentCaseForm
-                              documentCase={docCase}
-                              onClose={() => dismiss()}
-                            />,
-                            {
-                              title: 'Verify Found Document Case',
-                            }
-                          );
-                        }}
-                        color="green"
-                      >
-                        Verify
-                      </Menu.Item>
-                    </SystemAuthorized>
-                    <SystemAuthorized
-                      permissions={{ documentCase: ['reject'] }}
-                      unauthorizedAction={{ type: 'hide' }}
-                    >
-                      <Menu.Item
-                        leftSection={<TablerIcon name="x" size={14} />}
-                        onClick={() => {
-                          const dismiss = launchWorkspace(
-                            <RejectFoundDocumentCaseForm
-                              documentCase={docCase}
-                              onClose={() => dismiss()}
-                            />,
-                            {
-                              title: 'Reject Found Document Case',
-                            }
-                          );
-                        }}
-                        color="red"
-                      >
-                        Reject
-                      </Menu.Item>
-                    </SystemAuthorized>
+                  </SystemAuthorized>
+                  <SystemAuthorized
+                    permissions={{ documentCase: ['reject'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
                     <Menu.Item
-                      leftSection={<TablerIcon name="trash" size={14} />}
+                      leftSection={<TablerIcon name="x" size={14} />}
                       color="red"
-                      onClick={() => handleDelete(docCase)}
+                      onClick={() => {
+                        const dismiss = launchWorkspace(
+                          <RejectFoundDocumentCaseForm
+                            documentCase={report}
+                            onClose={() => dismiss()}
+                          />,
+                          { title: 'Reject Found Document Case' }
+                        );
+                      }}
                     >
-                      Delete
+                      Reject
                     </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              ),
-            },
-          ]}
-          onAdd={() => handleLaunchReportForm()}
-        />
-      </Paper>
+                  </SystemAuthorized>
+                  <Menu.Divider />
+                  <Menu.Item
+                    leftSection={<TablerIcon name="trash" size={14} />}
+                    color="red"
+                    onClick={() => handleDelete(report)}
+                  >
+                    Delete
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            ),
+          },
+        ]}
+        onAdd={handleAdd}
+        renderActions={() => (
+          <>
+            <TextInput
+              placeholder="Search cases..."
+              leftSection={<TablerIcon name="search" size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="xs"
+              w={200}
+            />
+            <Select
+              placeholder="Status"
+              data={STATUS_OPTIONS}
+              value={status}
+              onChange={setStatus}
+              size="xs"
+              clearable
+              w={140}
+            />
+          </>
+        )}
+        pagination={{
+          total: documentCasesAsync.total,
+          page,
+          limit: PAGE_SIZE,
+          onChange: setPage,
+        }}
+      />
     </Stack>
   );
 };
@@ -175,50 +195,33 @@ export default FoundDocumentCasesPage;
 
 const columns: ColumnDef<DocumentCase>[] = [
   {
-    header: '#',
-    id: 'no',
-    cell: ({ row, table }) => (table.getSortedRowModel().rows.indexOf(row) + 1).toString(),
-    enableSorting: false,
+    header: 'Case No.',
+    accessorKey: 'caseNumber',
     enableHiding: false,
   },
   {
-    header: 'Case number',
-    accessorKey: 'caseNumber',
-  },
-  {
-    header: 'Owner name',
+    header: 'Owner Name',
     accessorKey: 'document.fullName',
+    cell: ({ row: { original } }) => original.document?.fullName ?? '—',
   },
   {
     header: 'Document Type',
     accessorKey: 'document.type.name',
+    cell: ({ row: { original } }) => original.document?.type?.name ?? '—',
   },
   {
-    header: 'Found date',
+    header: 'Found Date',
     accessorKey: 'eventDate',
-    cell: ({ row: { original: docType } }) => formatDate(docType.eventDate),
-  },
-  {
-    header: 'Address',
-    accessorKey: 'address.label',
+    cell: ({ row: { original } }) => formatDate(original.eventDate),
   },
   {
     header: 'Status',
     accessorKey: 'foundDocumentCase.status',
-    cell: ({ row: { original: docType } }) => (
-      <Badge variant="light" color={getStatusColor(docType.foundDocumentCase?.status)}>
-        {docType.foundDocumentCase?.status}
-      </Badge>
-    ),
+    cell: ({ row: { original } }) => <StatusBadge status={original.foundDocumentCase?.status} />,
   },
   {
-    header: 'Created at',
+    header: 'Reported',
     accessorKey: 'createdAt',
-    cell: ({ row: { original: docType } }) => formatDate(docType.createdAt),
-  },
-  {
-    header: 'Updated at',
-    accessorKey: 'updatedAt',
-    cell: ({ row: { original: docType } }) => formatDate(docType.updatedAt),
+    cell: ({ row: { original } }) => formatDate(original.createdAt),
   },
 ];

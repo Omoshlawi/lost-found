@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Box, Menu, Paper, Stack, Text } from '@mantine/core';
+import { ActionIcon, Menu, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
@@ -10,7 +10,6 @@ import {
   TablerIcon,
   TablerIconName,
 } from '@/components';
-import { useAppColors } from '@/hooks/useAppColors';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { handleApiErrors } from '@/lib/api';
 import { DocumentTypeForm } from '../forms';
@@ -21,7 +20,6 @@ const DocumentTypesPage = () => {
   const documentTypesAsync = useDocumentTypes();
   const { deleteDocumentType, mutateDocumentTypes } = useDocumentTypesApi();
   const { hasAccess } = useUserHasSystemAccess({ documentType: ['create'] });
-  const { bgColor } = useAppColors();
   const handleDelete = (documentType: DocumentType) => {
     modals.openConfirmModal({
       title: 'Delete Document Type',
@@ -69,16 +67,12 @@ const DocumentTypesPage = () => {
   };
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Document Types"
-          subTitle={`
-          Manage document types`}
-          icon="listNumbers"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Document Types"
+        subTitle="Configure supported document categories"
+        icon="idBadge2"
+      />
         <StateFullDataTable
           {...documentTypesAsync}
           data={documentTypesAsync.documentTypes}
@@ -146,7 +140,6 @@ const DocumentTypesPage = () => {
           ]}
           onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
         />
-      </Paper>
     </Stack>
   );
 };

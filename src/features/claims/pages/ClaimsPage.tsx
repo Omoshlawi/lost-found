@@ -1,43 +1,78 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Badge, Box, Paper, Stack } from '@mantine/core';
-import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
-import { useAppColors } from '@/hooks/useAppColors';
+import { ActionIcon, Select, Stack } from '@mantine/core';
+import { DashboardPageHeader, StateFullDataTable, StatusBadge, TablerIcon } from '@/components';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { formatDate } from '@/lib/utils';
 import { useClaims } from '../hooks';
-import { Claim } from '../types';
+import { Claim, ClaimStatus } from '../types';
+
+const PAGE_SIZE = 20;
+
+const STATUS_OPTIONS = [
+  { label: 'Pending', value: ClaimStatus.PENDING },
+  { label: 'Under Review', value: ClaimStatus.UNDER_REVIEW },
+  { label: 'Verified', value: ClaimStatus.VERIFIED },
+  { label: 'Rejected', value: ClaimStatus.REJECTED },
+  { label: 'Disputed', value: ClaimStatus.DISPUTED },
+  { label: 'Cancelled', value: ClaimStatus.CANCELLED },
+];
 
 const ClaimsPage = () => {
-  const { bgColor } = useAppColors();
-  const claimsAsync = useClaims();
+  const { page, status, setStatus, setPage } = useTableUrlFilters();
+
+  const claimsAsync = useClaims({
+    page,
+    limit: PAGE_SIZE,
+    ...(status && { status }),
+  });
+
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader title="Claims" subTitle="Manage document claims" icon="listNumbers" />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
-          {...claimsAsync}
-          data={claimsAsync.claims}
-          columns={[
-            ...columns,
-            {
-              id: 'actions',
-              cell: ({ row: { original: docType } }) => (
-                <ActionIcon
-                  component={Link}
-                  to={`${docType.id}`}
-                  variant="subtle"
-                  aria-label="Settings"
-                >
-                  <TablerIcon name="eye" size={14} />
-                </ActionIcon>
-              ),
-            },
-          ]}
-          onAdd={() => {}}
-        />
-      </Paper>
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Claims"
+        subTitle="Review and resolve document ownership claims"
+        icon="filterQuestion"
+      />
+      <StateFullDataTable
+        {...claimsAsync}
+        data={claimsAsync.claims}
+        columns={[
+          ...columns,
+          {
+            id: 'actions',
+            size: 40,
+            cell: ({ row: { original: claim } }) => (
+              <ActionIcon
+                component={Link}
+                to={`${claim.id}`}
+                variant="subtle"
+                size="sm"
+                aria-label="View claim"
+              >
+                <TablerIcon name="eye" size={14} />
+              </ActionIcon>
+            ),
+          },
+        ]}
+        renderActions={() => (
+          <Select
+            placeholder="Status"
+            data={STATUS_OPTIONS}
+            value={status}
+            onChange={setStatus}
+            size="xs"
+            clearable
+            w={160}
+          />
+        )}
+        pagination={{
+          total: claimsAsync.total,
+          page,
+          limit: PAGE_SIZE,
+          onChange: setPage,
+        }}
+      />
     </Stack>
   );
 };
@@ -46,35 +81,38 @@ export default ClaimsPage;
 
 const columns: ColumnDef<Claim>[] = [
   {
-    header: '#',
-    id: 'no',
-    cell: ({ row, table }) => (table.getSortedRowModel().rows.indexOf(row) + 1).toString(),
-    enableSorting: false,
+    header: 'Claim Ref',
+    accessorKey: 'claimNumber',
     enableHiding: false,
   },
-  { header: 'Claimant', accessorKey: 'user.email' },
-  { header: 'Claim Ref No', accessorKey: 'claimNumber' },
-  { header: 'Match Ref No', accessorKey: 'match.matchNumber' },
-  { header: 'Security Questions', accessorKey: 'verification.passed' },
+  {
+    header: 'Claimant',
+    accessorKey: 'user.email',
+    cell: ({ row: { original } }) => original.user?.email ?? '—',
+  },
+  {
+    header: 'Match Ref',
+    accessorKey: 'match.matchNumber',
+    cell: ({ row: { original } }) => original.match?.matchNumber ?? '—',
+  },
+  {
+    header: 'Security Check',
+    accessorKey: 'verification.passed',
+    cell: ({ row: { original } }) =>
+      original.verification ? (
+        <StatusBadge status={original.verification.passed ? 'VERIFIED' : 'FAILED'} />
+      ) : (
+        '—'
+      ),
+  },
   {
     header: 'Status',
-    accessorKey: 'foundDocumentCase.status',
-    cell: ({ row: { original: claim } }) => (
-      <Badge
-        variant="light" //color={getStatusColor(claim?.status)}
-      >
-        {claim?.status}
-      </Badge>
-    ),
+    accessorKey: 'status',
+    cell: ({ row: { original } }) => <StatusBadge status={original.status} />,
   },
   {
-    header: 'Created at',
+    header: 'Submitted',
     accessorKey: 'createdAt',
-    cell: ({ row: { original: docType } }) => formatDate(docType.createdAt),
-  },
-  {
-    header: 'Updated at',
-    accessorKey: 'updatedAt',
-    cell: ({ row: { original: docType } }) => formatDate(docType.updatedAt),
+    cell: ({ row: { original } }) => formatDate(original.createdAt),
   },
 ];

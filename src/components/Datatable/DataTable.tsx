@@ -67,7 +67,7 @@ export function DataTable<TData, TValue>({
           <Table.Tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <Table.Th key={header.id} w={header?.getSize?.()}>
+                <Table.Th key={header.id} w={header?.getSize?.()} style={{ whiteSpace: 'nowrap' }}>
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -83,7 +83,7 @@ export function DataTable<TData, TValue>({
             <React.Fragment key={row.id}>
               <Table.Tr key={row.id} data-state={row.getIsSelected() && 'selected'}>
                 {row.getVisibleCells().map((cell) => (
-                  <Table.Td key={cell.id} w={cell?.column?.getSize?.()}>
+                  <Table.Td key={cell.id} w={cell?.column?.getSize?.()} style={{ whiteSpace: 'nowrap' }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Table.Td>
                 ))}
@@ -119,7 +119,7 @@ export function DataTable<TData, TValue>({
         withColumnViewOptions={withColumnViewOptions}
         actions={renderActions?.(table)}
       />
-      <Paper withBorder radius="xs" style={{ overflow: 'auto' }} component={Stack}>
+      <Paper withBorder style={{ overflow: 'auto' }} component={Stack}>
         {render(table)}
         {renderPaginator && <>{renderPaginator(table)}</>}
         {/* {table.getFilteredSelectedRowModel()?.rows?.length > 0 && (

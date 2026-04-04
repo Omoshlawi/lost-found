@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
-import { ActionIcon, Badge, Box, Menu, Paper, Stack, Text } from '@mantine/core';
+import { ActionIcon, Badge, Box, Divider, Group, Menu, Stack, Text, TextInput } from '@mantine/core';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
-import { useAppColors } from '@/hooks/useAppColors';
 import { handleApiErrors } from '@/lib/api';
 import { BanUserForm, SetRoleForm } from '../forms';
 import { useUsers, useUsersApi } from '../hooks';
@@ -13,8 +14,16 @@ import { User } from '../types';
 const UsersPage = () => {
   const usersAsync = useUsers();
   const { removeUser, revokeAllUserSessions } = useUsersApi();
-  const { bgColor } = useAppColors();
   const navigate = useNavigate();
+  const { search, searchInput, setSearchInput } = useTableUrlFilters({ searchDebounce: 200 });
+
+  const filteredUsers = useMemo(() => {
+    if (!search) return usersAsync.users;
+    const q = search.toLowerCase();
+    return usersAsync.users.filter(
+      (u) => u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
+    );
+  }, [usersAsync.users, search]);
 
   const handleRemove = (user: User) => {
     modals.openConfirmModal({
@@ -115,47 +124,80 @@ const UsersPage = () => {
   };
 
   return (
-    <Stack gap="xl">
-      <Box>
-        <DashboardPageHeader
-          title="Users"
-          subTitle="Manage administrative tasks for users"
-          icon="users"
-        />
-      </Box>
-      <Paper p="md" radius="md" bg={bgColor}>
-        <StateFullDataTable
+    <Stack gap="md">
+      <DashboardPageHeader
+        title="Users"
+        subTitle="Manage platform users and permissions"
+        icon="users"
+      />
+      <StateFullDataTable
           {...usersAsync}
-          data={usersAsync.users}
-          renderExpandedRow={({ original: user }) => {
-            return (
-              <Paper p="xs">
-                <Text size="sm">
-                  <strong>Email:</strong> {user.email}
-                </Text>
-                {user.username && (
-                  <Text size="sm">
-                    <strong>Username:</strong> {user.username}
+          data={filteredUsers}
+          renderActions={() => (
+            <TextInput
+              placeholder="Search by name or email..."
+              leftSection={<TablerIcon name="search" size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="xs"
+              w={240}
+            />
+          )}
+          renderExpandedRow={({ original: user }) => (
+            <Box
+              px="xl"
+              py="md"
+              style={{
+                borderTop: '1px solid var(--mantine-color-default-border)',
+                background: 'var(--mantine-color-default-hover)',
+              }}
+            >
+              <Group gap="xl" align="flex-start" wrap="wrap">
+                {/* Identity */}
+                <Stack gap={4} miw={180}>
+                  <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                    Identity
                   </Text>
-                )}
-                <Text size="sm">
-                  <strong>Joined:</strong> {new Date(user.createdAt).toDateString()}
-                </Text>
+                  <Divider mb={4} />
+                  <Field label="Email" value={user.email} />
+                  {user.username && <Field label="Username" value={user.username} />}
+                  <Field label="Member since" value={new Date(user.createdAt).toDateString()} />
+                </Stack>
+
+                {/* Access */}
+                <Stack gap={4} miw={160}>
+                  <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                    Access
+                  </Text>
+                  <Divider mb={4} />
+                  <Field label="Role" value={user.role ?? 'user'} />
+                  <Field
+                    label="Status"
+                    value={user.banned ? 'Banned' : 'Active'}
+                    valueColor={user.banned ? 'red' : 'civicGreen.6'}
+                  />
+                </Stack>
+
+                {/* Ban details — only when banned */}
                 {user.banned && (
-                  <>
-                    <Text size="sm" c="red">
-                      <strong>Banned Reason:</strong> {user.banReason || 'N/A'}
+                  <Stack gap={4} miw={200}>
+                    <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                      Ban Details
                     </Text>
+                    <Divider mb={4} />
+                    <Field label="Reason" value={user.banReason ?? 'No reason provided'} valueColor="red" />
                     {user.banExpires && (
-                      <Text size="sm" c="red">
-                        <strong>Ban Expires:</strong> {new Date(user.banExpires).toLocaleString()}
-                      </Text>
+                      <Field
+                        label="Expires"
+                        value={new Date(user.banExpires).toLocaleString()}
+                        valueColor="red"
+                      />
                     )}
-                  </>
+                  </Stack>
                 )}
-              </Paper>
-            );
-          }}
+              </Group>
+            </Box>
+          )}
           columns={[
             ...columns,
             {
@@ -215,7 +257,6 @@ const UsersPage = () => {
             },
           ]}
         />
-      </Paper>
     </Stack>
   );
 };
@@ -280,3 +321,26 @@ const columns: ColumnDef<User>[] = [
       user.banned ? <Badge color="red">Banned</Badge> : <Badge color="green">Active</Badge>,
   },
 ];
+
+// ─── Field helper ─────────────────────────────────────────────────────────────
+
+function Field({
+  label,
+  value,
+  valueColor,
+}: {
+  label: string;
+  value: string;
+  valueColor?: string;
+}) {
+  return (
+    <Group gap={6} wrap="nowrap" align="baseline">
+      <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+        {label}
+      </Text>
+      <Text size="xs" fw={500} c={valueColor} truncate>
+        {value}
+      </Text>
+    </Group>
+  );
+}

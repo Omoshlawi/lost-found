@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { apiFetch, APIFetchResponse, constructUrl, mutate } from '@/lib/api';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData } from '@/lib/api';
 import { Claim, RejectClaimFormData, VerifyClaimFormData } from '../types';
 
 export const useClaims = (paras: Record<string, any> = {}) => {
@@ -7,9 +7,12 @@ export const useClaims = (paras: Record<string, any> = {}) => {
     v: 'custom:include(match,foundDocumentCase,user)',
     ...paras,
   });
-  const { data, error, isLoading } = useSWR<APIFetchResponse<{ results: Array<Claim> }>>(url);
+  const { data, error, isLoading } = useSWR<APIFetchResponse<PaginatedData<Claim>>>(url);
   return {
     claims: data?.data?.results ?? [],
+    total: data?.data?.total ?? 0,
+    page: data?.data?.page ?? 1,
+    limit: data?.data?.limit ?? 20,
     error,
     isLoading,
   };
