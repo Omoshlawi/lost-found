@@ -5,7 +5,7 @@ import {
   ConfidenceScore,
   Document,
   DocumentCase,
-  Extraction,
+  AIExtraction,
   FoundDocumentCaseFormData,
   ImageAnalysisResult,
   ProgressEvent,
@@ -20,7 +20,7 @@ import {
 import ProgressEventStep from './ProgressEventStep';
 
 type ExtractionProgressProps = {
-  extraction: Extraction;
+  extraction: AIExtraction;
   onExtractionComplete: (documentCase: DocumentCase) => void;
   data: FoundDocumentCaseFormData;
 };

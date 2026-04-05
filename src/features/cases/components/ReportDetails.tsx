@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionIcon, Badge, Button, Grid, Group, Stack, Text } from '@mantine/core';
+import { Badge, Button, Grid, Group, Stack, Text } from '@mantine/core';
 import { SectionTitle, StatusBadge, TablerIcon, launchWorkspace } from '@/components';
 import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
@@ -9,7 +9,6 @@ import {
   FoundDocumentCase,
   FoundDocumentCaseStatus,
   LostDocumentCase,
-  LostDocumentCaseStatus,
 } from '../types';
 import { formatDate } from '../utils/reportUtils';
 
@@ -21,7 +20,6 @@ interface ReportDetailsProps {
   lostDocumentCase?: LostDocumentCase;
   foundDocumentCase?: FoundDocumentCase;
   documentCase?: DocumentCase;
-  onUpdateCaseDetails?: () => void;
 }
 
 const ReportDetails: React.FC<ReportDetailsProps> = ({
@@ -32,7 +30,6 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   lostDocumentCase,
   foundDocumentCase,
   documentCase,
-  onUpdateCaseDetails,
 }) => {
   const { hasAccess: canVerify } = useUserHasSystemAccessSync({ documentCase: ['verify'] });
   const { hasAccess: canReject } = useUserHasSystemAccessSync({ documentCase: ['reject'] });
@@ -79,16 +76,10 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
   );
 
   if (isLostReport) {
-    const lostStatus = lostDocumentCase?.status;
     return (
       <Stack gap="lg">
         <Group justify="space-between" align="center">
           <SectionTitle label="Lost Report Details" />
-          {lostStatus === LostDocumentCaseStatus.SUBMITTED && (
-            <ActionIcon variant="subtle" onClick={onUpdateCaseDetails}>
-              <TablerIcon name="edit" size={20} />
-            </ActionIcon>
-          )}
         </Group>
         <Grid>
           <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
@@ -116,11 +107,6 @@ const ReportDetails: React.FC<ReportDetailsProps> = ({
         <Group justify="space-between" align="center">
           <SectionTitle label="Found Report Details" />
           <Group gap="xs">
-            {foundStatus === FoundDocumentCaseStatus.DRAFT && (
-              <ActionIcon variant="subtle" onClick={onUpdateCaseDetails}>
-                <TablerIcon name="edit" size={20} />
-              </ActionIcon>
-            )}
             {foundStatus === FoundDocumentCaseStatus.SUBMITTED && canVerify && documentCase && (
               <Button
                 size="xs"

@@ -9,21 +9,19 @@ import InitiateCollectionForm from '../forms/InitiateCollectionForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import { useActiveCollection } from '../hooks';
-import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { CaseType, DocumentCase, FoundDocumentCaseStatus } from '../types';
 
 interface DocumentCaseActionsProps {
   caseId: string;
   documentCase: DocumentCase;
   reportType: CaseType;
   status: string;
-  onUpdateReportDetails?: () => void;
 }
 
 const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   documentCase,
   reportType,
   status,
-  onUpdateReportDetails,
 }) => {
   const { hasAccess: canCollect } = useUserHasSystemAccess({ documentCase: ['collect'] });
   const { hasAccess: canVerify } = useUserHasSystemAccess({ documentCase: ['verify'] });
@@ -96,21 +94,6 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Actions</Menu.Label>
-          <Menu.Divider />
-
-          {onUpdateReportDetails && (
-            <Menu.Item
-              leftSection={<TablerIcon name="edit" size={14} />}
-              onClick={onUpdateReportDetails}
-              disabled={
-                (reportType === 'FOUND' &&
-                  (status !== FoundDocumentCaseStatus.DRAFT || hasPendingCollection)) ||
-                (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED)
-              }
-            >
-              Edit Case Details
-            </Menu.Item>
-          )}
 
           {reportType === 'FOUND' && canCollect && (
             <>

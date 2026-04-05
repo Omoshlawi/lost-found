@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
 import {
   Anchor,
@@ -9,13 +10,13 @@ import {
   Stack,
   Text,
   Title,
+  useComputedColorScheme,
 } from '@mantine/core';
 import { TablerIcon, TablerIconName } from '@/components/TablerIcon';
-import { useClaims } from '@/features/claims/hooks';
 import { useDocumentCases } from '@/features/cases/hooks';
-import { ClaimStatus } from '@/features/claims/types';
 import { FoundDocumentCaseStatus, LostDocumentCaseStatus } from '@/features/cases/types';
-import dayjs from 'dayjs';
+import { useClaims } from '@/features/claims/hooks';
+import { ClaimStatus } from '@/features/claims/types';
 
 // ─── KPI card ────────────────────────────────────────────────────────────────
 
@@ -30,10 +31,11 @@ interface KpiCardProps {
 }
 
 function KpiCard({ label, description, icon, color, count, isLoading, linkTo }: KpiCardProps) {
+  const colorScheme = useComputedColorScheme();
   return (
     <Box
       style={(theme) => ({
-        border: `1px solid ${theme.colors.dark[theme.colorScheme === 'dark' ? 6 : 2] ?? 'var(--mantine-color-default-border)'}`,
+        border: `1px solid ${theme.colors.dark[colorScheme === 'dark' ? 6 : 2] ?? 'var(--mantine-color-default-border)'}`,
         borderLeft: `3px solid var(--mantine-color-${color}-6)`,
         padding: 'var(--mantine-spacing-md)',
         backgroundColor: 'var(--mantine-color-body)',
@@ -158,6 +160,15 @@ export function DashboardPage() {
           count={claimsPending.totalCount}
           isLoading={claimsPending.isLoading}
           linkTo="/dashboard/claims?status=PENDING"
+        />
+        <KpiCard
+          label="Claims Under Review"
+          description="Claims awaiting staff review"
+          icon="filterQuestion"
+          color="civicGold"
+          count={claimsUnderReview.totalCount}
+          isLoading={claimsUnderReview.isLoading}
+          linkTo="/dashboard/claims?status=UNDER_REVIEW"
         />
       </SimpleGrid>
     </Stack>

@@ -24,9 +24,7 @@ const ContactFooter: React.FC<ContactFooterProps> = ({ reportType, foundDocument
 
   if (reportType === 'FOUND') {
     const isReadyForClaim =
-      foundDocumentCase?.status === 'VERIFIED' ||
-      foundDocumentCase?.status === 'MATCHED' ||
-      foundDocumentCase?.status === 'CLAIMED';
+      foundDocumentCase?.status === 'VERIFIED';
 
     if (isReadyForClaim) {
       return (

@@ -1,37 +1,39 @@
 import { z } from 'zod';
 
-export const DocumentImageItemSchema = z.object({
-  url: z.string(),
-  imageType: z.enum(['FRONT', 'BACK', 'FULL']).optional(),
-});
-
-export const DocumentImageSchema = z.object({
-  images: DocumentImageItemSchema.array(),
+export const AddressComponentSchema = z.object({
+  type: z.string(),
+  value: z.string(),
 });
 
 export const CaseDocumentFieldSchema = z.object({
-  documentId: z.string().uuid(),
+  documentId: z.string().uuid().optional(),
   fieldName: z.string().min(1, 'Required'),
-  fieldValue: z.string().min(1, 'Required'), // All values stored as strings and converted as needed
+  fieldValue: z.string().min(1, 'Required'),
 });
 
 export const CaseDocumentSchema = z.object({
-  serialNumber: z.string().optional(), // Secondary identifier like serial number if present
-  documentNumber: z.string().optional(), // Generic document number (ID number, passport number, etc.)
-  batchNumber: z.string().optional(), // Batch number if available
+  serialNumber: z.string().optional(),
+  documentNumber: z.string().optional(),
+  batchNumber: z.string().optional(),
   issuer: z.string().optional(),
-  ownerName: z.string().min(1, 'Owner name required'),
-  dateOfBirth: z.coerce.date().optional(), // Owner's date of birth
-  placeOfBirth: z.string().optional(), // Owner's place of birth
+  surname: z.string().min(1, 'Surname required').optional(),
+  givenNames: z.string().min(1, 'GivenNames required').optional(),
+  dateOfBirth: z.coerce.date().optional(),
+  placeOfBirth: z.string().optional(),
   placeOfIssue: z.string().optional(),
-  gender: z.enum(['Male', 'Female', 'Unknown']).optional(), // Owner's gender
-  nationality: z.string().optional(),
-  note: z.string().optional(), // Additional notes, could be also any identifying marks on document as well, any instruction,e.t.c
+  gender: z.enum(['Male', 'Female', 'Unknown']).optional(),
+  note: z.string().optional(),
   typeId: z.string().min(1, 'Type required'),
   issuanceDate: z.coerce.date().optional(),
   expiryDate: z.coerce.date().optional(),
-  images: DocumentImageItemSchema.array().optional(),
+  images: z.string().array().max(2).optional(),
   additionalFields: CaseDocumentFieldSchema.omit({ documentId: true }).array().optional(),
+  photoPresent: z.boolean().optional(),
+  fingerprintPresent: z.boolean().optional(),
+  signaturePresent: z.boolean().optional(),
+  addressRaw: z.string().optional(),
+  addressCountry: z.string().optional(),
+  addressComponents: AddressComponentSchema.array().optional(),
 });
 
 export const DocumentFieldSchema = z.object({
@@ -57,14 +59,46 @@ export const DocumentCaseSchema = z.object({
   ]),
 });
 
-export const FoundDocumentCaseSchema = z.object({
+const FoundDocumentCaseBaseSchema = z.object({
+  typeId: z.string().uuid(),
   addressId: z.string().uuid(),
   eventDate: z.coerce.date(),
   tags: z.string().min(1).array().optional(),
   description: z.string().optional(),
+  images: z.string().array().max(2),
+  submissionMethod: z.enum(['DROPOFF', 'PICKUP']).optional(),
+  pickupStationId: z.string().uuid().optional(),
+  collectionAddressId: z.string().uuid().optional(),
+  scheduledPickupAt: z.string().datetime({ offset: true }).optional(),
 });
 
-export const LostDocumentCaseSchema = FoundDocumentCaseSchema.merge(CaseDocumentSchema).omit({
-  images: true,
+export const FoundDocumentCaseSchema = FoundDocumentCaseBaseSchema.superRefine((data, ctx) => {
+  if (data.submissionMethod === 'DROPOFF' && !data.pickupStationId) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['pickupStationId'],
+      message: 'A partner station is required for drop-off submission',
+    });
+  }
+  if (data.submissionMethod === 'PICKUP') {
+    if (!data.collectionAddressId) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['collectionAddressId'],
+        message: 'A collection address is required for agent pickup',
+      });
+    }
+    if (!data.scheduledPickupAt) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['scheduledPickupAt'],
+        message: 'A scheduled pickup date and time is required for agent pickup',
+      });
+    }
+  }
 });
+
+export const LostDocumentCaseSchema = FoundDocumentCaseBaseSchema.omit({
+  images: true,
+}).extend(CaseDocumentSchema.omit({ images: true }).shape);
 

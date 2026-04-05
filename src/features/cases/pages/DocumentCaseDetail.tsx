@@ -4,7 +4,6 @@ import { modals } from '@mantine/modals';
 import {
   DashboardPageHeader,
   ErrorState,
-  launchWorkspace,
   StatusBadge,
   TablerIcon,
 } from '@/components';
@@ -19,7 +18,6 @@ import {
   ReportDetails,
 } from '../components';
 import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
-import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import { useActiveCollection, useDocumentCase } from '../hooks';
 import { AIExtraction, CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
@@ -112,13 +110,6 @@ const DocumentCaseDetail = () => {
 
   const pointAwarded = reportData.foundDocumentCase?.pointAwarded ?? 0;
 
-  const handleUpdateReportDetails = () => {
-    const closeWorkspace = launchWorkspace(
-      <UpdateCasedetailsForm documentCase={reportData} closeWorkspace={() => closeWorkspace()} />,
-      { title: 'Update Case Details' }
-    );
-  };
-
   return (
     <Stack gap="xl">
       <DashboardPageHeader
@@ -146,7 +137,6 @@ const DocumentCaseDetail = () => {
             documentCase={reportData}
             reportType={reportType}
             status={status}
-            onUpdateReportDetails={handleUpdateReportDetails}
           />
         }
       />
@@ -256,7 +246,6 @@ const DocumentCaseDetail = () => {
                 lostDocumentCase={reportData.lostDocumentCase}
                 foundDocumentCase={reportData.foundDocumentCase}
                 documentCase={reportData}
-                onUpdateCaseDetails={handleUpdateReportDetails}
               />
               <ContactFooter
                 reportType={reportType}

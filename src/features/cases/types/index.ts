@@ -130,6 +130,7 @@ export interface Document {
   placeOfIssue?: string;
   note?: string;
   issuer: string;
+  ownerName?: string;
   fullName: string;
   surname: string;
   givenNames: string[];
@@ -227,6 +228,11 @@ export interface AIExtraction {
 export interface AdditionalField {
   fieldName: string;
   fieldValue: string;
+}
+
+export interface SecurityQuestion {
+  question: string;
+  answer: string;
 }
 
 export type CaseType = 'LOST' | 'FOUND';

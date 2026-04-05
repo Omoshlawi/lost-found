@@ -182,7 +182,24 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
           <Stack gap="md">
             <Controller
               control={form.control}
-              name="ownerName"
+              name="surname"
+              render={({ field, fieldState }) => (
+                <TextInput
+                  {...field}
+                  value={field.value as string}
+                  placeholder="Enter owner name"
+                  label="Owner Name"
+                  error={fieldState.error?.message}
+                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
+                  description="The name of the owner of the document"
+                  leftSection={<TablerIcon name="user" size={18} />}
+                  required
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="givenNames"
               render={({ field, fieldState }) => (
                 <TextInput
                   {...field}
@@ -241,21 +258,6 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
                     inputWrapperOrder={INPUT_WRAPPER_ORDER}
                     description="The gender of the owner"
                     leftSection={<TablerIcon name="genderAgender" size={18} />}
-                  />
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="nationality"
-                render={({ field, fieldState }) => (
-                  <TextInput
-                    {...field}
-                    label="Nationality"
-                    error={fieldState.error?.message}
-                    placeholder="Enter nationality"
-                    inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                    description="The nationality of the owner"
-                    leftSection={<TablerIcon name="flag" size={18} />}
                   />
                 )}
               />

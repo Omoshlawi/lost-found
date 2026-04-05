@@ -37,7 +37,8 @@ const UpdateDocumentinfoForm: React.FC<UpdateDocumentinfoFormProps> = ({
   const form = useForm<CaseDocumentFormData>({
     defaultValues: {
       typeId: document?.typeId ?? undefined,
-      ownerName: document?.ownerName ?? undefined,
+      surname: document?.surname ?? undefined,
+      givenNames: document?.givenNames?.join(' ') ?? undefined,
       serialNumber: document?.serialNumber ?? undefined,
       documentNumber: document?.documentNumber ?? undefined,
       batchNumber: document?.batchNumber ?? undefined,
@@ -45,9 +46,8 @@ const UpdateDocumentinfoForm: React.FC<UpdateDocumentinfoFormProps> = ({
       placeOfBirth: document?.placeOfBirth ?? undefined,
       placeOfIssue: document?.placeOfIssue ?? undefined,
       gender: document?.gender ?? undefined,
-      nationality: document?.nationality ?? undefined,
       note: document?.note ?? undefined,
-      images: document?.images?.map((img) => ({ url: img.url })) || [],
+      images: document?.images?.map((img) => img.url) || [],
       additionalFields:
         document?.additionalFields?.map((field) => ({
           fieldName: field.fieldName,
@@ -148,23 +148,42 @@ const UpdateDocumentinfoForm: React.FC<UpdateDocumentinfoFormProps> = ({
           {/* Owner Information Section */}
           {sectionTitle('Owner Information')}
           <Stack gap="md">
-            <Controller
-              control={form.control}
-              name="ownerName"
-              render={({ field, fieldState }) => (
-                <TextInput
-                  {...field}
-                  value={field.value as string}
-                  placeholder="Enter owner name"
-                  label="Owner Name"
-                  error={fieldState.error?.message}
-                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                  description="The name of the owner of the document"
-                  leftSection={<TablerIcon name="user" size={18} />}
-                  required
-                />
-              )}
-            />
+            <Group grow>
+              <Controller
+                control={form.control}
+                name="surname"
+                render={({ field, fieldState }) => (
+                  <TextInput
+                    {...field}
+                    value={(field.value as string) || ''}
+                    placeholder="Enter surname"
+                    label="Surname"
+                    error={fieldState.error?.message}
+                    inputWrapperOrder={INPUT_WRAPPER_ORDER}
+                    description="The surname of the owner"
+                    leftSection={<TablerIcon name="user" size={18} />}
+                    required
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="givenNames"
+                render={({ field, fieldState }) => (
+                  <TextInput
+                    {...field}
+                    value={(field.value as string) || ''}
+                    placeholder="Enter given names"
+                    label="Given Names"
+                    error={fieldState.error?.message}
+                    inputWrapperOrder={INPUT_WRAPPER_ORDER}
+                    description="The given names of the owner"
+                    leftSection={<TablerIcon name="user" size={18} />}
+                    required
+                  />
+                )}
+              />
+            </Group>
             <Group grow>
               <Controller
                 control={form.control}
@@ -209,21 +228,6 @@ const UpdateDocumentinfoForm: React.FC<UpdateDocumentinfoFormProps> = ({
                     inputWrapperOrder={INPUT_WRAPPER_ORDER}
                     description="The gender of the owner"
                     leftSection={<TablerIcon name="genderAgender" size={18} />}
-                  />
-                )}
-              />
-              <Controller
-                control={form.control}
-                name="nationality"
-                render={({ field, fieldState }) => (
-                  <TextInput
-                    {...field}
-                    label="Nationality"
-                    error={fieldState.error?.message}
-                    placeholder="Enter nationality"
-                    inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                    description="The nationality of the owner"
-                    leftSection={<TablerIcon name="flag" size={18} />}
                   />
                 )}
               />

@@ -7,8 +7,8 @@ import { InputSkeleton, TablerIcon } from '@/components';
 import { useAddresses } from '@/features/addresses/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useDocumentCaseApi } from '../hooks';
+import { z } from 'zod';
 import { DocumentCase, FoundDocumentCaseFormData } from '../types';
-import { FoundDocumentCaseSchema } from '../utils/validation';
 
 type UpdateCaseAddressFormProps = {
   documentCase: DocumentCase;
@@ -25,7 +25,7 @@ const UpdateCaseAddressForm: FC<UpdateCaseAddressFormProps> = ({
     defaultValues: {
       addressId: documentCase.addressId,
     },
-    resolver: zodResolver(FoundDocumentCaseSchema.pick({ addressId: true })),
+    resolver: zodResolver(z.object({ addressId: z.string().uuid() })),
   });
 
   const { addresses, isLoading: isLoadingAddresses } = useAddresses();

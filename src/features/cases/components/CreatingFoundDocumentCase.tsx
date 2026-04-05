@@ -16,14 +16,14 @@ import { useDocumentExtraction } from '../hooks/useDocumentExtraction';
 import {
   AiInteraction,
   DocumentCase,
-  Extraction,
+  AIExtraction,
   FoundDocumentCaseFormData,
   ProgressEvent,
 } from '../types';
 import { Status, StatusBadge, StatusIcon } from './extraction';
 
 type CreatingFoundDocumentCaseProps = {
-  extraction: Extraction;
+  extraction: AIExtraction;
   onExtractionComplete: (documentCase: DocumentCase) => void;
   data: FoundDocumentCaseFormData;
 };

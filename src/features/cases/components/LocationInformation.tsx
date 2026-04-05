@@ -1,8 +1,7 @@
 import React from 'react';
-import { ActionIcon, Grid, Group, Stack, Text } from '@mantine/core';
-import { SectionTitle, TablerIcon, launchWorkspace } from '@/components';
-import UpdateCaseAddressForm from '../forms/UpdateCaseAddressForm';
-import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { Grid, Group, Stack, Text } from '@mantine/core';
+import { SectionTitle } from '@/components';
+import { CaseType, DocumentCase } from '../types';
 
 interface LocationProps {
   documentCase: DocumentCase;
@@ -10,18 +9,8 @@ interface LocationProps {
   status: string;
 }
 
-const LocationInformation: React.FC<LocationProps> = ({ documentCase, reportType, status }) => {
-  const handleUpdateAddress = () => {
-    const closeWorkspace = launchWorkspace(
-      <UpdateCaseAddressForm documentCase={documentCase} closeWorkspace={() => closeWorkspace()} />,
-      { title: 'Update Address' }
-    );
-  };
-
+const LocationInformation: React.FC<LocationProps> = ({ documentCase }) => {
   const address = documentCase.address;
-  const isEditDisabled =
-    (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
-    (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED);
 
   const getLevel = (level: string) =>
     address?.locale?.formatSpec?.levels?.find((l) => l.level === level)?.label ??
@@ -31,9 +20,6 @@ const LocationInformation: React.FC<LocationProps> = ({ documentCase, reportType
     <Stack gap="lg">
       <Group justify="space-between" align="center">
         <SectionTitle label="Location Information" />
-        <ActionIcon variant="subtle" onClick={handleUpdateAddress} disabled={isEditDisabled}>
-          <TablerIcon name="edit" size={20} />
-        </ActionIcon>
       </Group>
 
       {/* Administrative Levels */}

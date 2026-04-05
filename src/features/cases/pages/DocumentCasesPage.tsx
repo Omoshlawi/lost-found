@@ -4,7 +4,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   ActionIcon,
   Badge,
-  Button,
   Menu,
   Select,
   Stack,
@@ -26,9 +25,7 @@ import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
 import {
-  FoundDocumentCaseForm,
   InitiateCollectionForm,
-  LostDocumentCaseForm,
   RejectFoundDocumentCaseForm,
   VerifyFoundDocumentCaseForm,
 } from '../forms';
@@ -133,21 +130,6 @@ const DocumentCasesPage = () => {
     });
   };
 
-  const handleAddLost = () => {
-    const close = launchWorkspace(<LostDocumentCaseForm closeWorkspace={() => close()} />, {
-      expandable: true,
-      width: 'wide',
-      title: 'Report Lost Document',
-    });
-  };
-
-  const handleAddFound = () => {
-    const close = launchWorkspace(<FoundDocumentCaseForm closeWorkspace={() => close()} />, {
-      expandable: true,
-      width: 'wide',
-      title: 'Report Found Document',
-    });
-  };
 
   const columns = useMemo<ColumnDef<DocumentCase>[]>(
     () => [
@@ -386,22 +368,6 @@ const DocumentCasesPage = () => {
         columns={[...columns, actionsColumn]}
         renderActions={() => (
           <>
-            <Button
-              leftSection={<TablerIcon name="fileSearch" size={14} />}
-              variant="light"
-              size="xs"
-              onClick={handleAddLost}
-            >
-              Report Lost
-            </Button>
-            <Button
-              leftSection={<TablerIcon name="fileCheck" size={14} />}
-              variant="light"
-              size="xs"
-              onClick={handleAddFound}
-            >
-              Log Found
-            </Button>
             <TextInput
               placeholder="Search cases..."
               leftSection={<TablerIcon name="search" size={14} />}

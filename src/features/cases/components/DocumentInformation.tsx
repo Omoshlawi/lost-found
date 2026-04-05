@@ -1,37 +1,22 @@
 import React from 'react';
-import { ActionIcon, Grid, Group, Stack, Text } from '@mantine/core';
-import { SectionTitle, TablerIcon } from '@/components';
-import { launchWorkspace } from '@/components/Workspace';
-import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
-import { CaseType, Document, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import { Grid, Group, Stack, Text } from '@mantine/core';
+import { SectionTitle } from '@/components';
+
+import { CaseType, Document } from '../types';
 import { formatDate } from '../utils/reportUtils';
 
 interface DocumentProps {
   document: Document;
-  onUpdateReportDocument?: () => void;
   reportType: CaseType;
   status: string;
 }
 
-const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, status }) => {
-  const handleUpdateDocument = () => {
-    const closeWorkspace = launchWorkspace(
-      <UpdateDocumentinfoForm document={document} closeWorkspace={() => closeWorkspace()} />,
-      { width: 'wide' }
-    );
-  };
-
-  const isEditDisabled =
-    (reportType === 'FOUND' && status !== FoundDocumentCaseStatus.DRAFT) ||
-    (reportType === 'LOST' && status !== LostDocumentCaseStatus.SUBMITTED);
+const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
 
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
         <SectionTitle label="Document Information" />
-        <ActionIcon variant="subtle" onClick={handleUpdateDocument} disabled={isEditDisabled}>
-          <TablerIcon name="edit" size={16} />
-        </ActionIcon>
       </Group>
 
       {/* Identity */}
@@ -128,7 +113,7 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document, reportType, st
       </Grid>
 
       {/* Additional Fields */}
-      {(document?.additionalFields?.length > 0 || document?.note) && (
+      {((document?.additionalFields?.length ?? 0) > 0 || document?.note) && (
         <>
           <SectionTitle label="Additional" />
           <Grid>

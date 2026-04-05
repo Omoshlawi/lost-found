@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useSocket } from '@/hooks/useSocket';
-import type { DocumentCase, Extraction, FoundDocumentCaseFormData } from '../types';
+import type { AIExtraction, DocumentCase, FoundDocumentCaseFormData } from '../types';
 
 export const useDocumentExtraction = () => {
   const { publishEventWithAck, socketRef, addEventListener } = useSocket({
@@ -10,7 +10,7 @@ export const useDocumentExtraction = () => {
 
   const startExtraction = useCallback(async () => {
     if (socketRef.current?.connected) {
-      const extraction = await publishEventWithAck<Extraction>('start');
+      const extraction = await publishEventWithAck<AIExtraction>('start');
       return extraction;
     }
     return undefined;
