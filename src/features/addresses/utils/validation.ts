@@ -3,13 +3,7 @@ import { z } from 'zod';
 const addressTypeEnum = z.enum(['HOME', 'WORK', 'BILLING', 'SHIPPING', 'OFFICE', 'OTHER']);
 const levelKeys = ['level1', 'level2', 'level3', 'level4', 'level5'] as const;
 
-const optionalString = z
-  .string()
-  .trim()
-  .max(255, 'Too long')
-  .optional()
-  .or(z.literal(''))
-  .transform((value) => value || undefined);
+
 
 const optionalNullableString = z
   .string()
@@ -32,6 +26,8 @@ const isoDateString = z
 export const AddressSchema = z.object({
   type: addressTypeEnum,
   label: optionalNullableString,
+  name: optionalNullableString,
+  phoneNumber: optionalNullableString,
   address1: z.string().trim().min(1, 'Address line 1 is required').max(255),
   address2: optionalNullableString,
   landmark: optionalNullableString,
@@ -65,6 +61,7 @@ export const AddressSchema = z.object({
   endDate: isoDateString.nullable(),
   preferred: z.boolean().default(false),
   formatted: optionalNullableString,
+  localeId: optionalNullableString,
   localeFormat: z
     .object(
       levelKeys.reduce(

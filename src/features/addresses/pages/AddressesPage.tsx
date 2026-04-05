@@ -253,26 +253,6 @@ const AddressDetails = ({ address }: { address: Address }) => (
       <Detail label="End date" value={address.endDate ? formatDate(address.endDate) : '—'} />
       <Detail label="Updated at" value={formatDate(address.updatedAt)} />
     </SimpleGrid>
-    {address.formatted && (
-      <Stack gap={0}>
-        <Text size="sm" c="dimmed">
-          Formatted
-        </Text>
-        <Text size="sm">{address.formatted}</Text>
-      </Stack>
-    )}
-    {address.localeFormat && (
-      <Stack gap={4}>
-        <Text size="sm" fw={600}>
-          Locale labels
-        </Text>
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
-          {Object.entries(address.localeFormat).map(([key, value]) => (
-            <Detail key={key} label={key} value={value ?? '—'} />
-          ))}
-        </SimpleGrid>
-      </Stack>
-    )}
   </Stack>
 );
 
@@ -286,7 +266,9 @@ const Detail = ({ label, value }: { label: string; value: React.ReactNode }) => 
 );
 
 const formatDate = (value?: string) => {
-  if (!value) return '—';
+  if (!value) {
+    return '—';
+  }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;

@@ -71,9 +71,47 @@ const AddressLocaleForm: React.FC<AddressLocaleFormProps> = ({ locale, closeWork
 
   const onSubmit: SubmitHandler<AddressLocaleFormData> = async (values) => {
     try {
+      const metadata = values.formatSpec.metadata;
+      const validationRulesObj = metadata?.validationRules?.reduce((acc, rule) => {
+        if (rule.field && rule.rule) {
+          acc[rule.field] = rule.rule;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+
+      const transformedMetadata = {
+        instructions: metadata?.instructions,
+        preferredFields: metadata?.preferredFields,
+        ...(validationRulesObj && Object.keys(validationRulesObj).length > 0 ? { validation: validationRulesObj } : {})
+      };
+
+      const transformedExamples = values.examples?.map(example => {
+        const addressObj = example.addressEntries.reduce((acc, entry) => {
+          if (entry.field && entry.value) {
+            acc[entry.field] = entry.value;
+          }
+          return acc;
+        }, {} as Record<string, string>);
+
+        return {
+          label: example.label,
+          notes: example.notes,
+          address: addressObj
+        };
+      });
+
+      const payload: any = {
+        ...values,
+        formatSpec: {
+          ...values.formatSpec,
+          metadata: transformedMetadata
+        },
+        examples: transformedExamples
+      };
+
       const result = locale
-        ? await updateAddressLocale(locale.id, values)
-        : await createAddressLocale(values);
+        ? await updateAddressLocale(locale.id, payload)
+        : await createAddressLocale(payload);
 
       showNotification({
         title: 'Success',

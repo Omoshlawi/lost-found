@@ -17,6 +17,8 @@ export interface AddressOwner {
 
 export interface Address {
   id: string;
+  phoneNumber: string;
+  name: string;
   userId: string;
   user?: AddressOwner | null;
   type: AddressTypeValue;
