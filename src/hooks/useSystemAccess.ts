@@ -222,7 +222,8 @@ export const useUserHasSystemAccessSync = (permissions: Record<string, Array<str
     if (!userSession?.user) {
       return false;
     }
-    return userHasSystemAccess(userSession.user as User, permissions);
+
+    return userHasSystemAccess(userSession?.user as unknown as User, permissions);
   }, [userSession, permissions]);
 
   return {

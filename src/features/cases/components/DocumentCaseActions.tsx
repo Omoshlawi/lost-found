@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button, Group, Menu } from '@mantine/core';
+import { closeModal, openModal } from '@mantine/modals';
 import { launchWorkspace, TablerIcon } from '@/components';
-import { useUserHasSystemAccessSync } from '@/hooks/useSystemAccess';
+import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import CancelCollectionForm from '../forms/CancelCollectionForm';
 import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
 import InitiateCollectionForm from '../forms/InitiateCollectionForm';
@@ -24,9 +25,9 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   status,
   onUpdateReportDetails,
 }) => {
-  const { hasAccess: canCollect } = useUserHasSystemAccessSync({ documentCase: ['collect'] });
-  const { hasAccess: canVerify } = useUserHasSystemAccessSync({ documentCase: ['verify'] });
-  const { hasAccess: canReject } = useUserHasSystemAccessSync({ documentCase: ['reject'] });
+  const { hasAccess: canCollect } = useUserHasSystemAccess({ documentCase: ['collect'] });
+  const { hasAccess: canVerify } = useUserHasSystemAccess({ documentCase: ['verify'] });
+  const { hasAccess: canReject } = useUserHasSystemAccess({ documentCase: ['reject'] });
 
   const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
   const isDraft = status === FoundDocumentCaseStatus.DRAFT;
@@ -43,10 +44,12 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   };
 
   const openEnterCode = () => {
-    const close = launchWorkspace(
-      <ConfirmCollectionForm documentCase={documentCase} onClose={() => close()} />,
-      { title: 'Enter Finder Code' }
-    );
+    const id = openModal({
+      children: (
+        <ConfirmCollectionForm documentCase={documentCase} onClose={() => closeModal(id)} />
+      ),
+      title: 'Enter Finder Code',
+    });
   };
 
   const openCancel = () => {
