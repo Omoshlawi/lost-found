@@ -30,6 +30,7 @@ import {
   VerifyFoundDocumentCaseForm,
 } from '../forms';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
+import { useDocumentTypes } from '@/features/admin/hooks/useDocumentTypes';
 import { DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 
 type CaseTab = 'all' | 'lost' | 'found';
@@ -48,6 +49,13 @@ const FOUND_STATUS_OPTIONS = [
   { label: 'Completed', value: FoundDocumentCaseStatus.COMPLETED },
 ];
 
+const EXTRACTION_STATUS_OPTIONS = [
+  { label: 'Extracted: Pending', value: 'PENDING' },
+  { label: 'Extracted: In Progress', value: 'IN_PROGRESS' },
+  { label: 'Extracted: Completed', value: 'COMPLETED' },
+  { label: 'Extracted: Failed', value: 'FAILED' },
+];
+
 const DocumentCasesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('type') ?? 'all') as CaseTab;
@@ -63,6 +71,40 @@ const DocumentCasesPage = () => {
     setPage,
     setPageSize,
   } = useTableUrlFilters();
+
+  const extractionStatus = searchParams.get('extractionStatus');
+
+  const setExtractionStatus = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('extractionStatus', value);
+        } else {
+          prev.delete('extractionStatus');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
+  const documentType = searchParams.get('documentType');
+
+  const setDocumentType = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('documentType', value);
+        } else {
+          prev.delete('documentType');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
 
   const handleTabChange = (value: string | null) => {
     setSearchParams(
@@ -94,7 +136,15 @@ const DocumentCasesPage = () => {
     limit: pageSize,
     ...(search && { search }),
     ...(status && { status }),
+    ...(extractionStatus && { extractionStatus }),
+    ...(documentType && { documentType }),
   });
+
+  const { documentTypes } = useDocumentTypes();
+  const documentTypeOptions = useMemo(
+    () => documentTypes.map((type) => ({ label: type.name, value: type.id })),
+    [documentTypes]
+  );
 
   const { deleteDocumentCase } = useDocumentCaseApi();
 
@@ -387,6 +437,25 @@ const DocumentCasesPage = () => {
                 w={140}
               />
             )}
+            <Select
+              placeholder="Document Type"
+              data={documentTypeOptions}
+              value={documentType}
+              onChange={setDocumentType}
+              size="xs"
+              clearable
+              w={160}
+              searchable
+            />
+            <Select
+              placeholder="Extraction"
+              data={EXTRACTION_STATUS_OPTIONS}
+              value={extractionStatus}
+              onChange={setExtractionStatus}
+              size="xs"
+              clearable
+              w={160}
+            />
           </>
         )}
         pagination={{
