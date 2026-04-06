@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {
   ActionIcon,
@@ -75,7 +76,7 @@ const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
               Scanned Images of the document
             </Text>
           </Stack>
-          <Button
+          {/* <Button
             variant="light"
             color="green"
             size="sm"
@@ -87,13 +88,13 @@ const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
             }
           >
             Upload Images
-          </Button>
+          </Button> */}
         </Group>
         <Card p="xl" radius="md" withBorder style={{ textAlign: 'center' }}>
           <Stack align="center" gap="md">
             <TablerIcon name="photo" size={48} style={{ opacity: 0.3 }} />
             <Text c="dimmed">No images uploaded yet</Text>
-            <Button
+            {/* <Button
               variant="light"
               color="green"
               size="sm"
@@ -105,7 +106,7 @@ const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
               }
             >
               Upload Images
-            </Button>
+            </Button> */}
           </Stack>
         </Card>
       </div>
@@ -121,7 +122,7 @@ const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
             Scanned Images of the document
           </Text>
         </Stack>
-        <Button
+        {/* <Button
           variant="light"
           color="green"
           size="sm"
@@ -133,7 +134,7 @@ const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
           }
         >
           Reupload
-        </Button>
+        </Button> */}
       </Group>
 
       <Grid gutter="lg">

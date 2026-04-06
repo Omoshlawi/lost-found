@@ -1,12 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { Alert, Badge, Button, Group, Loader, Paper, Stack, Tabs, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import {
-  DashboardPageHeader,
-  ErrorState,
-  StatusBadge,
-  TablerIcon,
-} from '@/components';
+import { DashboardPageHeader, ErrorState, StatusBadge, TablerIcon } from '@/components';
 import { TablerIconName } from '@/components/TablerIcon';
 import {
   AdditionalDetails,
@@ -189,11 +184,9 @@ const DocumentCaseDetail = () => {
           <Tabs.Tab value="document" leftSection={<TablerIcon name="id" size={16} />}>
             Document
           </Tabs.Tab>
-          {reportType === 'FOUND' && (
-            <Tabs.Tab value="images" leftSection={<TablerIcon name="photo" size={16} />}>
-              Images
-            </Tabs.Tab>
-          )}
+          <Tabs.Tab value="images" leftSection={<TablerIcon name="photo" size={16} />}>
+            Images
+          </Tabs.Tab>
           <Tabs.Tab value="location" leftSection={<TablerIcon name="mapPin" size={16} />}>
             Location
           </Tabs.Tab>
