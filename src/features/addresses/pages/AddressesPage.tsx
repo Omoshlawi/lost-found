@@ -1,6 +1,7 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Badge, Menu, SimpleGrid, Stack, Text } from '@mantine/core';
+import { useSearchParams } from 'react-router-dom';
+import { ActionIcon, Badge, Menu, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
@@ -12,8 +13,33 @@ import { useAddresses, useAddressesApi } from '../hooks';
 import { Address, AddressFormData } from '../types';
 
 const AddressesPage = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const addressQuery = useAddresses({ page, limit: pageSize });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
+    useTableUrlFilters();
+
+  const country = searchParams.get('country');
+
+  const setCountry = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('country', value);
+        } else {
+          prev.delete('country');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
+  const addressQuery = useAddresses({
+    page,
+    limit: pageSize,
+    search,
+    country: country ?? undefined,
+  });
   const { deleteAddress, restoreAddress, mutateAddresses } = useAddressesApi();
 
   const handleLaunchForm = (address?: Address) => {
@@ -109,6 +135,26 @@ const AddressesPage = () => {
           onChange: setPage,
           onPageSizeChange: setPageSize,
         }}
+        renderActions={() => (
+          <>
+            <TextInput
+              placeholder="Search labels..."
+              leftSection={<TablerIcon name="search" size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="xs"
+              w={200}
+            />
+            <TextInput
+              placeholder="Country code (e.g. KE)"
+              leftSection={<TablerIcon name="world" size={14} />}
+              value={country ?? ''}
+              onChange={(e) => setCountry(e.target.value)}
+              size="xs"
+              w={160}
+            />
+          </>
+        )}
       />
     </Stack>
   );

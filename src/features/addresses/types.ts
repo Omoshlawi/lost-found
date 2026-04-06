@@ -53,12 +53,12 @@ export interface Address {
 export interface AddressHierarchyNode {
   id: string;
   country: string;
-  levelKey: AddressLevelKey | string;
-  label: string;
-  description?: string | null;
-  metadata?: Record<string, string> | null;
-  createdAt: string;
-  updatedAt: string;
+  level: string;
+  code: string;
+  name: string;
+  nameLocal: string;
+  // createdAt: string;
+  // updatedAt: string;
   voided: boolean;
 }
 

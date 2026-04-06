@@ -1,6 +1,7 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Badge, Menu, SimpleGrid, Stack, Text } from '@mantine/core';
+import { ActionIcon, Badge, Menu, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { useSearchParams } from 'react-router-dom';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
@@ -9,9 +10,42 @@ import { handleApiErrors } from '@/lib/api';
 import { useAddressHierarchy, useAddressHierarchyApi } from '../hooks';
 import { AddressHierarchyNode } from '../types';
 
+const LEVEL_OPTIONS = [
+  { label: 'Level 1', value: '1' },
+  { label: 'Level 2', value: '2' },
+  { label: 'Level 3', value: '3' },
+  { label: 'Level 4', value: '4' },
+  { label: 'Level 5', value: '5' },
+];
+
 const AddressHierarchyPage = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const hierarchyQuery = useAddressHierarchy({ page, limit: pageSize });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
+    useTableUrlFilters();
+
+  const level = searchParams.get('level');
+
+  const setLevel = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('level', value);
+        } else {
+          prev.delete('level');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
+  const hierarchyQuery = useAddressHierarchy({
+    page,
+    limit: pageSize,
+    search,
+    level: level ? Number(level) : undefined,
+  });
   const { deleteHierarchyNode, restoreHierarchyNode, mutateAddressHierarchy } =
     useAddressHierarchyApi();
 
@@ -21,7 +55,11 @@ const AddressHierarchyPage = () => {
       centered: true,
       children: (
         <Text size="sm">
-          This hides the <Text span fw={600}>{node.label}</Text> label from use. Continue?
+          This hides the{' '}
+          <Text span fw={600}>
+            {node.name}
+          </Text>{' '}
+          label from use. Continue?
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
@@ -91,6 +129,27 @@ const AddressHierarchyPage = () => {
           onChange: setPage,
           onPageSizeChange: setPageSize,
         }}
+        renderActions={() => (
+          <>
+            <TextInput
+              placeholder="Search by name..."
+              leftSection={<TablerIcon name="search" size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="xs"
+              w={200}
+            />
+            <Select
+              placeholder="Level"
+              data={LEVEL_OPTIONS}
+              value={level}
+              onChange={setLevel}
+              size="xs"
+              clearable
+              w={120}
+            />
+          </>
+        )}
       />
     </Stack>
   );
@@ -109,27 +168,27 @@ const buildHierarchyColumns = (handlers: HierarchyHandlers): ColumnDef<AddressHi
     accessorKey: 'country',
   },
   {
-    header: 'Level key',
-    accessorKey: 'levelKey',
-    cell: ({ row: { original } }) => original?.levelKey?.toUpperCase(),
+    header: 'Level',
+    accessorKey: 'level',
   },
   {
-    header: 'Label',
-    accessorKey: 'label',
+    header: 'Name',
+    accessorKey: 'name',
   },
+  {
+    header: 'Name local',
+    accessorKey: 'nameLocal',
+    cell: ({ row: { original } }) => original?.nameLocal ?? '—',
+  },
+
   {
     header: 'Status',
     accessorKey: 'voided',
     cell: ({ row: { original } }) => (
-      <Badge color={original.voided ? 'red' : 'green'} variant="light">
+      <Badge color={original.voided ? 'red' : 'green'} variant="light" size="xs">
         {original.voided ? 'Voided' : 'Active'}
       </Badge>
     ),
-  },
-  {
-    header: 'Updated',
-    accessorKey: 'updatedAt',
-    cell: ({ row: { original } }) => new Date(original.updatedAt).toLocaleDateString(),
   },
   {
     id: 'actions',
@@ -137,7 +196,7 @@ const buildHierarchyColumns = (handlers: HierarchyHandlers): ColumnDef<AddressHi
     cell: ({ row: { original } }) => (
       <Menu shadow="md" width={200}>
         <Menu.Target>
-          <ActionIcon variant="outline">
+          <ActionIcon variant="subtle">
             <TablerIcon name="dotsVertical" size={16} />
           </ActionIcon>
         </Menu.Target>
@@ -162,6 +221,7 @@ const buildHierarchyColumns = (handlers: HierarchyHandlers): ColumnDef<AddressHi
         </Menu.Dropdown>
       </Menu>
     ),
+    size: 0,
   },
 ];
 
@@ -169,31 +229,10 @@ const HierarchyDetails = ({ node }: { node: AddressHierarchyNode }) => (
   <Stack gap="xs">
     <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
       <Detail label="Country" value={node.country} />
-      <Detail label="Level key" value={node.levelKey} />
-      <Detail label="Label" value={node.label} />
+      <Detail label="Level" value={node.level} />
+      <Detail label="Name" value={node.name} />
       <Detail label="Status" value={node.voided ? 'Voided' : 'Active'} />
-      <Detail label="Updated at" value={formatDate(node.updatedAt)} />
     </SimpleGrid>
-    {node.description && (
-      <Stack gap={0}>
-        <Text size="sm" c="dimmed">
-          Description
-        </Text>
-        <Text size="sm">{node.description}</Text>
-      </Stack>
-    )}
-    {node.metadata && (
-      <Stack gap="xs">
-        <Text size="sm" fw={600}>
-          Metadata
-        </Text>
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
-          {Object.entries(node.metadata).map(([key, value]) => (
-            <Detail key={key} label={key} value={value ?? '—'} />
-          ))}
-        </SimpleGrid>
-      </Stack>
-    )}
   </Stack>
 );
 
@@ -205,13 +244,3 @@ const Detail = ({ label, value }: { label: string; value: React.ReactNode }) => 
     <Text size="sm">{value ?? '—'}</Text>
   </Stack>
 );
-
-const formatDate = (value?: string) => {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleString();
-};
-

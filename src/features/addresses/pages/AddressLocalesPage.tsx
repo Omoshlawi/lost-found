@@ -1,5 +1,16 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Badge, Group, Menu, Paper, SimpleGrid, Stack, Text } from '@mantine/core';
+import { useSearchParams } from 'react-router-dom';
+import {
+  ActionIcon,
+  Badge,
+  Group,
+  Menu,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
@@ -10,9 +21,35 @@ import { useAddressLocales, useAddressLocalesApi } from '../hooks';
 import { AddressLocale, AddressLocaleFormData } from '../types';
 
 const AddressLocalesPage = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const localeQuery = useAddressLocales({ page, limit: pageSize });
-  const { deleteAddressLocale, restoreAddressLocale, mutateAddressLocales } = useAddressLocalesApi();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
+    useTableUrlFilters();
+
+  const country = searchParams.get('country');
+
+  const setCountry = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('country', value);
+        } else {
+          prev.delete('country');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
+  const localeQuery = useAddressLocales({
+    page,
+    limit: pageSize,
+    search,
+    country: country ?? undefined,
+  });
+  const { deleteAddressLocale, restoreAddressLocale, mutateAddressLocales } =
+    useAddressLocalesApi();
 
   const handleLaunchForm = (locale?: AddressLocale) => {
     const dispose = launchWorkspace(
@@ -107,6 +144,26 @@ const AddressLocalesPage = () => {
           onChange: setPage,
           onPageSizeChange: setPageSize,
         }}
+        renderActions={() => (
+          <>
+            <TextInput
+              placeholder="Search locales..."
+              leftSection={<TablerIcon name="search" size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="xs"
+              w={200}
+            />
+            <TextInput
+              placeholder="Country code (e.g. KE)"
+              leftSection={<TablerIcon name="world" size={14} />}
+              value={country ?? ''}
+              onChange={(e) => setCountry(e.target.value)}
+              size="xs"
+              w={160}
+            />
+          </>
+        )}
       />
     </Stack>
   );
@@ -162,7 +219,7 @@ const buildColumns = (handlers: ColumnHandlers): ColumnDef<AddressLocale>[] => [
       original.tags && original.tags.length ? (
         <Group gap={4}>
           {original.tags.map((tag) => (
-            <Badge key={tag} variant="light" color="blue">
+            <Badge key={tag} variant="light" color="blue" size="xs">
               {tag}
             </Badge>
           ))}
@@ -180,7 +237,7 @@ const buildColumns = (handlers: ColumnHandlers): ColumnDef<AddressLocale>[] => [
     header: 'Status',
     accessorKey: 'voided',
     cell: ({ row: { original } }) => (
-      <Badge color={original.voided ? 'red' : 'green'} variant="light">
+      <Badge color={original.voided ? 'red' : 'green'} variant="light" size="xs">
         {original.voided ? 'Voided' : 'Active'}
       </Badge>
     ),
@@ -191,7 +248,7 @@ const buildColumns = (handlers: ColumnHandlers): ColumnDef<AddressLocale>[] => [
     cell: ({ row: { original } }) => (
       <Menu shadow="md" width={200}>
         <Menu.Target>
-          <ActionIcon variant="outline">
+          <ActionIcon variant="subtle">
             <TablerIcon name="dotsVertical" size={16} />
           </ActionIcon>
         </Menu.Target>
@@ -308,9 +365,7 @@ const AddressLocaleDetails = ({ locale }: { locale: AddressLocale }) => (
         </Text>
         <Text size="sm">Label: {locale.formatSpec.postalCode.label}</Text>
         <Text size="sm">Required: {locale.formatSpec.postalCode.required ? 'Yes' : 'No'}</Text>
-        <Text size="sm">
-          Description: {locale.formatSpec.postalCode.description ?? '—'}
-        </Text>
+        <Text size="sm">Description: {locale.formatSpec.postalCode.description ?? '—'}</Text>
       </Stack>
     )}
 
@@ -358,4 +413,3 @@ const AddressLocaleDetails = ({ locale }: { locale: AddressLocale }) => (
     )}
   </Stack>
 );
-
