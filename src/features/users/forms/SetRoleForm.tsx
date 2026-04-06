@@ -2,15 +2,16 @@ import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Button, Group, Select, Stack } from '@mantine/core';
+import { Button, Group, MultiSelect, Stack } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
+import { useRoles } from '@/features/admin/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useUsersApi } from '../hooks';
-import { User, UserRolePayload } from '../types';
+import { User } from '../types';
 
 const SetRoleSchema = z.object({
   userId: z.string(),
-  role: z.string().nullable(),
+  roles: z.array(z.string()).default(['user']),
 });
 
 type SetRoleFormProps = {
@@ -20,19 +21,20 @@ type SetRoleFormProps = {
 };
 
 const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspace }) => {
-  const form = useForm<UserRolePayload>({
+  const form = useForm({
     defaultValues: {
       userId: user.id,
-      role: user.role ?? null,
+      roles: user.role?.split(',').filter(Boolean) ?? ['user'],
     },
     resolver: zodResolver(SetRoleSchema),
   });
+  const { roles } = useRoles();
 
   const { setRole } = useUsersApi();
 
-  const handleSubmit: SubmitHandler<UserRolePayload> = async (data) => {
+  const handleSubmit: SubmitHandler<z.infer<typeof SetRoleSchema>> = async (data) => {
     try {
-      const { data: responseData, error } = await setRole(data);
+      const { data: responseData, error } = await setRole({ ...data, role: data.roles });
       if (error) {
         showNotification({
           title: 'Error',
@@ -50,7 +52,7 @@ const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspa
       });
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<UserRolePayload>(error);
+      const e = handleApiErrors<z.infer<typeof SetRoleSchema>>(error);
       if (e.detail) {
         showNotification({
           title: 'Error updating role',
@@ -60,7 +62,7 @@ const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspa
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof UserRolePayload, { message: val })
+          form.setError(key as keyof z.infer<typeof SetRoleSchema>, { message: val })
         );
       }
     }
@@ -79,14 +81,10 @@ const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspa
         <Stack gap="md">
           <Controller
             control={form.control}
-            name="role"
+            name="roles"
             render={({ field, fieldState }) => (
-              <Select
-                data={[
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'user', label: 'User' },
-                  // Add more roles here as needed depending on the backend definition
-                ]}
+              <MultiSelect
+                data={roles}
                 label={`Select Role for ${user.name}`}
                 value={field.value}
                 placeholder="User Role"

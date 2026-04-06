@@ -31,7 +31,7 @@ export interface UserSession {
 
 export type UserRolePayload = {
   userId: string;
-  role: string | null;
+  role: string | string[] | null;
 };
 
 export type BanUserPayload = {

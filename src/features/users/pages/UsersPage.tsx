@@ -1,17 +1,28 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { useNavigate } from 'react-router-dom';
-import { ActionIcon, Badge, Box, Divider, Group, Menu, Stack, Text, TextInput } from '@mantine/core';
-import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Divider,
+  Group,
+  Menu,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { BanUserForm, SetRoleForm } from '../forms';
 import { useUsers, useUsersApi } from '../hooks';
 import { User } from '../types';
 
 const UsersPage = () => {
-  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } = useTableUrlFilters({ searchDebounce: 200 });
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
+    useTableUrlFilters({ searchDebounce: 200 });
   const offset = (page - 1) * pageSize;
   const usersAsync = useUsers({ limit: pageSize, offset, ...(search && { searchValue: search }) });
   const { removeUser, revokeAllUserSessions } = useUsersApi();
@@ -123,139 +134,163 @@ const UsersPage = () => {
         icon="users"
       />
       <StateFullDataTable
-          {...usersAsync}
-          data={usersAsync.users}
-          renderActions={() => (
-            <TextInput
-              placeholder="Search by name or email..."
-              leftSection={<TablerIcon name="search" size={14} />}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              size="xs"
-              w={240}
-            />
-          )}
-          renderExpandedRow={({ original: user }) => (
-            <Box
-              px="xl"
-              py="md"
-              style={{
-                borderTop: '1px solid var(--mantine-color-default-border)',
-                background: 'var(--mantine-color-default-hover)',
-              }}
-            >
-              <Group gap="xl" align="flex-start" wrap="wrap">
-                {/* Identity */}
-                <Stack gap={4} miw={180}>
-                  <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
-                    Identity
-                  </Text>
-                  <Divider mb={4} />
-                  <Field label="Email" value={user.email} />
-                  {user.username && <Field label="Username" value={user.username} />}
-                  <Field label="Member since" value={new Date(user.createdAt).toDateString()} />
-                </Stack>
+        {...usersAsync}
+        data={usersAsync.users}
+        renderActions={() => (
+          <TextInput
+            placeholder="Search by name or email..."
+            leftSection={<TablerIcon name="search" size={14} />}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            size="xs"
+            w={240}
+          />
+        )}
+        renderExpandedRow={({ original: user }) => (
+          <Box
+            px="xl"
+            py="md"
+            style={{
+              borderTop: '1px solid var(--mantine-color-default-border)',
+              background: 'var(--mantine-color-default-hover)',
+            }}
+          >
+            <Group gap="xl" align="flex-start" wrap="wrap">
+              {/* Identity */}
+              <Stack gap={4} miw={180}>
+                <Text
+                  size="xs"
+                  fw={600}
+                  tt="uppercase"
+                  c="dimmed"
+                  style={{ letterSpacing: '0.06em' }}
+                >
+                  Identity
+                </Text>
+                <Divider mb={4} />
+                <Field label="Email" value={user.email} />
+                {user.username && <Field label="Username" value={user.username} />}
+                <Field label="Member since" value={new Date(user.createdAt).toDateString()} />
+              </Stack>
 
-                {/* Access */}
-                <Stack gap={4} miw={160}>
-                  <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
-                    Access
+              {/* Access */}
+              <Stack gap={4} miw={160}>
+                <Text
+                  size="xs"
+                  fw={600}
+                  tt="uppercase"
+                  c="dimmed"
+                  style={{ letterSpacing: '0.06em' }}
+                >
+                  Access
+                </Text>
+                <Divider mb={4} />
+                <Field label="Role" value={user.role ?? 'user'} />
+                <Field
+                  label="Status"
+                  value={user.banned ? 'Banned' : 'Active'}
+                  valueColor={user.banned ? 'red' : 'civicGreen.6'}
+                />
+              </Stack>
+
+              {/* Ban details — only when banned */}
+              {user.banned && (
+                <Stack gap={4} miw={200}>
+                  <Text
+                    size="xs"
+                    fw={600}
+                    tt="uppercase"
+                    c="dimmed"
+                    style={{ letterSpacing: '0.06em' }}
+                  >
+                    Ban Details
                   </Text>
                   <Divider mb={4} />
-                  <Field label="Role" value={user.role ?? 'user'} />
                   <Field
-                    label="Status"
-                    value={user.banned ? 'Banned' : 'Active'}
-                    valueColor={user.banned ? 'red' : 'civicGreen.6'}
+                    label="Reason"
+                    value={user.banReason ?? 'No reason provided'}
+                    valueColor="red"
                   />
+                  {user.banExpires && (
+                    <Field
+                      label="Expires"
+                      value={new Date(user.banExpires).toLocaleString()}
+                      valueColor="red"
+                    />
+                  )}
                 </Stack>
+              )}
+            </Group>
+          </Box>
+        )}
+        pagination={{
+          totalCount: usersAsync.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
+        columns={[
+          ...columns,
+          {
+            header: '',
+            id: 'actions',
 
-                {/* Ban details — only when banned */}
-                {user.banned && (
-                  <Stack gap={4} miw={200}>
-                    <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
-                      Ban Details
-                    </Text>
-                    <Divider mb={4} />
-                    <Field label="Reason" value={user.banReason ?? 'No reason provided'} valueColor="red" />
-                    {user.banExpires && (
-                      <Field
-                        label="Expires"
-                        value={new Date(user.banExpires).toLocaleString()}
-                        valueColor="red"
-                      />
-                    )}
-                  </Stack>
-                )}
-              </Group>
-            </Box>
-          )}
-          pagination={{
-            totalCount: usersAsync.totalCount,
-            currentPage: page,
-            pageSize,
-            onChange: setPage,
-            onPageSizeChange: setPageSize,
-          }}
-          columns={[
-            ...columns,
-            {
-              header: 'Actions',
-              id: 'actions',
-              cell: ({ row: { original: user } }: { row: { original: User } }) => (
-                <Menu shadow="md" width={200}>
-                  <Menu.Target>
-                    <ActionIcon variant="outline" aria-label="Settings">
-                      <TablerIcon
-                        name="dotsVertical"
-                        style={{ width: '70%', height: '70%' }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Label>Manage User</Menu.Label>
-                    <Menu.Divider />
-                    <Menu.Item
-                      leftSection={<TablerIcon name="eye" size={14} />}
-                      onClick={() => navigate(`/dashboard/users/${user.id}`)}
-                    >
-                      View Details
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<TablerIcon name="userShield" size={14} />}
-                      onClick={() => handleLaunchSetRole(user)}
-                    >
-                      Set Role
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<TablerIcon name="ban" size={14} />}
-                      color={user.banned ? 'green' : 'orange'}
-                      onClick={() => handleLaunchBanUser(user)}
-                    >
-                      {user.banned ? 'Unban User' : 'Ban User'}
-                    </Menu.Item>
-                    <Menu.Item
-                      leftSection={<TablerIcon name="logout" size={14} />}
-                      color="orange"
-                      onClick={() => handleRevokeSessions(user)}
-                    >
-                      Revoke Sessions
-                    </Menu.Item>
-                    <Menu.Divider />
-                    <Menu.Item
-                      leftSection={<TablerIcon name="trash" size={14} />}
-                      color="red"
-                      onClick={() => handleRemove(user)}
-                    >
-                      Remove User
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              ),
-            },
-          ]}
-        />
+            cell: ({ row: { original: user } }: { row: { original: User } }) => (
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <ActionIcon variant="subtle" aria-label="Settings">
+                    <TablerIcon
+                      name="dotsVertical"
+                      style={{ width: '70%', height: '70%' }}
+                      stroke={1.5}
+                    />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Manage User</Menu.Label>
+                  <Menu.Divider />
+                  <Menu.Item
+                    leftSection={<TablerIcon name="eye" size={14} />}
+                    onClick={() => navigate(`/dashboard/users/${user.id}`)}
+                  >
+                    View Details
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="userShield" size={14} />}
+                    onClick={() => handleLaunchSetRole(user)}
+                  >
+                    Set Role
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="ban" size={14} />}
+                    color={user.banned ? 'green' : 'orange'}
+                    onClick={() => handleLaunchBanUser(user)}
+                  >
+                    {user.banned ? 'Unban User' : 'Ban User'}
+                  </Menu.Item>
+                  <Menu.Item
+                    leftSection={<TablerIcon name="logout" size={14} />}
+                    color="orange"
+                    onClick={() => handleRevokeSessions(user)}
+                  >
+                    Revoke Sessions
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item
+                    leftSection={<TablerIcon name="trash" size={14} />}
+                    color="red"
+                    onClick={() => handleRemove(user)}
+                  >
+                    Remove User
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            ),
+            size: 0,
+          },
+        ]}
+      />
     </Stack>
   );
 };
@@ -310,14 +345,32 @@ const columns: ColumnDef<User>[] = [
   {
     header: 'Role',
     accessorKey: 'role',
-    cell: ({ row: { original: user } }: { row: { original: User } }) =>
-      user.role ? <Badge color="blue">{user.role}</Badge> : <Badge color="gray">User</Badge>,
+    cell: ({ row: { original: user } }: { row: { original: User } }) => (
+      <Group gap={4}>
+        {user.role
+          ?.split(',')
+          .filter(Boolean)
+          .map((role) => (
+            <Badge color={role === 'admin' ? 'red' : 'blue'} size="xs">
+              {role}
+            </Badge>
+          ))}
+      </Group>
+    ),
   },
   {
     header: 'Status',
     accessorKey: 'banned',
     cell: ({ row: { original: user } }: { row: { original: User } }) =>
-      user.banned ? <Badge color="red">Banned</Badge> : <Badge color="green">Active</Badge>,
+      user.banned ? (
+        <Badge color="red" size="xs">
+          Banned
+        </Badge>
+      ) : (
+        <Badge color="green" size="xs">
+          Active
+        </Badge>
+      ),
   },
 ];
 
