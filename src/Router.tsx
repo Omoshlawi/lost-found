@@ -17,6 +17,7 @@ import {
 import { DocumentTypesPage } from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
+import { MatchDetailPage, MatchesPage } from './features/matches/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { AuthLayout, LoginRequired } from './features/landing/components';
@@ -100,6 +101,14 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <ClaimsPage /> },
           { path: ':claimId', element: <ClaimDetailPage /> },
+        ],
+      },
+      {
+        path: 'matches',
+        element: <Outlet />,
+        children: [
+          { index: true, element: <MatchesPage /> },
+          { path: ':matchId', element: <MatchDetailPage /> },
         ],
       },
       { path: 'components', element: <UiComponents /> },

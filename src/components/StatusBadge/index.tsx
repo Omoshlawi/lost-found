@@ -19,6 +19,8 @@ const STATUS_COLOR: Record<string, string> = {
   // AI extraction
   IN_PROGRESS: 'civicBlue',
   FAILED: 'red',
+  // Match
+  CLAIMED: 'teal',
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -33,6 +35,8 @@ const STATUS_LABEL: Record<string, string> = {
   CANCELLED: 'Cancelled',
   IN_PROGRESS: 'In Progress',
   FAILED: 'Failed',
+  // Match
+  CLAIMED: 'Claimed',
 };
 
 interface StatusBadgeProps {
@@ -40,7 +44,9 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
-  if (!status) return null;
+  if (!status) {
+    return null;
+  }
   return (
     <Badge color={STATUS_COLOR[status] ?? 'gray'} variant="light" size="sm">
       {STATUS_LABEL[status] ?? status}

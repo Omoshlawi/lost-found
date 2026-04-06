@@ -1,19 +1,36 @@
 import { FoundDocumentCase, LostDocumentCase } from '../cases/types';
 
+export interface Layer2FieldScore {
+  weightedScore: number;
+  threshold: number;
+  fields: Layer2FieldDto[];
+}
+
+export interface Layer2FieldDto {
+  field: string;
+  triggerValue?: string | null;
+  candidateValue?: string | null;
+  maskedCandidatevalue?: string | null;
+  matched: boolean;
+  score: number;
+  weight: number;
+  contribution: number;
+}
+
 export interface Match {
   id: string;
-  matchNumber: number;
+  matchNumber: string;
   vectorScore: number;
   exactScore: number;
-  aiScore: number;
   finalScore: number;
-  aiInteractionId: string;
   lostDocumentCaseId: string;
   lostDocumentCase: LostDocumentCase;
   foundDocumentCaseId: string;
   foundDocumentCase: FoundDocumentCase;
-  aiVerificationResult: AiAnalysis;
+  verdict: MatchVerdict;
+  aiVerificationResult?: AiAnalysis;
   securityQuestions: { question: string; answer: string }[];
+  layer2FieldScores?: Layer2FieldScore;
   status: MatchStatus;
   createdAt: string;
   updatedAt: string;
