@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DocumentTypeSchema } from '../utils';
+import { DocumentTypeSchema, TransitionReasonSchema } from '../utils';
 
 export interface DocumentType {
   id: string;
@@ -25,3 +25,20 @@ export interface DocumentType {
 }
 
 export type DocumentTypeFormData = z.infer<typeof DocumentTypeSchema>;
+
+export interface TransitionReason {
+  id: string;
+  code: string;
+  entityType: string;
+  fromStatus: string;
+  toStatus: string;
+  auto: boolean;
+  label: string;
+  description: string | null;
+  metadata: any;
+  createdAt: string;
+  updatedAt: string;
+  voided: boolean;
+}
+
+export type TransitionReasonFormData = z.infer<typeof TransitionReasonSchema>;

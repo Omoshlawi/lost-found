@@ -15,7 +15,7 @@ export function constructUrl(
 
   // Add new params
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined) {
+    if (value !== undefined && value !== null) {
       newParams.set(key, String(value)); // Add the new parameters
     }
   });

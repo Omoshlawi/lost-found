@@ -14,7 +14,7 @@ import {
   AddressHierarchyPage,
   AddressLocalesPage,
 } from './features/addresses/pages';
-import { DocumentTypesPage } from './features/admin/pages';
+import { DocumentTypesPage, TransitionReasonsPage } from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import { MatchDetailPage, MatchesPage } from './features/matches/pages';
@@ -115,6 +115,10 @@ const router = createBrowserRouter([
       {
         path: 'document-types',
         element: <DocumentTypesPage />,
+      },
+      {
+        path: 'status-transition-reasons',
+        element: <TransitionReasonsPage />,
       },
       {
         path: 'addresses',

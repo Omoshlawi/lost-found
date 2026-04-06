@@ -18,3 +18,13 @@ export const DocumentTypeSchema = z.object({
   replacementInstructions: z.string().optional(),
   averageReplacementCost: z.number({ coerce: true }).optional(),
 });
+
+export const TransitionReasonSchema = z.object({
+  code: z.string().min(1, 'Code is required'),
+  label: z.string().min(1, 'Label is required'),
+  entityType: z.string().min(1),
+  fromStatus: z.string().min(1),
+  toStatus: z.string().min(1),
+  auto: z.boolean(),
+  description: z.string().optional(),
+});
