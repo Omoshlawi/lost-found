@@ -240,11 +240,7 @@ const UsersPage = () => {
               <Menu shadow="md" width={200}>
                 <Menu.Target>
                   <ActionIcon variant="subtle" aria-label="Settings">
-                    <TablerIcon
-                      name="dotsVertical"
-                      style={{ width: '70%', height: '70%' }}
-                      stroke={1.5}
-                    />
+                    <TablerIcon name="dots" style={{ width: '70%', height: '70%' }} stroke={1.5} />
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>

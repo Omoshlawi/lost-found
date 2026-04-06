@@ -1,10 +1,15 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Badge, Menu, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
 import { useSearchParams } from 'react-router-dom';
+import { ActionIcon, Badge, Menu, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import {
+  DashboardPageHeader,
+  StateFullDataTable,
+  SystemAuthorized,
+  TablerIcon,
+} from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { useAddressHierarchy, useAddressHierarchyApi } from '../hooks';
@@ -192,31 +197,43 @@ const buildHierarchyColumns = (handlers: HierarchyHandlers): ColumnDef<AddressHi
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: '',
     cell: ({ row: { original } }) => (
       <Menu shadow="md" width={200}>
         <Menu.Target>
           <ActionIcon variant="subtle">
-            <TablerIcon name="dotsVertical" size={16} />
+            <TablerIcon name="dots" size={16} />
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
+          <Menu.Label>Actions</Menu.Label>
+          <Menu.Divider />
           {!original.voided ? (
-            <Menu.Item
-              color="red"
-              leftSection={<TablerIcon name="trash" size={14} />}
-              onClick={() => handlers.onDelete(original)}
+            <SystemAuthorized
+              permissions={{ addressHierarchy: ['delete'] }}
+              unauthorizedAction={{ type: 'hide' }}
             >
-              Delete
-            </Menu.Item>
+              <Menu.Item
+                color="red"
+                leftSection={<TablerIcon name="trash" size={14} />}
+                onClick={() => handlers.onDelete(original)}
+              >
+                Delete
+              </Menu.Item>
+            </SystemAuthorized>
           ) : (
-            <Menu.Item
-              color="green"
-              leftSection={<TablerIcon name="history" size={14} />}
-              onClick={() => handlers.onRestore(original)}
+            <SystemAuthorized
+              permissions={{ addressHierarchy: ['restore'] }}
+              unauthorizedAction={{ type: 'hide' }}
             >
-              Restore
-            </Menu.Item>
+              <Menu.Item
+                color="green"
+                leftSection={<TablerIcon name="history" size={14} />}
+                onClick={() => handlers.onRestore(original)}
+              >
+                Restore
+              </Menu.Item>
+            </SystemAuthorized>
           )}
         </Menu.Dropdown>
       </Menu>

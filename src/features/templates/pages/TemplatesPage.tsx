@@ -49,6 +49,8 @@ const TemplatesPage = () => {
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
+                  <Menu.Label>Actions</Menu.Label>
+                  <Menu.Divider />
                   <Menu.Item
                     leftSection={<TablerIcon name="eye" size={14} />}
                     component={Link}
@@ -72,10 +74,7 @@ const TemplatesPage = () => {
                     unauthorizedAction={{ type: 'hide' }}
                   >
                     <Menu.Divider />
-                    <Menu.Item
-                      leftSection={<TablerIcon name="trash" size={14} />}
-                      color="red"
-                    >
+                    <Menu.Item leftSection={<TablerIcon name="trash" size={14} />} color="red">
                       Delete
                     </Menu.Item>
                   </SystemAuthorized>
@@ -143,7 +142,11 @@ const columns: ColumnDef<Template>[] = [
         variant="light"
         size="xs"
         color={
-          original.type === 'notification' ? 'blue' : original.type === 'prompt' ? 'yellow' : 'green'
+          original.type === 'notification'
+            ? 'blue'
+            : original.type === 'prompt'
+              ? 'yellow'
+              : 'green'
         }
       >
         {original.type}

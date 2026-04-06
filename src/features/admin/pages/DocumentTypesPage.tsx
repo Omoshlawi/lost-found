@@ -95,7 +95,7 @@ const DocumentTypesPage = () => {
         columns={[
           ...columns,
           {
-            header: 'Actions',
+            header: '',
             id: 'actions',
             cell: ({ row: { original: docType } }: { row: { original: DocumentType } }) => (
               <Menu shadow="md" width={200}>

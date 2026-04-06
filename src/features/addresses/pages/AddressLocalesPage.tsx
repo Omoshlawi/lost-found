@@ -13,7 +13,13 @@ import {
 } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
+import {
+  DashboardPageHeader,
+  launchWorkspace,
+  StateFullDataTable,
+  SystemAuthorized,
+  TablerIcon,
+} from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { AddressLocaleForm } from '../forms';
@@ -244,43 +250,60 @@ const buildColumns = (handlers: ColumnHandlers): ColumnDef<AddressLocale>[] => [
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: '',
     cell: ({ row: { original } }) => (
       <Menu shadow="md" width={200}>
         <Menu.Target>
           <ActionIcon variant="subtle">
-            <TablerIcon name="dotsVertical" size={16} />
+            <TablerIcon name="dots" size={16} />
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
-          <Menu.Label>Manage</Menu.Label>
-          <Menu.Item
-            leftSection={<TablerIcon name="edit" size={14} />}
-            onClick={() => handlers.onEdit(original)}
+          <Menu.Label>Actions</Menu.Label>
+          <Menu.Divider />
+          <SystemAuthorized
+            permissions={{ addressLocale: ['update'] }}
+            unauthorizedAction={{ type: 'hide' }}
           >
-            Edit
-          </Menu.Item>
-          {!original.voided && (
             <Menu.Item
-              color="red"
-              leftSection={<TablerIcon name="trash" size={14} />}
-              onClick={() => handlers.onDelete(original)}
+              leftSection={<TablerIcon name="edit" size={14} />}
+              onClick={() => handlers.onEdit(original)}
             >
-              Delete
+              Edit
             </Menu.Item>
+          </SystemAuthorized>
+          {!original.voided && (
+            <SystemAuthorized
+              permissions={{ addressLocale: ['delete'] }}
+              unauthorizedAction={{ type: 'hide' }}
+            >
+              <Menu.Item
+                color="red"
+                leftSection={<TablerIcon name="trash" size={14} />}
+                onClick={() => handlers.onDelete(original)}
+              >
+                Delete
+              </Menu.Item>
+            </SystemAuthorized>
           )}
           {original.voided && (
-            <Menu.Item
-              color="green"
-              leftSection={<TablerIcon name="history" size={14} />}
-              onClick={() => handlers.onRestore(original)}
+            <SystemAuthorized
+              permissions={{ addressLocale: ['restore'] }}
+              unauthorizedAction={{ type: 'hide' }}
             >
-              Restore
-            </Menu.Item>
+              <Menu.Item
+                color="green"
+                leftSection={<TablerIcon name="history" size={14} />}
+                onClick={() => handlers.onRestore(original)}
+              >
+                Restore
+              </Menu.Item>
+            </SystemAuthorized>
           )}
         </Menu.Dropdown>
       </Menu>
     ),
+    size: 0,
   },
 ];
 

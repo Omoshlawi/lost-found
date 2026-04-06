@@ -233,12 +233,12 @@ const buildAddressColumns = (handlers: AddressColumnHandlers): ColumnDef<Address
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: '',
     cell: ({ row: { original } }) => (
       <Menu shadow="md" width={200}>
         <Menu.Target>
-          <ActionIcon variant="outline">
-            <TablerIcon name="dotsVertical" size={16} />
+          <ActionIcon variant="subtle">
+            <TablerIcon name="dots" size={16} />
           </ActionIcon>
         </Menu.Target>
         <Menu.Dropdown>
@@ -270,6 +270,7 @@ const buildAddressColumns = (handlers: AddressColumnHandlers): ColumnDef<Address
         </Menu.Dropdown>
       </Menu>
     ),
+    size: 0,
   },
 ];
 
