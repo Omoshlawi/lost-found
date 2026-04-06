@@ -37,6 +37,7 @@ const navConfig: NavEntry[] = [
       { icon: 'files', label: 'Cases', href: 'cases' },
       { icon: 'filterQuestion', label: 'Claims', href: 'claims' },
       { icon: 'exchange', label: 'Matches', href: 'matches' },
+      { icon: 'history', label: 'Status Transitions', href: 'status-transitions' },
     ],
   },
   {

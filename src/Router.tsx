@@ -23,6 +23,7 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
 import { SettingsPage } from './features/settings';
+import { StatusTransitionsPage } from './features/status-transitions/pages';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
 import { UserDetailPage, UsersPage } from './features/users/pages';
@@ -110,6 +111,10 @@ const router = createBrowserRouter([
           { index: true, element: <MatchesPage /> },
           { path: ':matchId', element: <MatchDetailPage /> },
         ],
+      },
+      {
+        path: 'status-transitions',
+        element: <StatusTransitionsPage />,
       },
       { path: 'components', element: <UiComponents /> },
       {
