@@ -10,8 +10,8 @@ import {
   TablerIcon,
   TablerIconName,
 } from '@/components';
-import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
+import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { DocumentTypeForm } from '../forms';
 import { useDocumentTypes, useDocumentTypesApi } from '../hooks';
@@ -75,80 +75,77 @@ const DocumentTypesPage = () => {
         subTitle="Configure supported document categories"
         icon="idBadge2"
       />
-        <StateFullDataTable
-          {...documentTypesAsync}
-          data={documentTypesAsync.documentTypes}
-          renderExpandedRow={({ original: docType }) => {
-            return (
-              <Paper p="xs">
-                <Text size="sm">{docType.name}</Text>
-                <Text size="sm">{docType.description}</Text>
-                <Text size="sm">{docType.createdAt}</Text>
-                <Text size="sm">{docType.updatedAt}</Text>
-                <Text size="sm">{docType.averageReplacementCost}</Text>
-                <Text size="sm">{docType.replacementInstructions}</Text>
-                <Text size="sm">{docType.description}</Text>
-                <Text size="sm">{docType.voided}</Text>
-              </Paper>
-            );
-          }}
-          columns={[
-            ...columns,
-            {
-              header: 'Actions',
-              id: 'actions',
-              cell: ({ row: { original: docType } }: { row: { original: DocumentType } }) => (
-                <Menu shadow="md" width={200}>
-                  <Menu.Target>
-                    <ActionIcon variant="outline" aria-label="Settings">
-                      <TablerIcon
-                        name="dotsVertical"
-                        style={{ width: '70%', height: '70%' }}
-                        stroke={1.5}
-                      />
-                    </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Label>Actions</Menu.Label>
-                    <Menu.Divider />
-                    <SystemAuthorized
-                      permissions={{ documentType: ['update'] }}
-                      unauthorizedAction={{ type: 'hide' }}
+      <StateFullDataTable
+        {...documentTypesAsync}
+        data={documentTypesAsync.documentTypes}
+        renderExpandedRow={({ original: docType }) => {
+          return (
+            <Paper p="xs">
+              <Text size="sm">{docType.name}</Text>
+              <Text size="sm">{docType.description}</Text>
+              <Text size="sm">{docType.createdAt}</Text>
+              <Text size="sm">{docType.updatedAt}</Text>
+              <Text size="sm">{docType.averageReplacementCost}</Text>
+              <Text size="sm">{docType.replacementInstructions}</Text>
+              <Text size="sm">{docType.description}</Text>
+              <Text size="sm">{docType.voided}</Text>
+            </Paper>
+          );
+        }}
+        columns={[
+          ...columns,
+          {
+            header: 'Actions',
+            id: 'actions',
+            cell: ({ row: { original: docType } }: { row: { original: DocumentType } }) => (
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <ActionIcon variant="subtle" aria-label="Settings">
+                    <TablerIcon name="dots" style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                  </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Actions</Menu.Label>
+                  <Menu.Divider />
+                  <SystemAuthorized
+                    permissions={{ documentType: ['update'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
+                    <Menu.Item
+                      leftSection={<TablerIcon name="edit" size={14} />}
+                      color="green"
+                      onClick={() => handleLaunchFormWorkspace(docType)}
                     >
-                      <Menu.Item
-                        leftSection={<TablerIcon name="edit" size={14} />}
-                        color="green"
-                        onClick={() => handleLaunchFormWorkspace(docType)}
-                      >
-                        Edit
-                      </Menu.Item>
-                    </SystemAuthorized>
-                    <SystemAuthorized
-                      permissions={{ documentType: ['delete'] }}
-                      unauthorizedAction={{ type: 'hide' }}
+                      Edit
+                    </Menu.Item>
+                  </SystemAuthorized>
+                  <SystemAuthorized
+                    permissions={{ documentType: ['delete'] }}
+                    unauthorizedAction={{ type: 'hide' }}
+                  >
+                    <Menu.Item
+                      leftSection={<TablerIcon name="trash" size={14} />}
+                      color="red"
+                      onClick={() => handleDelete(docType)}
                     >
-                      <Menu.Item
-                        leftSection={<TablerIcon name="trash" size={14} />}
-                        color="red"
-                        onClick={() => handleDelete(docType)}
-                      >
-                        Delete
-                      </Menu.Item>
-                    </SystemAuthorized>
-                  </Menu.Dropdown>
-                </Menu>
-              ),
-            },
-          ]}
-          onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
-          pagination={{
-            totalCount: documentTypesAsync.totalCount,
-            currentPage: page,
-            pageSize,
-            onChange: setPage,
-            onPageSizeChange: setPageSize,
-          }}
-        />
+                      Delete
+                    </Menu.Item>
+                  </SystemAuthorized>
+                </Menu.Dropdown>
+              </Menu>
+            ),
+            size: 0,
+          },
+        ]}
+        onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
+        pagination={{
+          totalCount: documentTypesAsync.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
+      />
     </Stack>
   );
 };

@@ -17,15 +17,15 @@ const AddressesPage = () => {
   const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
     useTableUrlFilters();
 
-  const country = searchParams.get('country');
+  const location = searchParams.get('location');
 
-  const setCountry = (value: string | null) => {
+  const setLocation = (value: string | null) => {
     setSearchParams(
       (prev) => {
         if (value) {
-          prev.set('country', value);
+          prev.set('location', value);
         } else {
-          prev.delete('country');
+          prev.delete('location');
         }
         prev.set('page', '1');
         return prev;
@@ -38,7 +38,7 @@ const AddressesPage = () => {
     page,
     limit: pageSize,
     search,
-    country: country ?? undefined,
+    location: location ?? undefined,
   });
   const { deleteAddress, restoreAddress, mutateAddresses } = useAddressesApi();
 
@@ -146,10 +146,10 @@ const AddressesPage = () => {
               w={200}
             />
             <TextInput
-              placeholder="Country code (e.g. KE)"
+              placeholder="Search area (e.g. Nairobi, juja, etc)"
               leftSection={<TablerIcon name="world" size={14} />}
-              value={country ?? ''}
-              onChange={(e) => setCountry(e.target.value)}
+              value={location ?? ''}
+              onChange={(e) => setLocation(e.target.value)}
               size="xs"
               w={160}
             />
