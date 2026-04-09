@@ -15,6 +15,12 @@ import {
   AddressLocalesPage,
 } from './features/addresses/pages';
 import { DocumentTypesPage, TransitionReasonsPage } from './features/admin/pages';
+import {
+  CustodyDetailPage,
+  CustodyListPage,
+  DocumentOperationTypesPage,
+  StaffStationOperationsPage,
+} from './features/custody/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import { MatchDetailPage, MatchesPage } from './features/matches/pages';
@@ -116,6 +122,16 @@ const router = createBrowserRouter([
         path: 'status-transitions',
         element: <StatusTransitionsPage />,
       },
+      {
+        path: 'custody',
+        element: <Outlet />,
+        children: [
+          { index: true, element: <CustodyListPage /> },
+          { path: ':foundCaseId', element: <CustodyDetailPage /> },
+        ],
+      },
+      { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
+      { path: 'staff-station-operations', element: <StaffStationOperationsPage /> },
       { path: 'components', element: <UiComponents /> },
       {
         path: 'document-types',

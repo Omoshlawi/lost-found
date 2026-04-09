@@ -42,6 +42,15 @@ const navConfig: NavEntry[] = [
   },
   {
     type: 'group',
+    label: 'Document Custody',
+    items: [
+      { icon: 'buildingWarehouse', label: 'Custody Tracker', href: 'custody' },
+      { icon: 'userCog', label: 'Staff Operations', href: 'staff-station-operations' },
+      { icon: 'settingsAutomation', label: 'Operation Types', href: 'document-operation-types' },
+    ],
+  },
+  {
+    type: 'group',
     label: 'Configuration',
     items: [
       { icon: 'idBadge2', label: 'Document Types', href: 'document-types' },

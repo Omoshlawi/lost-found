@@ -21,6 +21,12 @@ const STATUS_COLOR: Record<string, string> = {
   FAILED: 'red',
   // Match
   CLAIMED: 'teal',
+  // Custody
+  WITH_FINDER: 'civicGold',
+  IN_CUSTODY: 'teal',
+  IN_TRANSIT: 'civicBlue',
+  HANDED_OVER: 'civicGreen',
+  DISPOSED: 'gray',
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -37,6 +43,12 @@ const STATUS_LABEL: Record<string, string> = {
   FAILED: 'Failed',
   // Match
   CLAIMED: 'Claimed',
+  // Custody
+  WITH_FINDER: 'With Finder',
+  IN_CUSTODY: 'In Custody',
+  IN_TRANSIT: 'In Transit',
+  HANDED_OVER: 'Handed Over',
+  DISPOSED: 'Disposed',
 };
 
 interface StatusBadgeProps {
