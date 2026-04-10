@@ -1,3 +1,8 @@
+import { z } from 'zod';
+import { GrantStaffOperationSchema } from '../utils/validation';
+
+export type GrantStaffOperationFormData = z.infer<typeof GrantStaffOperationSchema>;
+
 export enum CustodyStatus {
   WITH_FINDER = 'WITH_FINDER',
   IN_CUSTODY = 'IN_CUSTODY',
@@ -51,10 +56,38 @@ export interface StaffStationOperation {
   updatedAt: string;
 }
 
+// ─── Staff grant grouping ─────────────────────────────────────────────────────
+
+export type StationGroup = {
+  stationId: string;
+  station?: StaffStationOperation['station'];
+  operations: StaffStationOperation[];
+};
+
+export type GroupedStaffGrant = {
+  userId: string;
+  user?: StaffStationOperation['user'];
+  stations: StationGroup[];
+  totalOperations: number;
+  latestGrantedAt: string;
+};
+
 export interface Station {
   id: string;
   name: string;
   code: string;
+  address1: string;
+  address2?: string | null;
+  landmark?: string | null;
+  level1: string;
+  level2?: string | null;
+  level3?: string | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+  formatted?: string | null;
+  voided: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DocumentOperation {

@@ -168,8 +168,8 @@ export const useStaffStationOperations = (params: Record<string, any> = {}) => {
   };
 };
 
-export const grantStaffStationOperation = async (payload: { userId: string; stationId: string; operationTypeId: string }) => {
-  const result = await apiFetch<StaffStationOperation>('/staff-station-operations', {
+export const grantStaffStationOperation = async (payload: { userId: string; stationId: string; operationTypeIds: string[] }) => {
+  const result = await apiFetch<StaffStationOperation[]>('/staff-station-operations', {
     method: 'POST',
     data: payload,
   });

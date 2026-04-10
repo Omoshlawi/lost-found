@@ -1,18 +1,62 @@
 import React, { useMemo } from 'react';
-import { ColumnDef } from '@tanstack/react-table';
-import { ActionIcon, Menu, Stack, Text } from '@mantine/core';
+import { ColumnDef, Row } from '@tanstack/react-table';
+import { ActionIcon, Badge, Menu, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
-import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
-import { useStaffStationOperations, revokeStaffStationOperation } from '../hooks/useCustody';
-import { StaffStationOperation } from '../types';
+import { revokeStaffStationOperation, useStaffStationOperations } from '../hooks/useCustody';
+import { GroupedStaffGrant, StaffStationOperation } from '../types';
 import { formatDate } from '@/lib/utils/helpers';
+import { ExpandedGrantRow } from '../components';
+import GrantStaffOperationForm from '../forms/GrantStaffOperationForm';
+
+// ─── Grouping helper ──────────────────────────────────────────────────────────
+
+function groupByUser(grants: StaffStationOperation[]): GroupedStaffGrant[] {
+  const map = new Map<string, GroupedStaffGrant>();
+
+  for (const grant of grants) {
+    if (!map.has(grant.userId)) {
+      map.set(grant.userId, {
+        userId: grant.userId,
+        user: grant.user,
+        stations: [],
+        totalOperations: 0,
+        latestGrantedAt: grant.createdAt,
+      });
+    }
+
+    const group = map.get(grant.userId)!;
+
+    if (grant.createdAt > group.latestGrantedAt) {
+      group.latestGrantedAt = grant.createdAt;
+    }
+
+    let stationGroup = group.stations.find((s) => s.stationId === grant.stationId);
+    if (!stationGroup) {
+      stationGroup = { stationId: grant.stationId, station: grant.station, operations: [] };
+      group.stations.push(stationGroup);
+    }
+
+    stationGroup.operations.push(grant);
+    group.totalOperations++;
+  }
+
+  return Array.from(map.values());
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 const StaffStationOperationsPage: React.FC = () => {
   const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const { grants, totalCount, isLoading, mutate } = useStaffStationOperations({ page, limit: pageSize });
+  const { grants, totalCount, isLoading, mutate } = useStaffStationOperations({
+    page,
+    limit: pageSize,
+  });
+
+  const grouped = useMemo(() => groupByUser(grants), [grants]);
 
   const handleRevoke = (grant: StaffStationOperation) => {
     modals.openConfirmModal({
@@ -38,60 +82,81 @@ const StaffStationOperationsPage: React.FC = () => {
     });
   };
 
-  const columns = useMemo<ColumnDef<StaffStationOperation>[]>(
+  const handleGrant = () => {
+    const closeWorkspace = launchWorkspace(
+      <GrantStaffOperationForm onClose={() => closeWorkspace()} onSuccess={() => void mutate()} />,
+      { width: 'narrow', title: 'Grant Staff Operation' }
+    );
+  };
+
+  const columns = useMemo<ColumnDef<GroupedStaffGrant>[]>(
     () => [
       {
-        header: 'Staff',
+        id: 'expand',
+        size: 40,
+        header: '',
+        cell: ({ row }) => (
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size="sm"
+            onClick={() => row.toggleExpanded()}
+            aria-label="Expand row"
+          >
+            <TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={14} />
+          </ActionIcon>
+        ),
+      },
+      {
+        header: 'Staff Member',
         id: 'user',
-        cell: ({ row: { original } }) => original.user?.name ?? original.userId,
+        cell: ({ row: { original } }) => (
+          <Text size="sm" fw={500}>{original.user?.name ?? original.userId}</Text>
+        ),
       },
       {
-        header: 'Station',
-        id: 'station',
-        cell: ({ row: { original } }) =>
-          original.station ? `${original.station.name} (${original.station.code})` : original.stationId,
+        header: 'Stations',
+        id: 'stations',
+        cell: ({ row: { original } }) => (
+          <Badge variant="light" color="teal" size="sm">{original.stations.length}</Badge>
+        ),
       },
       {
-        header: 'Operation',
-        id: 'operation',
-        cell: ({ row: { original } }) => original.operationType?.name ?? original.operationTypeId,
+        header: 'Operations',
+        id: 'operations',
+        cell: ({ row: { original } }) => (
+          <Badge variant="light" color="civicBlue" size="sm">{original.totalOperations}</Badge>
+        ),
       },
       {
-        header: 'Granted By',
-        id: 'grantedBy',
-        cell: ({ row: { original } }) => original.grantedBy?.name ?? original.grantedById,
+        header: 'Last Granted',
+        id: 'latestGrantedAt',
+        cell: ({ row: { original } }) => formatDate(original.latestGrantedAt),
       },
       {
-        header: 'Granted At',
-        id: 'createdAt',
-        cell: ({ row: { original } }) => formatDate(original.createdAt),
+        id: 'actions',
+        size: 40,
+        cell: ({ row }) => (
+          <Menu position="bottom-end" width={160}>
+            <Menu.Target>
+              <ActionIcon variant="subtle" size="sm">
+                <TablerIcon name="dots" size={14} stroke={1.5} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                leftSection={<TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={14} />}
+                onClick={() => row.toggleExpanded()}
+              >
+                {row.getIsExpanded() ? 'Collapse' : 'Expand'}
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        ),
       },
     ],
     []
   );
-
-  const actionsColumn: ColumnDef<StaffStationOperation> = {
-    id: 'actions',
-    size: 40,
-    cell: ({ row: { original } }) => (
-      <Menu position="bottom-end" width={160}>
-        <Menu.Target>
-          <ActionIcon variant="subtle" size="sm">
-            <TablerIcon name="dots" size={14} stroke={1.5} />
-          </ActionIcon>
-        </Menu.Target>
-        <Menu.Dropdown>
-          <Menu.Item
-            leftSection={<TablerIcon name="userMinus" size={14} />}
-            color="red"
-            onClick={() => handleRevoke(original)}
-          >
-            Revoke
-          </Menu.Item>
-        </Menu.Dropdown>
-      </Menu>
-    ),
-  };
 
   return (
     <Stack gap="md">
@@ -101,9 +166,13 @@ const StaffStationOperationsPage: React.FC = () => {
         icon="userCog"
       />
       <StateFullDataTable
-        data={grants}
+        data={grouped}
         isLoading={isLoading}
-        columns={[...columns, actionsColumn]}
+        onAdd={handleGrant}
+        columns={columns}
+        renderExpandedRow={(row: Row<GroupedStaffGrant>) => (
+          <ExpandedGrantRow group={row.original} onRevoke={handleRevoke} />
+        )}
         pagination={{
           totalCount,
           currentPage: page,

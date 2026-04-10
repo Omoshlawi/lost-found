@@ -19,6 +19,7 @@ import {
   CustodyDetailPage,
   CustodyListPage,
   DocumentOperationTypesPage,
+  PickupStationsPage,
   StaffStationOperationsPage,
 } from './features/custody/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
@@ -131,6 +132,7 @@ const router = createBrowserRouter([
         ],
       },
       { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
+      { path: 'pickup-stations', element: <PickupStationsPage /> },
       { path: 'staff-station-operations', element: <StaffStationOperationsPage /> },
       { path: 'components', element: <UiComponents /> },
       {
