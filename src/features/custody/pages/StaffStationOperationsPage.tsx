@@ -6,11 +6,11 @@ import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
-import { revokeStaffStationOperation, useStaffStationOperations } from '../hooks/useCustody';
-import { GroupedStaffGrant, StaffStationOperation } from '../types';
 import { formatDate } from '@/lib/utils/helpers';
 import { ExpandedGrantRow } from '../components';
 import GrantStaffOperationForm from '../forms/GrantStaffOperationForm';
+import { revokeStaffStationOperation, useStaffStationOperations } from '../hooks/useCustody';
+import { GroupedStaffGrant, StaffStationOperation } from '../types';
 
 // ─── Grouping helper ──────────────────────────────────────────────────────────
 
@@ -72,11 +72,19 @@ const StaffStationOperationsPage: React.FC = () => {
       onConfirm: async () => {
         try {
           await revokeStaffStationOperation(grant.id);
-          showNotification({ title: 'Revoked', message: 'Operation grant revoked.', color: 'green' });
+          showNotification({
+            title: 'Revoked',
+            message: 'Operation grant revoked.',
+            color: 'green',
+          });
           void mutate();
         } catch (err) {
           const e = handleApiErrors<{}>(err);
-          showNotification({ title: 'Error', message: e.detail ?? 'Failed to revoke grant.', color: 'red' });
+          showNotification({
+            title: 'Error',
+            message: e.detail ?? 'Failed to revoke grant.',
+            color: 'red',
+          });
         }
       },
     });
@@ -93,7 +101,7 @@ const StaffStationOperationsPage: React.FC = () => {
     () => [
       {
         id: 'expand',
-        size: 40,
+        size: 0,
         header: '',
         cell: ({ row }) => (
           <ActionIcon
@@ -111,21 +119,27 @@ const StaffStationOperationsPage: React.FC = () => {
         header: 'Staff Member',
         id: 'user',
         cell: ({ row: { original } }) => (
-          <Text size="sm" fw={500}>{original.user?.name ?? original.userId}</Text>
+          <Text size="sm" fw={500}>
+            {original.user?.name ?? original.userId}
+          </Text>
         ),
       },
       {
         header: 'Stations',
         id: 'stations',
         cell: ({ row: { original } }) => (
-          <Badge variant="light" color="teal" size="sm">{original.stations.length}</Badge>
+          <Badge variant="light" color="teal" size="sm">
+            {original.stations.length}
+          </Badge>
         ),
       },
       {
         header: 'Operations',
         id: 'operations',
         cell: ({ row: { original } }) => (
-          <Badge variant="light" color="civicBlue" size="sm">{original.totalOperations}</Badge>
+          <Badge variant="light" color="civicBlue" size="sm">
+            {original.totalOperations}
+          </Badge>
         ),
       },
       {
@@ -135,7 +149,7 @@ const StaffStationOperationsPage: React.FC = () => {
       },
       {
         id: 'actions',
-        size: 40,
+        size: 0,
         cell: ({ row }) => (
           <Menu position="bottom-end" width={160}>
             <Menu.Target>
@@ -145,7 +159,9 @@ const StaffStationOperationsPage: React.FC = () => {
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Item
-                leftSection={<TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={14} />}
+                leftSection={
+                  <TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={14} />
+                }
                 onClick={() => row.toggleExpanded()}
               >
                 {row.getIsExpanded() ? 'Collapse' : 'Expand'}

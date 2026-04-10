@@ -1,14 +1,29 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { AppShell, Box, Burger, Divider, Group, Modal, Text } from '@mantine/core';
+import {
+  Alert,
+  AppShell,
+  Box,
+  Burger,
+  Button,
+  Divider,
+  Group,
+  Modal,
+  Text,
+} from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
 import { ColorSchemeToggle, Logo } from '@/components';
 import { useWorkspace } from '@/components/Workspace';
+import { authClient } from '@/lib/api';
 import SideNav from './SideNav';
 import UserActionsMenu from './UserActionsMenu';
 
 const DashboardLayout: FC = () => {
   const [drawerOpened, { toggle: toggleOpenDrawer }] = useDisclosure();
+  const [isStoppingImpersonation, setIsStoppingImpersonation] = useState(false);
+  const { data: sessionData, refetch: refetchSession } = authClient.useSession();
+  const isImpersonating = Boolean(sessionData?.session?.impersonatedBy);
 
   const { workspace, width } = useWorkspace();
   const isMobile = useMediaQuery('(max-width: 50em)');
@@ -83,6 +98,48 @@ const DashboardLayout: FC = () => {
         )}
 
         <AppShell.Main>
+          {isImpersonating && (
+            <Alert
+              color="orange"
+              variant="light"
+              title="Impersonation Active"
+              mb="md"
+              radius="md"
+            >
+              <Group justify="space-between" align="center" gap="sm" wrap="wrap">
+                <Text size="sm">
+                  You are currently impersonating this account. Changes are applied as this user.
+                </Text>
+                <Button
+                  size="xs"
+                  color="orange"
+                  variant="filled"
+                  loading={isStoppingImpersonation}
+                  onClick={async () => {
+                    setIsStoppingImpersonation(true);
+                    const { error } = await authClient.admin.stopImpersonating();
+                    if (error) {
+                      showNotification({
+                        color: 'red',
+                        title: 'Failed to stop impersonation',
+                        message: error.message,
+                      });
+                    } else {
+                      showNotification({
+                        color: 'teal',
+                        title: 'Impersonation stopped',
+                        message: 'You are back in your admin session.',
+                      });
+                    }
+                    await refetchSession();
+                    setIsStoppingImpersonation(false);
+                  }}
+                >
+                  Stop impersonation
+                </Button>
+              </Group>
+            </Alert>
+          )}
           <Outlet />
         </AppShell.Main>
       </AppShell>

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { Button, Group, Loader, MultiSelect, Select, Stack } from '@mantine/core';
+import { Button, Group, Loader, MultiSelect, Select, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { useSearchStation } from '@/hooks/useSearchStation';
 import { useSearchUser } from '@/hooks/usesearchUser';
 import { handleApiErrors } from '@/lib/api';
-import { grantStaffStationOperation, useDocumentOperationTypes } from '../hooks/useCustody';
+import { grantStaffStationOperation, useStationOperationTypes } from '../hooks/useCustody';
 import { GrantStaffOperationFormData } from '../types';
 import { GrantStaffOperationSchema } from '../utils/validation';
 
@@ -27,7 +27,16 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
 
   const userSearch = useSearchUser();
   const stationSearch = useSearchStation();
-  const { operationTypes } = useDocumentOperationTypes({ limit: 100 });
+
+  // Watch stationId to drive operation type options
+  const selectedStationId = form.watch('stationId');
+  const { stationOpTypes, isLoading: isLoadingOps } = useStationOperationTypes(
+    selectedStationId || undefined
+  );
+
+  const enabledOperationTypeOptions = stationOpTypes
+    .filter((sot) => sot.isEnabled && !sot.voided && sot.operationType && !sot.operationType.voided)
+    .map((sot) => ({ value: sot.operationTypeId, label: sot.operationType!.name }));
 
   // Keep selected options in state so labels persist after search clears
   const [selectedUserOption, setSelectedUserOption] = useState<{
@@ -52,10 +61,6 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
       .filter((s) => s.id !== selectedStationOption?.value)
       .map((s) => ({ value: s.id, label: `${s.name} (${s.code})` })),
   ];
-
-  const operationTypeOptions = operationTypes
-    .filter((o) => !o.voided)
-    .map((o) => ({ label: o.name, value: o.id }));
 
   const handleSubmit: SubmitHandler<GrantStaffOperationFormData> = async (data) => {
     try {
@@ -125,6 +130,8 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
                 onChange={(value, option) => {
                   field.onChange(value ?? '');
                   setSelectedStationOption(value ? { value, label: option.label } : null);
+                  // Clear operation selections when station changes
+                  form.setValue('operationTypeIds', []);
                 }}
                 onSearchChange={(searchValue) =>
                   stationSearch.setFilters(searchValue ? { search: searchValue } : undefined)
@@ -146,17 +153,33 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
             render={({ field, fieldState }) => (
               <MultiSelect
                 label="Operation Types"
-                placeholder="Select one or more operations"
-                data={operationTypeOptions}
+                placeholder={
+                  !selectedStationId
+                    ? 'Select a station first'
+                    : isLoadingOps
+                      ? 'Loading operations...'
+                      : enabledOperationTypeOptions.length === 0
+                        ? 'No operations enabled at this station'
+                        : 'Select one or more operations'
+                }
+                data={enabledOperationTypeOptions}
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
+                disabled={!selectedStationId || isLoadingOps || enabledOperationTypeOptions.length === 0}
+                rightSection={isLoadingOps ? <Loader size="xs" /> : undefined}
                 required
                 searchable
                 hidePickedOptions
               />
             )}
           />
+
+          {selectedStationId && !isLoadingOps && enabledOperationTypeOptions.length === 0 && (
+            <Text size="xs" c="dimmed">
+              No operation types are enabled at this station. Configure them on the Pickup Stations page first.
+            </Text>
+          )}
         </Stack>
 
         <Group gap={1}>
