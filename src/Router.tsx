@@ -14,7 +14,7 @@ import {
   AddressHierarchyPage,
   AddressLocalesPage,
 } from './features/addresses/pages';
-import { DocumentTypesPage, TransitionReasonsPage } from './features/admin/pages';
+import { DocumentTypesPage, RolesPage, TransitionReasonsPage } from './features/admin/pages';
 import {
   CustodyDetailPage,
   CustodyListPage,
@@ -142,6 +142,10 @@ const router = createBrowserRouter([
       {
         path: 'status-transition-reasons',
         element: <TransitionReasonsPage />,
+      },
+      {
+        path: 'roles',
+        element: <RolesPage />,
       },
       {
         path: 'addresses',

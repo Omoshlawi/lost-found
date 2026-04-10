@@ -42,3 +42,17 @@ export interface TransitionReason {
 }
 
 export type TransitionReasonFormData = z.infer<typeof TransitionReasonSchema>;
+
+export interface RolePermission {
+  resource: string;
+  resourceName: string;
+  action: string;
+  actionName: string;
+}
+
+export interface SystemRole {
+  role: string;
+  name: string;
+  label?: string;
+  permissions: RolePermission[];
+}

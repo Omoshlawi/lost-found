@@ -57,6 +57,7 @@ const navConfig: NavEntry[] = [
       { icon: 'idBadge2', label: 'Document Types', href: 'document-types' },
       { icon: 'messageQuestion', label: 'Transition Reasons', href: 'status-transition-reasons' },
       { icon: 'template', label: 'Templates', href: 'templates' },
+      { icon: 'shieldLock', label: 'Roles', href: 'roles' },
       { icon: 'users', label: 'Users', href: 'users' },
       { icon: 'layersLinked', label: 'Address Hierarchy', href: 'address-hierarchy' },
       { icon: 'worldPin', label: 'Address Locales', href: 'address-locales' },
