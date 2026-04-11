@@ -197,27 +197,16 @@ export interface TokenUsage {
   candidatesTokenCount: number;
 }
 
-export interface AsyncState<TData = any, TError extends Error = Error> {
-  isLoading: boolean;
-  error?: TError;
-  data?: TData;
+export enum ExtractionStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
 }
-
-export interface AiInteractionProgressEvent {
-  key: 'IMAGE_ANALYSIS' | 'DATA_EXTRACTION' | 'CONFIDENCE_SCORE' | 'SECURITY_QUESTIONS';
-  state: AsyncState<AiInteraction>;
-}
-
-export interface ImageValidationEvent {
-  key: 'IMAGE_VALIDATION';
-  state: AsyncState<string>;
-}
-
-export type ProgressEvent = ImageValidationEvent | AiInteractionProgressEvent;
 
 export interface AIExtraction {
   id: string;
-  extractionStatus: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  extractionStatus: ExtractionStatus;
   currentStep: 'VISION' | 'TEXT' | 'POST_PROCESSING' | null;
   ocrConfidence?: number;
   extractionConfidence?: number;

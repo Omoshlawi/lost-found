@@ -22,9 +22,10 @@ type Prop = {
   document: Document;
   reportType: CaseType;
   status: string;
+  failed?: boolean;
 };
 
-const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
+const DocumentImages: React.FC<Prop> = ({ document, reportType, status, failed = false }) => {
   const { images = [] } = document;
   const onUploadImage = () => {
     const modalId = modals.open({
@@ -139,7 +140,7 @@ const DocumentImages: React.FC<Prop> = ({ document, reportType, status }) => {
 
       <Grid gutter="lg">
         {images.map((image, index) => {
-          const url = `/api/files/stream?fileName=${image.url}`;
+          const url = `/api/files/stream?fileName=${image.url}&failed=${failed}`;
           return (
             <Grid.Col key={index} span={{ base: 12, sm: images.length === 1 ? 12 : 6 }}>
               <Card

@@ -14,7 +14,13 @@ import {
 } from '../components';
 import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
 import { useActiveCollection, useDocumentCase } from '../hooks';
-import { AIExtraction, CaseType, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import {
+  AIExtraction,
+  CaseType,
+  ExtractionStatus,
+  FoundDocumentCaseStatus,
+  LostDocumentCaseStatus,
+} from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const STEP_LABEL: Record<string, string> = {
@@ -214,6 +220,7 @@ const DocumentCaseDetail = () => {
               document={reportData.document!}
               reportType={reportType}
               status={status}
+              failed={reportData.extraction?.extractionStatus !== ExtractionStatus.COMPLETED}
             />
           </Paper>
         </Tabs.Panel>
