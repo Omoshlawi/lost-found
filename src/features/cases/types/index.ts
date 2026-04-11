@@ -95,6 +95,8 @@ export interface FoundDocumentCase {
   caseId: string;
   case?: DocumentCase;
   status: FoundDocumentCaseStatus;
+  submissionMethod?: SubmissionMethod;
+  custodyStatus?: CustodyStatus;
   createdAt: string;
   updatedAt: string;
   pointAwarded: number;
@@ -202,6 +204,19 @@ export enum ExtractionStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
+}
+
+export enum SubmissionMethod {
+  DROPOFF = 'DROPOFF',
+  PICKUP = 'PICKUP',
+}
+
+export enum CustodyStatus {
+  WITH_FINDER = 'WITH_FINDER',
+  IN_CUSTODY = 'IN_CUSTODY',
+  IN_TRANSIT = 'IN_TRANSIT',
+  HANDED_OVER = 'HANDED_OVER',
+  DISPOSED = 'DISPOSED',
 }
 
 export interface AIExtraction {

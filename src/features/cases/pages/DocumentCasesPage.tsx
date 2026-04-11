@@ -1,16 +1,7 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Link, useSearchParams } from 'react-router-dom';
-import {
-  ActionIcon,
-  Badge,
-  Menu,
-  Select,
-  Stack,
-  Tabs,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import { ActionIcon, Badge, Menu, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
@@ -21,6 +12,7 @@ import {
   TablerIcon,
 } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
+import { useDocumentTypes } from '@/features/admin/hooks/useDocumentTypes';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
@@ -30,8 +22,13 @@ import {
   VerifyFoundDocumentCaseForm,
 } from '../forms';
 import { useDocumentCaseApi, useDocumentCases } from '../hooks';
-import { useDocumentTypes } from '@/features/admin/hooks/useDocumentTypes';
-import { DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import {
+  CustodyStatus,
+  DocumentCase,
+  FoundDocumentCaseStatus,
+  LostDocumentCaseStatus,
+  SubmissionMethod,
+} from '../types';
 
 type CaseTab = 'all' | 'lost' | 'found';
 
@@ -54,6 +51,19 @@ const EXTRACTION_STATUS_OPTIONS = [
   { label: 'Extracted: In Progress', value: 'IN_PROGRESS' },
   { label: 'Extracted: Completed', value: 'COMPLETED' },
   { label: 'Extracted: Failed', value: 'FAILED' },
+];
+
+const SUBMISSION_METHOD_OPTIONS = [
+  { label: 'Drop-off', value: SubmissionMethod.DROPOFF },
+  { label: 'Agent Pickup', value: SubmissionMethod.PICKUP },
+];
+
+const CUSTODY_STATUS_OPTIONS = [
+  { label: 'With Finder', value: CustodyStatus.WITH_FINDER },
+  { label: 'In Custody', value: CustodyStatus.IN_CUSTODY },
+  { label: 'In Transit', value: CustodyStatus.IN_TRANSIT },
+  { label: 'Handed Over', value: CustodyStatus.HANDED_OVER },
+  { label: 'Disposed', value: CustodyStatus.DISPOSED },
 ];
 
 const DocumentCasesPage = () => {
@@ -106,6 +116,40 @@ const DocumentCasesPage = () => {
     );
   };
 
+  const submissionMethod = searchParams.get('submissionMethod');
+
+  const setSubmissionMethod = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('submissionMethod', value);
+        } else {
+          prev.delete('submissionMethod');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
+  const custodyStatus = searchParams.get('custodyStatus');
+
+  const setCustodyStatus = (value: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (value) {
+          prev.set('custodyStatus', value);
+        } else {
+          prev.delete('custodyStatus');
+        }
+        prev.set('page', '1');
+        return prev;
+      },
+      { replace: true }
+    );
+  };
+
   const handleTabChange = (value: string | null) => {
     setSearchParams(
       (prev) => {
@@ -138,6 +182,8 @@ const DocumentCasesPage = () => {
     ...(status && { status }),
     ...(extractionStatus && { extractionStatus }),
     ...(documentType && { documentType }),
+    ...(submissionMethod && { submissionMethod }),
+    ...(custodyStatus && { custodyStatus }),
   });
 
   const { documentTypes } = useDocumentTypes();
@@ -179,7 +225,6 @@ const DocumentCasesPage = () => {
       },
     });
   };
-
 
   const columns = useMemo<ColumnDef<DocumentCase>[]>(
     () => [
@@ -280,6 +325,32 @@ const DocumentCasesPage = () => {
         accessorKey: 'createdAt',
         cell: ({ row: { original } }) => formatDate(original.createdAt),
       },
+      {
+        header: 'Submission',
+        id: 'submissionMethod',
+        cell: ({ row: { original } }) => {
+          const method = original.foundDocumentCase?.submissionMethod;
+          if (!method) {
+            return '—';
+          }
+          return (
+            <Badge variant="outline" size="xs">
+              {method === SubmissionMethod.DROPOFF ? 'Drop-off' : 'Agent Pickup'}
+            </Badge>
+          );
+        },
+      },
+      {
+        header: 'Custody',
+        id: 'custodyStatus',
+        cell: ({ row: { original } }) => {
+          const status = original.foundDocumentCase?.custodyStatus;
+          if (!status) {
+            return '—';
+          }
+          return <StatusBadge status={status} />;
+        },
+      },
     ],
     [activeTab]
   );
@@ -319,10 +390,7 @@ const DocumentCasesPage = () => {
                     }
                     onClick={() => {
                       const dismiss = launchWorkspace(
-                        <InitiateCollectionForm
-                          documentCase={report}
-                          onClose={() => dismiss()}
-                        />,
+                        <InitiateCollectionForm documentCase={report} onClose={() => dismiss()} />,
                         { title: 'Initiate Collection' }
                       );
                     }}
@@ -456,6 +524,28 @@ const DocumentCasesPage = () => {
               clearable
               w={160}
             />
+            {activeTab === 'found' && (
+              <>
+                <Select
+                  placeholder="Submission"
+                  data={SUBMISSION_METHOD_OPTIONS}
+                  value={submissionMethod}
+                  onChange={setSubmissionMethod}
+                  size="xs"
+                  clearable
+                  w={140}
+                />
+                <Select
+                  placeholder="Custody"
+                  data={CUSTODY_STATUS_OPTIONS}
+                  value={custodyStatus}
+                  onChange={setCustodyStatus}
+                  size="xs"
+                  clearable
+                  w={140}
+                />
+              </>
+            )}
           </>
         )}
         pagination={{
