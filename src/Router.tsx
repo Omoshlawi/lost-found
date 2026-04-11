@@ -15,6 +15,8 @@ import {
   AddressLocalesPage,
 } from './features/addresses/pages';
 import { DocumentTypesPage, RolesPage, TransitionReasonsPage } from './features/admin/pages';
+import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
+import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import {
   CustodyDetailPage,
   CustodyListPage,
@@ -22,14 +24,17 @@ import {
   PickupStationsPage,
   StaffStationOperationsPage,
 } from './features/custody/pages';
-import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
-import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
-import { MatchDetailPage, MatchesPage } from './features/matches/pages';
 import { DashboardLayout } from './features/dashboard/components';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { AuthLayout, LoginRequired } from './features/landing/components';
 import LandingLayout from './features/landing/pages/LandingLayout';
+import { MatchDetailPage, MatchesPage } from './features/matches/pages';
 import { SettingsPage } from './features/settings';
+import {
+  StationContextRequired,
+  StationSelectionLayout,
+} from './features/station-context/components';
+import { StationSelectionPage } from './features/station-context/pages';
 import { StatusTransitionsPage } from './features/status-transitions/pages';
 import { TemplateDetailPage, TemplatesPage } from './features/templates/pages';
 import UiComponents from './features/ui/UiComponents';
@@ -82,97 +87,114 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/select-station',
+    element: (
+      <LoginRequired redirectTo="/login">
+        <StationSelectionLayout />
+      </LoginRequired>
+    ),
+    children: [{ index: true, element: <StationSelectionPage /> }],
+  },
+  {
     path: '/dashboard',
     element: (
       <LoginRequired>
-        <DashboardLayout />
+        <StationContextRequired>
+          <DashboardLayout />
+        </StationContextRequired>
       </LoginRequired>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
       {
-        path: 'cases',
+        path: '',
         element: <Outlet />,
         children: [
-          { index: true, element: <DocumentCasesPage /> },
-          { path: ':reportId', element: <DocumentCaseDetail /> },
-        ],
-      },
-      {
-        path: 'settings',
-        element: <SettingsPage />,
-        children: [{ path: ':tab', element: <SettingsPage /> }],
-      },
-      {
-        path: 'claims',
-        element: <Outlet />,
-        children: [
-          { index: true, element: <ClaimsPage /> },
-          { path: ':claimId', element: <ClaimDetailPage /> },
-        ],
-      },
-      {
-        path: 'matches',
-        element: <Outlet />,
-        children: [
-          { index: true, element: <MatchesPage /> },
-          { path: ':matchId', element: <MatchDetailPage /> },
-        ],
-      },
-      {
-        path: 'status-transitions',
-        element: <StatusTransitionsPage />,
-      },
-      {
-        path: 'custody',
-        element: <Outlet />,
-        children: [
-          { index: true, element: <CustodyListPage /> },
-          { path: ':foundCaseId', element: <CustodyDetailPage /> },
-        ],
-      },
-      { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
-      { path: 'pickup-stations', element: <PickupStationsPage /> },
-      { path: 'staff-station-operations', element: <StaffStationOperationsPage /> },
-      { path: 'components', element: <UiComponents /> },
-      {
-        path: 'document-types',
-        element: <DocumentTypesPage />,
-      },
-      {
-        path: 'status-transition-reasons',
-        element: <TransitionReasonsPage />,
-      },
-      {
-        path: 'roles',
-        element: <RolesPage />,
-      },
-      {
-        path: 'addresses',
-        element: <AddressesPage />,
-      },
-      {
-        path: 'address-hierarchy',
-        element: <AddressHierarchyPage />,
-      },
-      {
-        path: 'address-locales',
-        element: <AddressLocalesPage />,
-      },
-      {
-        path: 'users',
-        element: <Outlet />,
-        children: [
-          { index: true, element: <UsersPage /> },
-          { path: ':id', element: <UserDetailPage /> },
-        ],
-      },
-      {
-        path: 'templates',
-        element: <Outlet />,
-        children: [
-          { index: true, element: <TemplatesPage /> },
-          { path: ':id', element: <TemplateDetailPage /> },
+          { index: true, element: <DashboardPage /> },
+          {
+            path: 'cases',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <DocumentCasesPage /> },
+              { path: ':reportId', element: <DocumentCaseDetail /> },
+            ],
+          },
+          {
+            path: 'settings',
+            element: <SettingsPage />,
+            children: [{ path: ':tab', element: <SettingsPage /> }],
+          },
+          {
+            path: 'claims',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <ClaimsPage /> },
+              { path: ':claimId', element: <ClaimDetailPage /> },
+            ],
+          },
+          {
+            path: 'matches',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <MatchesPage /> },
+              { path: ':matchId', element: <MatchDetailPage /> },
+            ],
+          },
+          {
+            path: 'status-transitions',
+            element: <StatusTransitionsPage />,
+          },
+          {
+            path: 'custody',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <CustodyListPage /> },
+              { path: ':foundCaseId', element: <CustodyDetailPage /> },
+            ],
+          },
+          { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
+          { path: 'pickup-stations', element: <PickupStationsPage /> },
+          { path: 'staff-station-operations', element: <StaffStationOperationsPage /> },
+          { path: 'components', element: <UiComponents /> },
+          {
+            path: 'document-types',
+            element: <DocumentTypesPage />,
+          },
+          {
+            path: 'status-transition-reasons',
+            element: <TransitionReasonsPage />,
+          },
+          {
+            path: 'roles',
+            element: <RolesPage />,
+          },
+          {
+            path: 'addresses',
+            element: <AddressesPage />,
+          },
+          {
+            path: 'address-hierarchy',
+            element: <AddressHierarchyPage />,
+          },
+          {
+            path: 'address-locales',
+            element: <AddressLocalesPage />,
+          },
+          {
+            path: 'users',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <UsersPage /> },
+              { path: ':id', element: <UserDetailPage /> },
+            ],
+          },
+          {
+            path: 'templates',
+            element: <Outlet />,
+            children: [
+              { index: true, element: <TemplatesPage /> },
+              { path: ':id', element: <TemplateDetailPage /> },
+            ],
+          },
         ],
       },
     ],

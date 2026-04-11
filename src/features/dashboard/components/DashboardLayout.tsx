@@ -1,20 +1,11 @@
 import { FC, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import {
-  Alert,
-  AppShell,
-  Box,
-  Burger,
-  Button,
-  Divider,
-  Group,
-  Modal,
-  Text,
-} from '@mantine/core';
+import { Alert, AppShell, Box, Burger, Button, Divider, Group, Modal, Text } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import { ColorSchemeToggle, Logo } from '@/components';
 import { useWorkspace } from '@/components/Workspace';
+import { StationIndicator } from '@/features/station-context/components';
 import { authClient } from '@/lib/api';
 import SideNav from './SideNav';
 import UserActionsMenu from './UserActionsMenu';
@@ -64,11 +55,15 @@ const DashboardLayout: FC = () => {
       >
         <AppShell.Header>
           <Group justify="space-between" align="center" h="100%" px="md">
-            <Group gap="sm">
-              {isMobile && (
-                <Burger opened={drawerOpened} onClick={toggleOpenDrawer} size="sm" />
-              )}
+            <Group gap="sm" align="center">
+              {isMobile && <Burger opened={drawerOpened} onClick={toggleOpenDrawer} size="sm" />}
               <Logo />
+              <Divider
+                orientation="vertical"
+                visibleFrom="sm"
+                style={{ height: 20, alignSelf: 'center' }}
+              />
+              <StationIndicator />
             </Group>
             <Group gap="xs">
               <Text
@@ -99,13 +94,7 @@ const DashboardLayout: FC = () => {
 
         <AppShell.Main>
           {isImpersonating && (
-            <Alert
-              color="orange"
-              variant="light"
-              title="Impersonation Active"
-              mb="md"
-              radius="md"
-            >
+            <Alert color="orange" variant="light" title="Impersonation Active" mb="md" radius="md">
               <Group justify="space-between" align="center" gap="sm" wrap="wrap">
                 <Text size="sm">
                   You are currently impersonating this account. Changes are applied as this user.
