@@ -168,7 +168,7 @@ const DocumentCasesPage = () => {
 
   const vParam =
     activeTab === 'found'
-      ? 'custom:include(foundDocumentCase,document:include(type),address,user,extraction)'
+      ? 'custom:include(foundDocumentCase:include(currentStation),document:include(type),address,user,extraction)'
       : activeTab === 'lost'
         ? 'custom:include(lostDocumentCase,document:include(type),address,user,extraction)'
         : 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type),address,user,extraction)';
@@ -349,6 +349,17 @@ const DocumentCasesPage = () => {
             return '—';
           }
           return <StatusBadge status={status} />;
+        },
+      },
+      {
+        header: 'Current Station',
+        id: 'currentStation',
+        cell: ({ row: { original } }) => {
+          const status = original.foundDocumentCase?.currentStation?.name;
+          if (!status) {
+            return '—';
+          }
+          return status;
         },
       },
     ],

@@ -3,6 +3,8 @@ import { GrantStaffOperationSchema } from '../utils/validation';
 
 export type GrantStaffOperationFormData = z.infer<typeof GrantStaffOperationSchema>;
 
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
 export enum CustodyStatus {
   WITH_FINDER = 'WITH_FINDER',
   IN_CUSTODY = 'IN_CUSTODY',
@@ -10,6 +12,25 @@ export enum CustodyStatus {
   HANDED_OVER = 'HANDED_OVER',
   DISPOSED = 'DISPOSED',
 }
+
+export enum DocumentOperationStatus {
+  DRAFT = 'DRAFT',
+  SUBMITTED = 'SUBMITTED',
+  APPROVED = 'APPROVED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED',
+}
+
+export enum DocumentOperationItemStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  SKIPPED = 'SKIPPED',
+}
+
+// ── Core types ────────────────────────────────────────────────────────────────
 
 export interface DocumentOperationType {
   id: string;
@@ -56,22 +77,6 @@ export interface StaffStationOperation {
   updatedAt: string;
 }
 
-// ─── Staff grant grouping ─────────────────────────────────────────────────────
-
-export type StationGroup = {
-  stationId: string;
-  station?: StaffStationOperation['station'];
-  operations: StaffStationOperation[];
-};
-
-export type GroupedStaffGrant = {
-  userId: string;
-  user?: StaffStationOperation['user'];
-  stations: StationGroup[];
-  totalOperations: number;
-  latestGrantedAt: string;
-};
-
 export interface Station {
   id: string;
   name: string;
@@ -90,26 +95,80 @@ export interface Station {
   updatedAt: string;
 }
 
+export interface DocumentOperationItem {
+  id: string;
+  operationId: string;
+  foundCaseId: string;
+  foundCase?: {
+    id: string;
+    custodyStatus: CustodyStatus;
+    case: {
+      caseNumber: string;
+      document?: { type?: { name: string } } | null;
+      user?: { id: string; name: string } | null;
+    };
+  } | null;
+  status: DocumentOperationItemStatus;
+  custodyStatusBefore?: CustodyStatus | null;
+  custodyStatusAfter?: CustodyStatus | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
 export interface DocumentOperation {
   id: string;
   operationNumber: string;
-  foundCaseId: string;
   operationTypeId: string;
   operationType?: DocumentOperationType;
+  status: DocumentOperationStatus;
   stationId?: string | null;
-  station?: Station | null;
+  station?: { id: string; name: string; code: string } | null;
   fromStationId?: string | null;
-  fromStation?: Station | null;
+  fromStation?: { id: string; name: string; code: string } | null;
   toStationId?: string | null;
-  toStation?: Station | null;
+  toStation?: { id: string; name: string; code: string } | null;
   requestedByStationId?: string | null;
-  requestedByStation?: Station | null;
-  performedById: string;
-  performedBy?: { id: string; name: string };
-  pairedOperationId?: string | null;
-  custodyStatusBefore: CustodyStatus;
-  custodyStatusAfter: CustodyStatus;
+  requestedByStation?: { id: string; name: string; code: string } | null;
+  createdById: string;
+  createdBy?: { id: string; name: string } | null;
   notes?: string | null;
-  metadata?: Record<string, unknown> | null;
+  completedAt?: string | null;
+  items: DocumentOperationItem[];
   createdAt: string;
+  updatedAt: string;
 }
+
+// ── Form payloads ────────────────────────────────────────────────────────────��
+
+export interface CreateOperationPayload {
+  operationTypeId: string;
+  foundCaseIds: string[];
+  stationId?: string;
+  fromStationId?: string;
+  toStationId?: string;
+  requestedByStationId?: string;
+  notes?: string;
+}
+
+export interface UpdateOperationPayload {
+  stationId?: string | null;
+  fromStationId?: string | null;
+  toStationId?: string | null;
+  notes?: string | null;
+}
+
+// ── Staff grant grouping ──────────────────────────────────────────────────────
+
+export type StationGroup = {
+  stationId: string;
+  station?: StaffStationOperation['station'];
+  operations: StaffStationOperation[];
+};
+
+export type GroupedStaffGrant = {
+  userId: string;
+  user?: StaffStationOperation['user'];
+  stations: StationGroup[];
+  totalOperations: number;
+  latestGrantedAt: string;
+};

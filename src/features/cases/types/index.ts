@@ -1,6 +1,7 @@
 import { User } from 'better-auth';
 import { z } from 'zod';
 import { Address } from '@/features/addresses/types';
+import { Station } from '@/features/custody/types';
 import { CaseDocumentSchema, FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
 
 export interface DocumentCase {
@@ -97,6 +98,8 @@ export interface FoundDocumentCase {
   status: FoundDocumentCaseStatus;
   submissionMethod?: SubmissionMethod;
   custodyStatus?: CustodyStatus;
+  currentStationId?: string;
+  currentStation?: Station;
   createdAt: string;
   updatedAt: string;
   pointAwarded: number;

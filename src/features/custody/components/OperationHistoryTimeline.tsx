@@ -58,11 +58,13 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
             }
           >
             <Stack gap={4} mt={4}>
-              <Group gap="xs">
-                <CustodyStatusBadge status={op.custodyStatusBefore} />
-                <TablerIcon name="arrowRight" size={12} />
-                <CustodyStatusBadge status={op.custodyStatusAfter} />
-              </Group>
+              {op.items[0] && (
+                <Group gap="xs">
+                  <CustodyStatusBadge status={op.items[0].custodyStatusBefore ?? undefined} />
+                  <TablerIcon name="arrowRight" size={12} />
+                  <CustodyStatusBadge status={op.items[0].custodyStatusAfter ?? undefined} />
+                </Group>
+              )}
 
               {stationLabel && (
                 <Text size="xs" c="dimmed">
@@ -83,7 +85,7 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
               )}
 
               <Text size="xs" c="dimmed">
-                By {op.performedBy?.name ?? op.performedById} · {formatDate(op.createdAt)}
+                By {op.createdBy?.name ?? op.createdById} · {formatDate(op.createdAt)}
               </Text>
             </Stack>
           </Timeline.Item>

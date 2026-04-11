@@ -1,12 +1,164 @@
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
-import { DocumentOperation, DocumentOperationType, StaffStationOperation, StationOperationType } from '../types';
+import {
+  CreateOperationPayload,
+  DocumentOperation,
+  DocumentOperationType,
+  StaffStationOperation,
+  StationOperationType,
+  UpdateOperationPayload,
+} from '../types';
 
-// ─── Custody Operation History ─────────────────────────────────────────────────
+const OPERATIONS_KEY = '/document-custody/operations';
+
+// ── Lifecycle: list + single ──────────────────────────────────────────────────
+
+export const useDocumentOperations = (params: Record<string, any> = {}) => {
+  const url = constructUrl(OPERATIONS_KEY, params);
+  const { data, error, isLoading, mutate: swrMutate } = useApi<APIFetchResponse<PaginatedData<DocumentOperation>>>(url);
+  return {
+    operations: data?.data?.results ?? [],
+    totalCount: data?.data?.totalCount ?? 0,
+    currentPage: data?.data?.currentPage ?? 1,
+    pageSize: data?.data?.pageSize ?? 20,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
+};
+
+export const useDocumentOperation = (id?: string) => {
+  const { data, error, isLoading, mutate: swrMutate } = useApi<APIFetchResponse<DocumentOperation>>(
+    id ? `${OPERATIONS_KEY}/${id}` : null,
+  );
+  return {
+    operation: data?.data ?? null,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
+};
+
+// ── Lifecycle: mutations ──────────────────────────────────────────────────────
+
+export const createOperation = async (payload: CreateOperationPayload) => {
+  const result = await apiFetch<DocumentOperation>(OPERATIONS_KEY, {
+    method: 'POST',
+    data: payload,
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+export const updateOperation = async (id: string, payload: UpdateOperationPayload) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}`, {
+    method: 'PATCH',
+    data: payload,
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+export const addOperationItem = async (id: string, foundCaseId: string, notes?: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/items`, {
+    method: 'POST',
+    data: { foundCaseId, notes },
+  });
+  mutate(`${OPERATIONS_KEY}/${id}`);
+  return result.data;
+};
+
+export const removeOperationItem = async (id: string, itemId: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/items/${itemId}`, {
+    method: 'DELETE',
+  });
+  mutate(`${OPERATIONS_KEY}/${id}`);
+  return result.data;
+};
+
+export const skipOperationItem = async (id: string, itemId: string, comment?: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/items/${itemId}/skip`, {
+    method: 'POST',
+    data: { comment },
+  });
+  mutate(`${OPERATIONS_KEY}/${id}`);
+  return result.data;
+};
+
+export const submitOperation = async (id: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/submit`, {
+    method: 'POST',
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+export const approveOperation = async (id: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/approve`, {
+    method: 'POST',
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+export const rejectOperation = async (id: string, reasonCode: string, comment?: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/reject`, {
+    method: 'POST',
+    data: { reasonCode, comment },
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+export const executeOperation = async (id: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/execute`, {
+    method: 'POST',
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+export const cancelOperation = async (id: string, reasonCode: string, comment?: string) => {
+  const result = await apiFetch<DocumentOperation>(`${OPERATIONS_KEY}/${id}/cancel`, {
+    method: 'POST',
+    data: { reasonCode, comment },
+  });
+  mutate(OPERATIONS_KEY);
+  return result.data;
+};
+
+// ── Deprecated: per-case shortcut mutations ───────────────────────────────────
+// These create a single-item DRAFT operation and immediately execute it.
+// Use the new lifecycle operations for multi-case or approval workflows.
+
+const singleItemOp = async (foundCaseId: string, opCode: string, stationKey: 'stationId' | 'toStationId', stationId?: string, notes?: string) => {
+  const opTypes = await apiFetch<any>(`/document-operation-types?limit=50`);
+  const opType = opTypes.data?.results?.find((t: any) => t.code === opCode);
+  if (!opType) throw new Error(`${opCode} operation type not found`);
+  const created = await createOperation({ operationTypeId: opType.id, foundCaseIds: [foundCaseId], [stationKey]: stationId, notes });
+  return executeOperation(created!.id);
+};
+
+export const recordAudit = (foundCaseId: string, data: { stationId: string; notes?: string }) =>
+  singleItemOp(foundCaseId, 'AUDIT', 'stationId', data.stationId, data.notes);
+
+export const recordConditionUpdate = (foundCaseId: string, data: { stationId: string; notes: string }) =>
+  singleItemOp(foundCaseId, 'CONDITION_UPDATE', 'stationId', data.stationId, data.notes);
+
+export const recordDisposal = (foundCaseId: string, data: { stationId: string; notes: string }) =>
+  singleItemOp(foundCaseId, 'DISPOSAL', 'stationId', data.stationId, data.notes);
+
+export const initiateTransfer = (foundCaseId: string, data: { toStationId: string; notes?: string }) =>
+  singleItemOp(foundCaseId, 'TRANSFER_OUT', 'toStationId', data.toStationId, data.notes);
+
+export const recordReturn = (foundCaseId: string, data: { stationId: string; notes?: string }) =>
+  singleItemOp(foundCaseId, 'RETURN', 'stationId', data.stationId, data.notes);
+
+// ── Per-case history (CustodyDetailPage) ─────────────────────────────────────
 
 export const useCustodyHistory = (foundCaseId?: string, params: Record<string, any> = {}) => {
   const url = constructUrl(`/document-custody/${foundCaseId}/history`, params);
   const { data, error, isLoading, mutate: swrMutate } = useApi<APIFetchResponse<PaginatedData<DocumentOperation>>>(
-    foundCaseId ? url : null
+    foundCaseId ? url : null,
   );
   return {
     operations: data?.data?.results ?? [],
@@ -19,81 +171,7 @@ export const useCustodyHistory = (foundCaseId?: string, params: Record<string, a
   };
 };
 
-// ─── Custody API calls ─────────────────────────────────────────────────────────
-
-export const recordReceived = async (foundCaseId: string, data: { stationId: string; notes?: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/receive`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const initiateTransfer = async (foundCaseId: string, data: { toStationId: string; notes?: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/transfer`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const confirmTransfer = async (foundCaseId: string, data: { pairedOperationId: string; notes?: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/transfer/confirm`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const recordHandover = async (foundCaseId: string, data: { stationId: string; notes?: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/handover`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const recordDisposal = async (foundCaseId: string, data: { stationId: string; notes: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/dispose`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const recordReturn = async (foundCaseId: string, data: { stationId: string; notes?: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/return`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const recordAudit = async (foundCaseId: string, data: { stationId: string; notes?: string }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/audit`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-export const recordConditionUpdate = async (foundCaseId: string, data: { stationId: string; notes: string; metadata?: Record<string, unknown> }) => {
-  const result = await apiFetch<DocumentOperation>(`/document-custody/${foundCaseId}/condition`, {
-    method: 'POST',
-    data,
-  });
-  mutate(`/document-custody/${foundCaseId}/history`);
-  return result.data;
-};
-
-// ─── Document Operation Types ─────────────────────────────────────────────────
+// ── Document Operation Types ──────────────────────────────────────────────────
 
 export const useDocumentOperationTypes = (params: Record<string, any> = {}) => {
   const url = constructUrl('/document-operation-types', params);
@@ -130,12 +208,12 @@ export const deleteDocumentOperationType = async (id: string) => {
   mutate('/document-operation-types');
 };
 
-// ─── Station Operation Types ──────────────────────────────────────────────────
+// ── Station Operation Types ───────────────────────────────────────────────────
 
 export const useStationOperationTypes = (stationId?: string) => {
   const url = constructUrl(`/pickup-stations/${stationId}/operation-types`, { limit: 50 });
   const { data, error, isLoading, mutate: swrMutate } = useApi<APIFetchResponse<PaginatedData<StationOperationType>>>(
-    stationId ? url : null
+    stationId ? url : null,
   );
   return {
     stationOpTypes: data?.data?.results ?? [],
@@ -154,7 +232,7 @@ export const updateStationOperationType = async (stationId: string, id: string, 
   return result.data;
 };
 
-// ─── Staff Station Operations ─────────────────────────────────────────────────
+// ── Staff Station Operations ──────────────────────────────────────────────────
 
 export const useStaffStationOperations = (params: Record<string, any> = {}) => {
   const url = constructUrl('/staff-station-operations', params);
