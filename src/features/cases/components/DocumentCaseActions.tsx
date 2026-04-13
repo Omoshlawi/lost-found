@@ -7,9 +7,11 @@ import CancelCollectionForm from '../forms/CancelCollectionForm';
 import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
 import InitiateCollectionForm from '../forms/InitiateCollectionForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
+import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
+import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import { useActiveCollection } from '../hooks';
-import { CaseType, DocumentCase, FoundDocumentCaseStatus } from '../types';
+import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 
 interface DocumentCaseActionsProps {
   caseId: string;
@@ -28,7 +30,8 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   const { hasAccess: canReject } = useUserHasSystemAccess({ documentCase: ['reject'] });
 
   const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
-  const isDraft = status === FoundDocumentCaseStatus.DRAFT;
+  const isDraft =
+    status === FoundDocumentCaseStatus.DRAFT || status === LostDocumentCaseStatus.DRAFT;
   const extractionComplete = documentCase.extraction?.extractionStatus === 'COMPLETED';
   const { hasActiveCollection: hasPendingCollection } = useActiveCollection(
     reportType === 'FOUND' ? documentCase.foundDocumentCase?.id : undefined
@@ -94,6 +97,40 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Actions</Menu.Label>
+
+          {/* Edit actions — only available while in DRAFT */}
+          <Menu.Item
+            leftSection={<TablerIcon name="edit" size={14} />}
+            disabled={!isDraft || hasPendingCollection}
+            onClick={() => {
+              const close = launchWorkspace(
+                <UpdateCasedetailsForm
+                  documentCase={documentCase}
+                  closeWorkspace={() => close()}
+                />,
+                { title: 'Edit Case Details' }
+              );
+            }}
+          >
+            Edit Case Details
+          </Menu.Item>
+          {documentCase.document && (
+            <Menu.Item
+              leftSection={<TablerIcon name="fileText" size={14} />}
+              disabled={!isDraft || hasPendingCollection}
+              onClick={() => {
+                const close = launchWorkspace(
+                  <UpdateDocumentinfoForm
+                    document={documentCase.document!}
+                    closeWorkspace={() => close()}
+                  />,
+                  { title: 'Edit Document Info' }
+                );
+              }}
+            >
+              Edit Document Info
+            </Menu.Item>
+          )}
 
           {reportType === 'FOUND' && canCollect && (
             <>

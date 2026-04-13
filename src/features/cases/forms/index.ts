@@ -6,3 +6,5 @@ export { default as RejectFoundDocumentCaseForm } from './RejectFoundDocumentCas
 export { default as InitiateCollectionForm } from './InitiateCollectionForm';
 export { default as ConfirmCollectionForm } from './ConfirmCollectionForm';
 export { default as CancelCollectionForm } from './CancelCollectionForm';
+export { default as UpdateCasedetailsForm } from './UpdateCasedetailsForm';
+export { default as UpdateDocumentinfoForm } from './UpdateDocumentinfoForm';

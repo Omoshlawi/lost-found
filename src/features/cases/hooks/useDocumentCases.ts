@@ -7,6 +7,7 @@ import {
   CaseDocumentFormData,
   DocumentCase,
   DocumentImage,
+  ExtractionStatus,
   FoundDocumentCaseFormData,
   LostDocumentCaseFormData,
 } from '../types';
@@ -30,7 +31,16 @@ export const useDocumentCase = (reportId?: string) => {
     v: 'custom:include(foundDocumentCase,lostDocumentCase,document:include(type, images),document:include(additionalFields),address:include(locale),extraction:include(aiextractionInteractions:include(aiInteraction)))',
   });
   const { data, error, mutate, isLoading } = useApi<APIFetchResponse<DocumentCase>>(
-    reportId ? url : null
+    reportId ? url : null,
+    undefined,
+    {
+      refreshInterval: (latest) => {
+        const status = latest?.data?.extraction?.extractionStatus;
+        return status === ExtractionStatus.PENDING || status === ExtractionStatus.IN_PROGRESS
+          ? 3000
+          : 0;
+      },
+    }
   );
   return {
     report: data?.data,

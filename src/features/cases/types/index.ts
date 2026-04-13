@@ -54,7 +54,7 @@ export interface ConfidenceScore {
   documentNumber: number;
   batchNumber: number;
   issuer: number;
-  ownerName: number;
+  fullName: number;
   dateOfBirth: number;
   placeOfBirth: number;
   placeOfIssue: number;
@@ -135,7 +135,7 @@ export interface Document {
   placeOfIssue?: string;
   note?: string;
   issuer: string;
-  ownerName?: string;
+  fullName?: string;
   fullName: string;
   surname: string;
   givenNames: string[];

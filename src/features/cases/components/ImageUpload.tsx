@@ -1,13 +1,14 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import {
   ActionIcon,
-  Card,
+  Badge,
+  Box,
   Group,
   Image,
-  Paper,
+  InputWrapper,
   SimpleGrid,
+  Stack,
   Text,
-  Title,
   Tooltip,
 } from '@mantine/core';
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
@@ -15,31 +16,16 @@ import { modals } from '@mantine/modals';
 import { TablerIcon } from '@/components';
 
 export interface ImageUploadProps {
-  /** Title for the image upload section */
-  title?: string;
-  /** Description text below the title */
+  label?: string;
   description?: string;
-  /** Maximum file size in bytes (default: 5MB) */
   maxSize?: number;
-  /** Whether multiple files can be selected */
   multiple?: boolean;
-  /** Callback when files are selected */
   onFilesChange?: (files: FileWithPath[]) => void;
-  /** Whether the upload is in progress */
   uploading?: boolean;
-  /** Custom dropzone styles */
-  dropzoneStyles?: React.CSSProperties;
-  /** Grid columns for preview (default: { base: 1, sm: 2, md: 3 }) */
-  previewCols?: { base?: number; sm?: number; md?: number; lg?: number };
-  /** Preview image height (default: 200) */
-  previewHeight?: number;
-  /** Show preview section label */
-  showPreviewLabel?: boolean;
-  /** Custom accept MIME types */
   accept?: string[];
-  /** Maximum number of files to upload */
   maxFiles?: number;
   withBorder?: boolean;
+  error?: string;
 }
 
 export interface ImageUploadRef {
@@ -50,19 +36,15 @@ export interface ImageUploadRef {
 const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
   (
     {
-      title = 'Document Images',
-      description = 'Select images (will be uploaded on submit)',
-      maxSize = 5 * 1024 * 1024, // 5MB default
+      label = 'Document Images',
+      description = 'Upload images of the document. Max 2 files, 5 MB each.',
+      maxSize = 5 * 1024 * 1024,
       multiple = true,
       onFilesChange,
       uploading = false,
-      dropzoneStyles,
-      previewCols = { base: 1, sm: 2, md: 3 },
-      previewHeight = 200,
-      showPreviewLabel = true,
       accept = IMAGE_MIME_TYPE,
       maxFiles = 2,
-      withBorder = true,
+      error,
     },
     ref
   ) => {
@@ -76,185 +58,170 @@ const ImageUpload = forwardRef<ImageUploadRef, ImageUploadProps>(
       },
     }));
 
-    const handleImageSelect = useCallback(
+    const handleDrop = useCallback(
       (newFiles: FileWithPath[]) => {
-        const updatedFiles = multiple ? [...files, ...newFiles] : newFiles;
-        setFiles(updatedFiles);
-        onFilesChange?.(updatedFiles);
+        const merged = multiple ? [...files, ...newFiles].slice(0, maxFiles) : newFiles.slice(0, 1);
+        setFiles(merged);
+        onFilesChange?.(merged);
       },
-      [files, multiple, onFilesChange]
+      [files, multiple, maxFiles, onFilesChange]
     );
 
-    const handleRemoveImage = useCallback(
+    const handleRemove = useCallback(
       (index: number) => {
-        const newFiles = files.filter((_, i) => i !== index);
-        setFiles(newFiles);
-        onFilesChange?.(newFiles);
+        const next = files.filter((_, i) => i !== index);
+        setFiles(next);
+        onFilesChange?.(next);
       },
       [files, onFilesChange]
     );
 
-    const handleViewImage = useCallback((url: string) => {
+    const handlePreview = useCallback((url: string) => {
       modals.open({
         size: '90vw',
         centered: true,
         withCloseButton: true,
         padding: 'xs',
         styles: {
-          inner: {
-            padding: '2vh',
-          },
-          content: {
-            maxHeight: '96vh',
-            display: 'flex',
-            flexDirection: 'column',
-          },
-          body: {
-            flex: 1,
-            padding: 0,
-          },
+          content: { maxHeight: '96vh', display: 'flex', flexDirection: 'column' },
+          body: { flex: 1, padding: 0 },
         },
         children: (
           <Image
             src={url}
             height="100%"
             fit="contain"
-            radius="md"
-            fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+            radius="sm"
+            fallbackSrc="https://placehold.co/600x400?text=Image"
           />
         ),
       });
     }, []);
 
-    // Create object URLs for previews
-    const previewUrls = useMemo(() => {
-      return files.map((file) => URL.createObjectURL(file));
-    }, [files]);
+    const previewUrls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
 
-    // Clean up object URLs when component unmounts or files change
     useEffect(() => {
-      return () => {
-        previewUrls.forEach((url) => URL.revokeObjectURL(url));
-      };
+      return () => previewUrls.forEach((u) => URL.revokeObjectURL(u));
     }, [previewUrls]);
 
-    const previews = files.map((_, index) => {
-      const imageUrl = previewUrls[index];
-      return (
-        <Card key={index} p={0} radius="md" style={{ position: 'relative' }} withBorder>
-          <Image
-            src={imageUrl}
-            height={previewHeight}
-            fit="cover"
-            radius="md"
-            fallbackSrc="https://placehold.co/300x200?text=Image"
-          />
-          <Group
-            gap="xs"
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              opacity: 0.9,
-            }}
-          >
-            <Tooltip label="View full size">
-              <ActionIcon
-                color="blue"
-                variant="filled"
-                size="lg"
-                onClick={() => handleViewImage(imageUrl)}
-              >
-                <TablerIcon name="windowMaximize" size={18} />
-              </ActionIcon>
-            </Tooltip>
-            <Tooltip label="Remove image">
-              <ActionIcon
-                color="red"
-                variant="filled"
-                size="lg"
-                onClick={() => handleRemoveImage(index)}
-                disabled={uploading}
-              >
-                <TablerIcon name="trash" size={18} />
-              </ActionIcon>
-            </Tooltip>
-          </Group>
-        </Card>
-      );
-    });
+    const atLimit = files.length >= maxFiles;
 
     return (
-      <Paper p="md" radius="md" withBorder={withBorder}>
-        <Group justify="space-between" align="center" mb="md">
-          <div>
-            <Title order={5} mb={4}>
-              {title}
-            </Title>
-            <Text size="sm" c="dimmed">
-              {description}
-            </Text>
-          </div>
-          {files.length > 0 && (
-            <Text size="sm" fw={500} c="blue">
-              {files.length} image{files.length !== 1 ? 's' : ''} selected
-            </Text>
+      <InputWrapper label={label} description={description} error={error}>
+        <Stack gap="xs" mt={4}>
+          {!atLimit && (
+            <Dropzone
+              accept={accept}
+              onDrop={handleDrop}
+              loading={uploading}
+              disabled={uploading || atLimit}
+              maxSize={maxSize}
+              multiple={multiple}
+              maxFiles={maxFiles - files.length}
+              styles={{
+                root: {
+                  borderStyle: 'dashed',
+                  borderWidth: 1,
+                  borderRadius: 'var(--mantine-radius-sm)',
+                },
+              }}
+            >
+              <Group justify="center" gap="sm" py="md" style={{ pointerEvents: 'none' }}>
+                <Dropzone.Accept>
+                  <TablerIcon
+                    name="circleCheck"
+                    size={28}
+                    style={{ color: 'var(--mantine-color-blue-6)' }}
+                  />
+                </Dropzone.Accept>
+                <Dropzone.Reject>
+                  <TablerIcon
+                    name="circleX"
+                    size={28}
+                    style={{ color: 'var(--mantine-color-red-6)' }}
+                  />
+                </Dropzone.Reject>
+                <Dropzone.Idle>
+                  <TablerIcon
+                    name="photo"
+                    size={28}
+                    style={{ color: 'var(--mantine-color-dimmed)' }}
+                  />
+                </Dropzone.Idle>
+                <Box>
+                  <Text size="sm" fw={500}>
+                    Drag images here or click to browse
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {maxFiles - files.length} slot{maxFiles - files.length !== 1 ? 's' : ''}{' '}
+                    remaining · max {Math.round(maxSize / (1024 * 1024))} MB each
+                  </Text>
+                </Box>
+              </Group>
+            </Dropzone>
           )}
-        </Group>
 
-        <Dropzone
-          accept={accept}
-          onDrop={handleImageSelect}
-          loading={uploading}
-          disabled={uploading}
-          maxSize={maxSize}
-          multiple={multiple}
-          maxFiles={maxFiles}
-          styles={{
-            root: {
-              borderStyle: 'dashed',
-              borderWidth: 2,
-              transition: 'all 0.2s ease',
-              ...dropzoneStyles,
-            },
-          }}
-        >
-          <Group justify="center" gap="xl" mih={120} style={{ pointerEvents: 'none' }}>
-            <Dropzone.Accept>
-              <TablerIcon name="check" size={52} style={{ color: 'var(--mantine-color-blue-6)' }} />
-            </Dropzone.Accept>
-            <Dropzone.Reject>
-              <TablerIcon name="x" size={52} style={{ color: 'var(--mantine-color-red-6)' }} />
-            </Dropzone.Reject>
-            <Dropzone.Idle>
-              <TablerIcon name="photo" size={52} style={{ color: 'var(--mantine-color-dimmed)' }} />
-            </Dropzone.Idle>
-            <div>
-              <Text size="xl" inline>
-                Drag images here or click to select
-              </Text>
-              <Text size="sm" c="dimmed" inline mt={7}>
-                Attach images as needed. Each file should not exceed{' '}
-                {Math.round(maxSize / (1024 * 1024))}MB. Images will be uploaded when you submit the
-                form.
-              </Text>
-            </div>
-          </Group>
-        </Dropzone>
-
-        {previews.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
-            {showPreviewLabel && (
-              <Text size="sm" fw={500} mb="xs">
-                Image Previews
-              </Text>
-            )}
-            <SimpleGrid cols={previewCols} spacing="md">
-              {previews}
+          {files.length > 0 && (
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs">
+              {files.map((_, index) => {
+                const url = previewUrls[index];
+                return (
+                  <Box
+                    key={index}
+                    style={{
+                      position: 'relative',
+                      borderRadius: 'var(--mantine-radius-sm)',
+                      overflow: 'hidden',
+                      border: '1px solid var(--mantine-color-default-border)',
+                    }}
+                  >
+                    <Image
+                      src={url}
+                      height={160}
+                      fit="cover"
+                      fallbackSrc="https://placehold.co/300x160?text=Image"
+                    />
+                    <Group
+                      gap={4}
+                      style={{ position: 'absolute', top: 6, right: 6 }}
+                    >
+                      <Tooltip label="Preview" withArrow>
+                        <ActionIcon
+                          size="sm"
+                          color="blue"
+                          variant="filled"
+                          onClick={() => handlePreview(url)}
+                        >
+                          <TablerIcon name="windowMaximize" size={13} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Remove" withArrow>
+                        <ActionIcon
+                          size="sm"
+                          color="red"
+                          variant="filled"
+                          onClick={() => handleRemove(index)}
+                          disabled={uploading}
+                        >
+                          <TablerIcon name="trash" size={13} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </Group>
+                    <Badge
+                      size="xs"
+                      variant="filled"
+                      color="dark"
+                      style={{ position: 'absolute', bottom: 6, left: 6, opacity: 0.85 }}
+                    >
+                      {index + 1} / {maxFiles}
+                    </Badge>
+                  </Box>
+                );
+              })}
             </SimpleGrid>
-          </div>
-        )}
-      </Paper>
+          )}
+        </Stack>
+      </InputWrapper>
     );
   }
 );

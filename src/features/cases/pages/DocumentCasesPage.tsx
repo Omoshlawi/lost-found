@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ActionIcon, Badge, Menu, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
+import { ActionIcon, Badge, Button, Group, Menu, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
@@ -17,7 +17,9 @@ import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
 import {
+  FoundDocumentCaseForm,
   InitiateCollectionForm,
+  LostDocumentCaseForm,
   RejectFoundDocumentCaseForm,
   VerifyFoundDocumentCaseForm,
 } from '../forms';
@@ -47,10 +49,10 @@ const FOUND_STATUS_OPTIONS = [
 ];
 
 const EXTRACTION_STATUS_OPTIONS = [
-  { label: 'Extracted: Pending', value: 'PENDING' },
-  { label: 'Extracted: In Progress', value: 'IN_PROGRESS' },
-  { label: 'Extracted: Completed', value: 'COMPLETED' },
-  { label: 'Extracted: Failed', value: 'FAILED' },
+  { label: 'Processing: Pending', value: 'PENDING' },
+  { label: 'Processing: In Progress', value: 'IN_PROGRESS' },
+  { label: 'Processing: Completed', value: 'COMPLETED' },
+  { label: 'Processing: Failed', value: 'FAILED' },
 ];
 
 const SUBMISSION_METHOD_OPTIONS = [
@@ -291,7 +293,7 @@ const DocumentCasesPage = () => {
         },
       },
       {
-        header: 'AI Extraction',
+        header: 'AI Processing',
         id: 'extraction',
         cell: ({ row: { original } }) => {
           const extraction = original.extraction;
@@ -305,7 +307,7 @@ const DocumentCasesPage = () => {
           }
           const STEP_LABEL: Record<string, string> = {
             VISION: 'Image Analysis',
-            TEXT: 'Data Extraction',
+            TEXT: 'Data Reading',
             POST_PROCESSING: 'Post Processing',
           };
           return (
@@ -497,6 +499,36 @@ const DocumentCasesPage = () => {
         columns={[...columns, actionsColumn]}
         renderActions={() => (
           <>
+            <Group gap="xs" wrap="nowrap">
+              <Button
+                size="xs"
+                variant="light"
+                color="orange"
+                leftSection={<TablerIcon name="fileSearch" size={14} />}
+                onClick={() => {
+                  const dismiss = launchWorkspace(
+                    <LostDocumentCaseForm onSuccess={() => dismiss()} closeWorkspace={() => dismiss()} />,
+                    { title: 'Report Lost Document' }
+                  );
+                }}
+              >
+                Report Lost
+              </Button>
+              <Button
+                size="xs"
+                variant="light"
+                color="teal"
+                leftSection={<TablerIcon name="fileCheck" size={14} />}
+                onClick={() => {
+                  const dismiss = launchWorkspace(
+                    <FoundDocumentCaseForm onSuccess={() => dismiss()} closeWorkspace={() => dismiss()} />,
+                    { title: 'Report Found Document' }
+                  );
+                }}
+              >
+                Report Found
+              </Button>
+            </Group>
             <TextInput
               placeholder="Search cases..."
               leftSection={<TablerIcon name="search" size={14} />}
@@ -527,7 +559,7 @@ const DocumentCasesPage = () => {
               searchable
             />
             <Select
-              placeholder="Extraction"
+              placeholder="AI Processing"
               data={EXTRACTION_STATUS_OPTIONS}
               value={extractionStatus}
               onChange={setExtractionStatus}

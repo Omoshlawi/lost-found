@@ -1,7 +1,6 @@
 import React from 'react';
 import { Grid, Group, Stack, Text } from '@mantine/core';
 import { SectionTitle } from '@/components';
-
 import { CaseType, Document } from '../types';
 import { formatDate } from '../utils/reportUtils';
 
@@ -12,7 +11,6 @@ interface DocumentProps {
 }
 
 const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
-
   return (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
@@ -24,9 +22,9 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
       <Grid>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Owner
+            Holder name
           </Text>
-          <Text>{document?.ownerName || 'Not specified'}</Text>
+          <Text>{document?.fullName || 'Not specified'}</Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
@@ -36,7 +34,7 @@ const DocumentInformation: React.FC<DocumentProps> = ({ document }) => {
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
           <Text size="sm" fw={600} c="dimmed" mb={4}>
-            Gender
+            Holder Gender
           </Text>
           <Text>{document?.gender || 'Unknown'}</Text>
         </Grid.Col>

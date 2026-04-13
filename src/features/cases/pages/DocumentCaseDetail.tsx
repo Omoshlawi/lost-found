@@ -15,7 +15,12 @@ import {
   ReportDetails,
 } from '../components';
 import { useActiveCollection, useDocumentCase } from '../hooks';
-import { CaseType, ExtractionStatus, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import {
+  CaseType,
+  ExtractionStatus,
+  FoundDocumentCaseStatus,
+  LostDocumentCaseStatus,
+} from '../types';
 import DocumentCaseDetailSkeleton from './DocumentCaseDetailSkeleton';
 
 const DocumentCaseDetail = () => {
@@ -49,13 +54,17 @@ const DocumentCaseDetail = () => {
         title={`${docType} Report`}
         subTitle={() => (
           <Group gap="sm">
-            <Text size="sm" c="dimmed" ff="monospace">{caseNumber}</Text>
+            <Text size="sm" c="dimmed" ff="monospace">
+              {caseNumber}
+            </Text>
             <Badge size="xs" variant="light">
               {reportType === 'FOUND' ? 'Found Document' : 'Lost Document'}
             </Badge>
             <StatusBadge status={status} />
             {reportType === 'FOUND' && pointAwarded > 0 && (
-              <Badge size="xs" color="civicGreen" variant="light">{pointAwarded} pts</Badge>
+              <Badge size="xs" color="civicGreen" variant="light">
+                {pointAwarded} pts
+              </Badge>
             )}
           </Group>
         )}
@@ -96,7 +105,7 @@ const DocumentCaseDetail = () => {
           </Tabs.Tab>
           {reportData.extraction && (
             <Tabs.Tab value="extraction" leftSection={<TablerIcon name="robot" size={16} />}>
-              Extraction
+              AI Processing
             </Tabs.Tab>
           )}
         </Tabs.List>

@@ -19,7 +19,7 @@ import { AIExtraction, AIExtractionInteraction, AIExtractionInteractionType } fr
 
 const INTERACTION_LABEL: Record<AIExtractionInteractionType, string> = {
   VISION_EXTRACTION: 'Image Analysis',
-  TEXT_EXTRACTION: 'Data Extraction',
+  TEXT_EXTRACTION: 'Data Reading',
 };
 
 const INTERACTION_ICON: Record<AIExtractionInteractionType, string> = {
@@ -181,7 +181,7 @@ const ExtractionInteractionsPanel: React.FC<ExtractionInteractionsPanelProps> = 
 
       {/* ── Summary ─────────────────────────────────────────────────────── */}
       <Stack gap="md">
-        <SectionTitle label="Pipeline Summary" />
+        <SectionTitle label="Processing Summary" />
         <Grid gutter="md">
           <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
             <Text size="xs" fw={600} c="dimmed" mb={4}>Status</Text>
@@ -203,7 +203,7 @@ const ExtractionInteractionsPanel: React.FC<ExtractionInteractionsPanelProps> = 
           )}
           {extraction.extractionConfidence != null && (
             <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-              <Text size="xs" fw={600} c="dimmed" mb={4}>Extraction Confidence</Text>
+              <Text size="xs" fw={600} c="dimmed" mb={4}>Analysis Confidence</Text>
               <Text size="sm">{Math.round(extraction.extractionConfidence * 100)}%</Text>
             </Grid.Col>
           )}
@@ -214,7 +214,7 @@ const ExtractionInteractionsPanel: React.FC<ExtractionInteractionsPanelProps> = 
                 color="orange"
                 leftSection={<TablerIcon name="alertTriangle" size={12} />}
               >
-                Fallback extraction triggered — results may be less accurate
+                Fallback processing used — results may be less accurate
               </Badge>
             </Grid.Col>
           )}
@@ -225,14 +225,14 @@ const ExtractionInteractionsPanel: React.FC<ExtractionInteractionsPanelProps> = 
 
       {/* ── Interactions ─────────────────────────────────────────────────── */}
       <Stack gap="md">
-        <SectionTitle label="AI Interactions" />
+        <SectionTitle label="Processing Steps" />
 
         {interactions.length === 0 ? (
           <Text size="sm" c="dimmed">
-            No interaction data available.{' '}
+            No processing data available.{' '}
             {extraction.extractionStatus === 'PENDING' || extraction.extractionStatus === 'IN_PROGRESS'
-              ? 'The pipeline has not yet started or completed this step.'
-              : 'Interaction records may not have been captured.'}
+              ? 'Processing has not yet started or completed.'
+              : 'Processing records may not have been captured.'}
           </Text>
         ) : (
           <Accordion variant="separated" defaultValue={interactions[0]?.id}>

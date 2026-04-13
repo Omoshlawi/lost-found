@@ -21,7 +21,7 @@ import { useDocumentCaseTimeline } from '../hooks/useDocumentCases';
 const EVENT_META: Record<string, { label: string; icon: string; description: string }> = {
   document_event:     { label: 'Document Event',     icon: 'calendar',      description: 'Date the document was lost or found' },
   case_reported:      { label: 'Case Reported',       icon: 'clipboardText', description: 'Case filed in the system' },
-  ai_extraction:      { label: 'AI Extraction',       icon: 'robot',         description: 'Document data extracted via AI pipeline' },
+  ai_extraction:      { label: 'Document Processing',  icon: 'robot',         description: 'Document data processed via AI pipeline' },
   case_submitted:     { label: 'Case Submitted',      icon: 'send',          description: 'Case submitted for staff review' },
   case_verified:      { label: 'Case Verified',       icon: 'circleCheck',   description: 'Case verified by staff' },
   case_rejected:      { label: 'Case Rejected',       icon: 'circleX',       description: 'Case rejected by staff' },

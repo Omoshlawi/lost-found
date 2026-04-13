@@ -59,8 +59,7 @@ const CaseDocumentImageUploadForm: React.FC<ReportDocumentImageUploadFormProps> 
         accept={IMAGE_MIME_TYPE}
         uploading={loading}
         onFilesChange={setFiles}
-        description="Select images (max 2, will be uploaded on submit). This action will rescan, extract and update document information."
-        withBorder={false}
+        description="Select images (max 2). This will rescan, analyse and update document information."
       />
       <Group justify="flex-end">
         <Button onClick={handleUpload} disabled={files.length === 0 || loading} loading={loading}>

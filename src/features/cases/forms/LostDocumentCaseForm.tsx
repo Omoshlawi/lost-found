@@ -67,7 +67,7 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
         color: 'green',
         message: `Lost Document case created successfully`,
       });
-      navigate(`/dashboard/lost-documents/${doc.id}`);
+      navigate(`/dashboard/cases/${doc.id}`);
       closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<LostDocumentCaseFormData>(error);
@@ -187,11 +187,11 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
                 <TextInput
                   {...field}
                   value={field.value as string}
-                  placeholder="Enter owner name"
-                  label="Owner Name"
+                  placeholder="Enter surname"
+                  label="Surname"
                   error={fieldState.error?.message}
                   inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                  description="The name of the owner of the document"
+                  description="The last name of the document owner"
                   leftSection={<TablerIcon name="user" size={18} />}
                   required
                 />
@@ -204,11 +204,11 @@ const LostDocumentCaseForm = ({ closeWorkspace, onSuccess }: LostDocumentCaseFor
                 <TextInput
                   {...field}
                   value={field.value as string}
-                  placeholder="Enter owner name"
-                  label="Owner Name"
+                  placeholder="Enter given names"
+                  label="Given Names"
                   error={fieldState.error?.message}
                   inputWrapperOrder={INPUT_WRAPPER_ORDER}
-                  description="The name of the owner of the document"
+                  description="The first and middle names of the document owner"
                   leftSection={<TablerIcon name="user" size={18} />}
                   required
                 />

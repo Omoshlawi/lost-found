@@ -4,14 +4,13 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { Button, Group, Select, Stack, Textarea } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { closeModal, openModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { InputSkeleton, TablerIcon } from '@/components';
 import { useAddresses } from '@/features/addresses/hooks';
+import { useDocumentTypes } from '@/features/admin/hooks';
 import { handleApiErrors, uploadFile } from '@/lib/api';
 import { ImageUpload, ImageUploadRef } from '../components';
-import { ExtractionProgress } from '../components/extraction';
-import { useDocumentExtraction } from '../hooks/useDocumentExtraction';
+import { createFoundDocumentCase } from '../hooks';
 import { DocumentCase, FoundDocumentCaseFormData } from '../types';
 import { FoundDocumentCaseSchema } from '../utils';
 
@@ -25,16 +24,14 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
   const imageUploadRef = useRef<ImageUploadRef>(null);
   const navigate = useNavigate();
   const form = useForm<FoundDocumentCaseFormData>({
-    defaultValues: {},
+    defaultValues: { images: [] },
     resolver: zodResolver(FoundDocumentCaseSchema),
   });
-  const { addresses, isLoading } = useAddresses();
-  const { startExtraction } = useDocumentExtraction();
-  // const { createFoundDocumentCase } = useDocumentCaseApi();
+  const { addresses, isLoading: isLoadingAddresses } = useAddresses();
+  const { documentTypes, isLoading: isLoadingTypes } = useDocumentTypes();
 
   const handleSubmit: SubmitHandler<FoundDocumentCaseFormData> = async (data) => {
     try {
-      // First, upload all images if there are any
       let imageUrls: string[] = [];
       const files = imageUploadRef.current?.getFiles() || [];
 
@@ -51,7 +48,6 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
               color: 'red',
               position: 'top-right',
             });
-            setUploadingImages(false);
             return;
           }
         } catch (error) {
@@ -62,63 +58,31 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
             color: 'red',
             position: 'top-right',
           });
-          setUploadingImages(false);
           return;
         } finally {
           setUploadingImages(false);
         }
       }
 
-      // Submit form with uploaded image URLs
       const submitData = {
         ...data,
         images: imageUrls.length > 0 ? (imageUrls as [string, ...string[]]) : [],
       };
 
-      const extraction = await startExtraction();
-      if (!extraction) {
-        return showNotification({
-          color: 'red',
-          title: 'Extraction failed',
-          message: 'Failed to start document extraction',
-        });
-      }
-      const modelId = openModal({
-        fullScreen: true,
-        withCloseButton: false,
-        closeOnEscape: false,
-        children: (
-          <ExtractionProgress
-            extraction={extraction}
-            onExtractionComplete={(docCase) => {
-              onSuccess?.(docCase);
-              showNotification({
-                title: 'Success',
-                color: 'green',
-                message: `Found Document case created successfully`,
-              });
-              navigate(`/dashboard/found-documents/${docCase.id}`);
-              closeModal(modelId);
-              closeWorkspace?.();
-            }}
-            data={submitData}
-          />
-        ),
+      const doc = await createFoundDocumentCase(submitData);
+      onSuccess?.(doc);
+      showNotification({
+        title: 'Success',
+        color: 'green',
+        message: 'Found Document case created successfully',
       });
-      // const doc = await createFoundDocumentCase(submitData);
-      // onSuccess?.(doc);
-      // showNotification({
-      //   title: 'Success',
-      //   color: 'green',
-      //   message: `Found Document case created successfully`,
-      // });
-      // navigate(`/dashboard/found-documents/${doc.id}`);
-      // closeWorkspace?.();
+      navigate(`/dashboard/cases/${doc.id}`);
+      closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<FoundDocumentCaseFormData>(error);
       if ('detail' in e && e.detail) {
         showNotification({
-          title: `Error creating found document case`,
+          title: 'Error creating found document case',
           message: e.detail,
           color: 'red',
           position: 'top-right',
@@ -130,18 +94,37 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
       }
     }
   };
+
   return (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        display: 'flex',
-      }}
+      style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between', display: 'flex' }}
     >
       <Stack p="md" h="100%" justify="space-between" gap="lg">
         <Stack gap="md">
+          <Controller
+            control={form.control}
+            name="typeId"
+            render={({ field, fieldState }) =>
+              isLoadingTypes ? (
+                <InputSkeleton />
+              ) : (
+                <Select
+                  {...field}
+                  value={field.value || null}
+                  data={documentTypes.map((d) => ({ value: d.id, label: d.name }))}
+                  label="Document Type"
+                  description="Type of the found document"
+                  error={fieldState.error?.message}
+                  placeholder="Select document type"
+                  leftSection={<TablerIcon name="fileText" size={18} />}
+                  searchable
+                  nothingFoundMessage="Nothing found..."
+                  required
+                />
+              )
+            }
+          />
           <Controller
             control={form.control}
             name="eventDate"
@@ -152,6 +135,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
                 error={fieldState.error?.message}
                 placeholder="Select date"
                 leftSection={<TablerIcon name="calendar" size={18} />}
+                required
               />
             )}
           />
@@ -159,7 +143,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
             control={form.control}
             name="addressId"
             render={({ field, fieldState }) =>
-              isLoading ? (
+              isLoadingAddresses ? (
                 <InputSkeleton />
               ) : (
                 <Select
@@ -167,11 +151,13 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
                   value={field.value || null}
                   data={addresses.map((l) => ({ value: l.id, label: l.label ?? '' }))}
                   label="Address"
+                  description="Where the document was found"
                   error={fieldState.error?.message}
                   nothingFoundMessage="Nothing found..."
                   searchable
                   placeholder="Select address"
                   leftSection={<TablerIcon name="mapPin" size={18} />}
+                  required
                 />
               )
             }
@@ -183,8 +169,9 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
               <Textarea
                 {...field}
                 value={field.value as string}
-                placeholder="Describe the found document..."
+                placeholder="Add any notes about the found document..."
                 label="Description"
+                description="Optional additional details"
                 error={fieldState.error?.message}
                 minRows={3}
                 autosize
@@ -194,8 +181,8 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
 
           <ImageUpload
             ref={imageUploadRef}
-            title="Document Images"
-            description="Select images of the found document (will be uploaded on submit)"
+            label="Document Images"
+            description="Attach photos of the found document (max 2)"
             uploading={uploadingImages}
           />
         </Stack>
@@ -217,7 +204,7 @@ const FoundDocumentCaseForm = ({ closeWorkspace, onSuccess }: DocumentCaseFormPr
             disabled={form.formState.isSubmitting || uploadingImages}
             leftSection={<TablerIcon name="check" size={18} />}
           >
-            Submit Found Document Case
+            Submit Found Case
           </Button>
         </Group>
       </Stack>
