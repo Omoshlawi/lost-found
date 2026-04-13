@@ -230,6 +230,19 @@ export interface AIExtraction {
   extractionConfidence?: number;
   fallbackTriggered?: boolean;
   createdAt: string;
+  aiextractionInteractions?: AIExtractionInteraction[];
+}
+
+export type AIExtractionInteractionType = 'VISION_EXTRACTION' | 'TEXT_EXTRACTION';
+
+export interface AIExtractionInteraction {
+  id: string;
+  extractionType: AIExtractionInteractionType;
+  success: boolean;
+  errorMessage?: string | null;
+  confidence?: number | null;
+  createdAt: string;
+  aiInteraction?: AiInteraction;
 }
 
 export interface AdditionalField {

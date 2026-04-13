@@ -12,8 +12,8 @@ import {
   Text,
   Timeline,
 } from '@mantine/core';
-import { SectionTitle, StatusBadge, TablerIcon } from '@/components';
-import { AIExtraction, CaseType, Document, LostDocumentCase } from '../types';
+import { SectionTitle, TablerIcon } from '@/components';
+import { CaseType, Document, LostDocumentCase } from '../types';
 import { useDocumentCaseTimeline } from '../hooks/useDocumentCases';
 
 // ─── Timeline event metadata ─────────────────────────────────────────────────
@@ -42,7 +42,6 @@ interface AdditionalDetailsProps {
   status: string;
   document?: Document;
   lostDocumentCase?: LostDocumentCase;
-  extraction?: AIExtraction;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -54,7 +53,6 @@ const AdditionalDetails: React.FC<AdditionalDetailsProps> = ({
   status,
   document,
   lostDocumentCase,
-  extraction,
 }) => {
   const { events, isLoading: timelineLoading } = useDocumentCaseTimeline(caseId);
 
@@ -132,49 +130,6 @@ const AdditionalDetails: React.FC<AdditionalDetailsProps> = ({
                 </Badge>
               </Stack>
             </Group>
-          </Stack>
-          <Divider />
-        </>
-      )}
-
-      {/* ── AI Extraction Details ────────────────────────────────────────── */}
-      {extraction && (
-        <>
-          <Stack gap="md">
-            <SectionTitle label="AI Extraction" />
-            <Grid>
-              <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-                <Text size="sm" fw={600} c="dimmed" mb={4}>Status</Text>
-                <StatusBadge status={extraction.extractionStatus} />
-              </Grid.Col>
-              {extraction.currentStep && (
-                <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-                  <Text size="sm" fw={600} c="dimmed" mb={4}>Current Step</Text>
-                  <Text size="sm">
-                    {{ VISION: 'Image Analysis', TEXT: 'Data Extraction', POST_PROCESSING: 'Post Processing' }[extraction.currentStep] ?? extraction.currentStep}
-                  </Text>
-                </Grid.Col>
-              )}
-              {extraction.ocrConfidence != null && (
-                <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-                  <Text size="sm" fw={600} c="dimmed" mb={4}>OCR Confidence</Text>
-                  <Text size="sm">{Math.round(extraction.ocrConfidence * 100)}%</Text>
-                </Grid.Col>
-              )}
-              {extraction.extractionConfidence != null && (
-                <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-                  <Text size="sm" fw={600} c="dimmed" mb={4}>Extraction Confidence</Text>
-                  <Text size="sm">{Math.round(extraction.extractionConfidence * 100)}%</Text>
-                </Grid.Col>
-              )}
-              {extraction.fallbackTriggered && (
-                <Grid.Col span={12}>
-                  <Badge variant="light" color="orange" leftSection={<TablerIcon name="alertTriangle" size={12} />}>
-                    Fallback extraction triggered — results may be less accurate
-                  </Badge>
-                </Grid.Col>
-              )}
-            </Grid>
           </Stack>
           <Divider />
         </>
