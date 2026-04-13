@@ -40,6 +40,19 @@ export const useUsersApi = () => {
     return authClient.admin.removeUser({ userId });
   };
 
+  const createUser = async (payload: {
+    name: string;
+    email: string;
+    password: string;
+    role?: string;
+  }) => {
+    return authClient.admin.createUser(payload as any);
+  };
+
+  const setUserPassword = async (userId: string, newPassword: string) => {
+    return authClient.admin.setUserPassword({ userId, newPassword } as any);
+  };
+
   return {
     getUsers,
     getUserSessions,
@@ -49,6 +62,8 @@ export const useUsersApi = () => {
     revokeUserSession,
     revokeAllUserSessions,
     removeUser,
+    createUser,
+    setUserPassword,
   };
 };
 

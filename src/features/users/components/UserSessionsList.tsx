@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge, Button, Card, Group, Loader, Paper, Stack, Text } from '@mantine/core';
+import { Badge, Button, Group, Loader, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { StateFullDataTable, TablerIcon } from '@/components';
@@ -74,17 +74,21 @@ const UserSessionsList: React.FC<UserSessionsListProps> = ({ userId }) => {
   };
 
   return (
-    <Stack gap="md" p="sm">
-      <Group justify="space-between">
-        <Text fw={500}>Active Sessions</Text>
+    <Stack gap="md">
+      <Group justify="space-between" align="flex-start">
+        <Stack gap={2}>
+          <Text fw={600}>Active Sessions</Text>
+          <Text size="xs" c="dimmed">Devices currently signed in to this account</Text>
+        </Stack>
         <Button
           onClick={handleRevokeAll}
           variant="light"
           color="orange"
-          leftSection={<TablerIcon name="logout" size={16} />}
+          size="xs"
+          leftSection={<TablerIcon name="logout" size={14} />}
           disabled={!sessionsAsync.sessions || sessionsAsync.sessions.length === 0}
         >
-          Revoke All Sessions
+          Revoke All
         </Button>
       </Group>
 
@@ -93,33 +97,32 @@ const UserSessionsList: React.FC<UserSessionsListProps> = ({ userId }) => {
           <Loader />
         </Group>
       ) : sessionsAsync.sessions.length === 0 ? (
-        <Card withBorder padding="xl" radius="md" ta="center">
-          <Text c="dimmed">No active sessions found for this user.</Text>
-        </Card>
+        <Stack align="center" gap="xs" py="xl">
+          <TablerIcon name="deviceDesktopOff" size={32} color="var(--mantine-color-dimmed)" />
+          <Text c="dimmed" size="sm">No active sessions</Text>
+        </Stack>
       ) : (
-        <Paper withBorder radius="md">
-          <StateFullDataTable
-            {...sessionsAsync}
-            data={sessionsAsync.sessions}
-            columns={[
-              ...columns,
-              {
-                header: 'Actions',
-                id: 'actions',
-                cell: ({ row: { original: session } }: { row: { original: UserSession } }) => (
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    color="red"
-                    onClick={() => handleRevoke(session)}
-                  >
-                    Revoke
-                  </Button>
-                ),
-              },
-            ]}
-          />
-        </Paper>
+        <StateFullDataTable
+          {...sessionsAsync}
+          data={sessionsAsync.sessions}
+          columns={[
+            ...columns,
+            {
+              header: 'Actions',
+              id: 'actions',
+              cell: ({ row: { original: session } }: { row: { original: UserSession } }) => (
+                <Button
+                  size="xs"
+                  variant="outline"
+                  color="red"
+                  onClick={() => handleRevoke(session)}
+                >
+                  Revoke
+                </Button>
+              ),
+            },
+          ]}
+        />
       )}
     </Stack>
   );

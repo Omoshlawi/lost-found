@@ -169,7 +169,7 @@ const SideNav: React.FC<SideNavProps> = ({ onClose }) => {
                     {entry.label}
                   </Text>
                 }
-                defaultOpened={anyChildActive || true}
+                defaultOpened={anyChildActive || entry.label === 'Case Management'}
                 childrenOffset={12}
                 style={{ marginTop: i > 0 ? 4 : 0 }}
                 styles={{

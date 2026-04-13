@@ -4,6 +4,7 @@ import {
   ActionIcon,
   Badge,
   Box,
+  Button,
   Divider,
   Group,
   Menu,
@@ -16,7 +17,7 @@ import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, launchWorkspace, StateFullDataTable, TablerIcon } from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
-import { BanUserForm, SetRoleForm } from '../forms';
+import { BanUserForm, CreateUserForm, SetRoleForm } from '../forms';
 import { useUsers, useUsersApi } from '../hooks';
 import { User } from '../types';
 
@@ -61,6 +62,16 @@ const UsersPage = () => {
         }
       },
     });
+  };
+
+  const handleLaunchCreateUser = () => {
+    const closeWorkspace = launchWorkspace(
+      <CreateUserForm
+        closeWorkspace={() => closeWorkspace()}
+        onSuccess={() => usersAsync.mutate()}
+      />,
+      { width: 'narrow', title: 'Add New User' }
+    );
   };
 
   const handleRevokeSessions = (user: User) => {
@@ -137,14 +148,23 @@ const UsersPage = () => {
         {...usersAsync}
         data={usersAsync.users}
         renderActions={() => (
-          <TextInput
-            placeholder="Search by name or email..."
-            leftSection={<TablerIcon name="search" size={14} />}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            size="xs"
-            w={240}
-          />
+          <Group gap="xs">
+            <TextInput
+              placeholder="Search by name or email..."
+              leftSection={<TablerIcon name="search" size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              size="xs"
+              w={240}
+            />
+            <Button
+              size="xs"
+              leftSection={<TablerIcon name="userPlus" size={14} />}
+              onClick={handleLaunchCreateUser}
+            >
+              Add User
+            </Button>
+          </Group>
         )}
         renderExpandedRow={({ original: user }) => (
           <Box
