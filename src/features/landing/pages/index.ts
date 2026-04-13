@@ -7,3 +7,5 @@ export { default as AboutUsPage } from './AboutUsPage';
 export { default as HowItWorksPage } from './HowItWorksPage';
 export { default as ContactUsPage } from './ContactUsPage';
 export { default as TwoFactorVerifyPage } from './TwoFactorVerifyPage';
+export { default as VerifyEmailPage } from './VerifyEmailPage';
+export { default as ChangeEmailVerifyPage } from './ChangeEmailVerifyPage';

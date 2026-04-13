@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import {
   AboutUsPage,
+  ChangeEmailVerifyPage,
   ContactUsPage,
   ForgotPasswordPage,
   HowItWorksPage,
@@ -8,6 +9,7 @@ import {
   RegisterPage,
   ResetPasswordPage,
   TwoFactorVerifyPage,
+  VerifyEmailPage,
 } from '@/features/landing/pages';
 import {
   AddressesPage,
@@ -83,6 +85,14 @@ const router = createBrowserRouter([
       {
         path: '/two-factor-verify',
         element: <TwoFactorVerifyPage />,
+      },
+      {
+        path: '/verify-email',
+        element: <VerifyEmailPage />,
+      },
+      {
+        path: '/change-email-verify',
+        element: <ChangeEmailVerifyPage />,
       },
     ],
   },

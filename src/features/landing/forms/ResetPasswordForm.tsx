@@ -1,9 +1,9 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
-import { Button, Group, PasswordInput, Stack, Text, Title } from '@mantine/core';
+import { Alert, Button, Group, PasswordInput, Stack, Text, Title } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import useAuthClent from '@/lib/api/useAuthClent';
@@ -21,6 +21,9 @@ const ResetPasswordSchema = z
 type ResetPasswordFormData = z.infer<typeof ResetPasswordSchema>;
 
 const ResetPasswordForm: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+
   const form = useForm<ResetPasswordFormData>({
     defaultValues: { password: '', confirmPassword: '' },
     resolver: zodResolver(ResetPasswordSchema),
@@ -29,10 +32,29 @@ const ResetPasswordForm: React.FC = () => {
   const { resetPassword } = useAuthClent();
   const navigate = useNavigate();
 
+  if (!token) {
+    return (
+      <Stack gap="md" p="md">
+        <Alert
+          color="red"
+          title="Invalid reset link"
+          icon={<TablerIcon name="alertCircle" size={16} />}
+        >
+          This password reset link is invalid or has expired. Please request a new one from the{' '}
+          <Text component={Link} to="/forgot-password" size="sm" c="civicBlue.6" display="inline">
+            forgot password page
+          </Text>
+          .
+        </Alert>
+      </Stack>
+    );
+  }
+
   const handleSubmit: SubmitHandler<ResetPasswordFormData> = async (data) => {
     try {
       const { error } = await resetPassword({
         newPassword: data.password,
+        token,
       });
 
       if (error) {
