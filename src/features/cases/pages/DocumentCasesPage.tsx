@@ -388,6 +388,14 @@ const DocumentCasesPage = () => {
             >
               View Details
             </Menu.Item>
+            <Menu.Item
+              leftSection={<TablerIcon name="vectorTriangle" size={14} />}
+              component={Link}
+              to={`/dashboard/matches?matchesTab=semantic&semanticRef=${report.caseNumber}&semanticType=${isFound ? 'found' : 'lost'}`}
+              color="civicBlue"
+            >
+              Similar Cases
+            </Menu.Item>
             {isFound && (
               <>
                 <SystemAuthorized

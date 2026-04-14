@@ -1,17 +1,32 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ActionIcon, Badge, Select, Stack, Text, TextInput } from '@mantine/core';
+import { ActionIcon, Badge, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
 import { DashboardPageHeader, StateFullDataTable, StatusBadge, TablerIcon } from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { formatDate } from '@/lib/utils';
+import { SemanticMatchesTab } from '../components';
+import { CONFIDENCE_OPTIONS, STATUS_OPTIONS, VERDICT_COLORS, VERDICT_LABELS } from '../constants';
 import { useMatches } from '../hooks';
 import { Match, MatchConfidence } from '../types';
-import { CONFIDENCE_OPTIONS, STATUS_OPTIONS, VERDICT_COLORS, VERDICT_LABELS } from '../constants';
-
 
 const MatchesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = searchParams.get('matchesTab') ?? 'recorded';
+  const setActiveTab = (tab: string | null) => {
+    setSearchParams(
+      (prev) => {
+        if (tab && tab !== 'recorded') {
+          prev.set('matchesTab', tab);
+        } else {
+          prev.delete('matchesTab');
+        }
+        return prev;
+      },
+      { replace: true }
+    );
+  };
   const {
     page,
     pageSize,
@@ -214,60 +229,77 @@ const MatchesPage = () => {
     <Stack gap="md">
       <DashboardPageHeader
         title="Matches"
-        subTitle="AI-generated matches between lost and found document cases"
+        subTitle="Recorded matches and real-time semantic similarity search"
         icon="exchange"
       />
-      <StateFullDataTable
-        {...matchesAsync}
-        data={matchesAsync.matches}
-        columns={columns}
-        renderActions={() => (
-          <>
-            <TextInput
-              placeholder="Search matches..."
-              leftSection={<TablerIcon name="search" size={14} />}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              size="xs"
-              w={200}
-            />
-            <Select
-              placeholder="Status"
-              data={STATUS_OPTIONS}
-              value={status}
-              onChange={setStatus}
-              size="xs"
-              clearable
-              w={130}
-            />
-            <Select
-              placeholder="Confidence"
-              data={CONFIDENCE_OPTIONS}
-              value={confidence}
-              onChange={setConfidence}
-              size="xs"
-              clearable
-              w={140}
-            />
-            <Select
-              placeholder="Verdict"
-              data={Object.entries(VERDICT_LABELS).map(([value, label]) => ({ label, value }))}
-              value={verdict}
-              onChange={setVerdict}
-              size="xs"
-              clearable
-              w={160}
-            />
-          </>
-        )}
-        pagination={{
-          totalCount: matchesAsync.totalCount,
-          currentPage: page,
-          pageSize,
-          onChange: setPage,
-          onPageSizeChange: setPageSize,
-        }}
-      />
+      <Tabs value={activeTab} onChange={setActiveTab} variant="default">
+        <Tabs.List>
+          <Tabs.Tab value="recorded" leftSection={<TablerIcon name="database" size={16} />}>
+            Recorded Matches
+          </Tabs.Tab>
+          <Tabs.Tab value="semantic" leftSection={<TablerIcon name="vectorTriangle" size={16} />}>
+            Semantic Search
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="recorded" pt="md">
+          <StateFullDataTable
+            {...matchesAsync}
+            data={matchesAsync.matches}
+            columns={columns}
+            renderActions={() => (
+              <>
+                <TextInput
+                  placeholder="Search matches..."
+                  leftSection={<TablerIcon name="search" size={14} />}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  size="xs"
+                  w={200}
+                />
+                <Select
+                  placeholder="Status"
+                  data={STATUS_OPTIONS}
+                  value={status}
+                  onChange={setStatus}
+                  size="xs"
+                  clearable
+                  w={130}
+                />
+                <Select
+                  placeholder="Confidence"
+                  data={CONFIDENCE_OPTIONS}
+                  value={confidence}
+                  onChange={setConfidence}
+                  size="xs"
+                  clearable
+                  w={140}
+                />
+                <Select
+                  placeholder="Verdict"
+                  data={Object.entries(VERDICT_LABELS).map(([value, label]) => ({ label, value }))}
+                  value={verdict}
+                  onChange={setVerdict}
+                  size="xs"
+                  clearable
+                  w={160}
+                />
+              </>
+            )}
+            pagination={{
+              totalCount: matchesAsync.totalCount,
+              currentPage: page,
+              pageSize,
+              onChange: setPage,
+              onPageSizeChange: setPageSize,
+            }}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="semantic" pt="md">
+          <SemanticMatchesTab />
+        </Tabs.Panel>
+      </Tabs>
     </Stack>
   );
 };

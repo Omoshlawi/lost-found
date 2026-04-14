@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button, Group, Menu } from '@mantine/core';
 import { closeModal, openModal } from '@mantine/modals';
 import { launchWorkspace, TablerIcon } from '@/components';
@@ -15,12 +16,14 @@ import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus
 
 interface DocumentCaseActionsProps {
   caseId: string;
+  caseNumber: string;
   documentCase: DocumentCase;
   reportType: CaseType;
   status: string;
 }
 
 const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
+  caseNumber,
   documentCase,
   reportType,
   status,
@@ -97,6 +100,16 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Actions</Menu.Label>
+
+          <Menu.Item
+            leftSection={<TablerIcon name="vectorTriangle" size={14} />}
+            component={Link}
+            to={`/dashboard/matches?matchesTab=semantic&semanticRef=${caseNumber}&semanticType=${reportType === 'LOST' ? 'lost' : 'found'}`}
+            color="civicBlue"
+          >
+            Similar Cases
+          </Menu.Item>
+          <Menu.Divider />
 
           {/* Edit actions — only available while in DRAFT */}
           <Menu.Item

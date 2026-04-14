@@ -4,3 +4,4 @@ export * from './MatchScoreBreakdown';
 export * from './MatchComparisonTab';
 export * from './MatchAnalysisTab';
 export * from './MatchImagesTab';
+export * from './SemanticMatchesTab';

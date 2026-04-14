@@ -1,4 +1,5 @@
 import useSWR from 'swr';
+import { DocumentCase } from '@/features/cases/types';
 import { APIFetchResponse, constructUrl, PaginatedData } from '@/lib/api';
 import { Match } from '../types';
 
@@ -30,5 +31,47 @@ export const useMatch = (matchId?: string) => {
     match: data?.data,
     isLoading,
     error,
+  };
+};
+
+export const useSemanticMatches = (params: {
+  caseRef?: string;
+  type?: 'lost' | 'found';
+  minMatchScore?: number;
+  limit?: number;
+} = {}) => {
+  const { caseRef, type, minMatchScore, limit } = params;
+
+  const lostUrl =
+    caseRef && type === 'lost'
+      ? constructUrl('/matching/lost', {
+          lostDocumentCase: caseRef,
+          v: 'custom:include(lostDocumentCase,foundDocumentCase,document:include(type))',
+          ...(minMatchScore !== undefined && { minMatchScore }),
+          ...(limit !== undefined && { limit }),
+        })
+      : null;
+
+  const foundUrl =
+    caseRef && type === 'found'
+      ? constructUrl('/matching/found', {
+          foundDocumentCase: caseRef,
+          v: 'custom:include(lostDocumentCase,foundDocumentCase,document:include(type))',
+          ...(minMatchScore !== undefined && { minMatchScore }),
+          ...(limit !== undefined && { limit }),
+        })
+      : null;
+
+  const { data: lostData, isLoading: lostLoading, error: lostError } =
+    useSWR<APIFetchResponse<{ results: DocumentCase[] }>>(lostUrl);
+  const { data: foundData, isLoading: foundLoading, error: foundError } =
+    useSWR<APIFetchResponse<{ results: DocumentCase[] }>>(foundUrl);
+
+  const results = lostData?.data?.results ?? foundData?.data?.results ?? [];
+  return {
+    results,
+    totalCount: results.length,
+    isLoading: lostLoading || foundLoading,
+    error: lostError ?? foundError,
   };
 };

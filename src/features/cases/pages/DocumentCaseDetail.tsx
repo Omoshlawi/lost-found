@@ -71,6 +71,7 @@ const DocumentCaseDetail = () => {
         traiiling={
           <DocumentCaseActions
             caseId={reportData.id}
+            caseNumber={caseNumber}
             documentCase={reportData}
             reportType={reportType}
             status={status}
