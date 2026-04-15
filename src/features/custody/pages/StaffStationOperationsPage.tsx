@@ -51,7 +51,7 @@ function groupByUser(grants: StaffStationOperation[]): GroupedStaffGrant[] {
 
 const StaffStationOperationsPage: React.FC = () => {
   const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const { grants, totalCount, isLoading, mutate } = useStaffStationOperations({
+  const { grants, totalCount, isLoading, mutate, error } = useStaffStationOperations({
     page,
     limit: pageSize,
   });
@@ -183,6 +183,7 @@ const StaffStationOperationsPage: React.FC = () => {
       />
       <StateFullDataTable
         data={grouped}
+        error={error}
         isLoading={isLoading}
         onAdd={handleGrant}
         columns={columns}

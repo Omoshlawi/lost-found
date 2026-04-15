@@ -11,7 +11,7 @@ interface OperationHistoryTimelineProps {
 }
 
 const OPERATION_ICON: Record<string, string> = {
-  RECEIVED: 'packageImport',
+  RECEIPT: 'packageImport',
   TRANSFER_OUT: 'arrowRight',
   TRANSFER_IN: 'arrowLeft',
   REQUISITION: 'fileText',
@@ -40,7 +40,7 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
         const stationLabel =
           op.fromStation && op.toStation
             ? `${op.fromStation.name} → ${op.toStation.name}`
-            : op.station?.name ?? null;
+            : (op.station?.name ?? null);
 
         return (
           <Timeline.Item

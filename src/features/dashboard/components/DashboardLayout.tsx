@@ -94,7 +94,7 @@ const DashboardLayout: FC = () => {
 
         <AppShell.Main>
           {isImpersonating && (
-            <Alert color="orange" variant="light" title="Impersonation Active" mb="md" radius="md">
+            <Alert color="orange" variant="light" title="Impersonation Active" mb="md">
               <Group justify="space-between" align="center" gap="sm" wrap="wrap">
                 <Text size="sm">
                   You are currently impersonating this account. Changes are applied as this user.
