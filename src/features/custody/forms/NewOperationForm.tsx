@@ -1,261 +1,217 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
+import { Controller } from 'react-hook-form';
 import {
   Alert,
   Badge,
   Box,
   Button,
-  Combobox,
   Group,
-  Input,
-  Pill,
-  PillsInput,
   ScrollArea,
   Select,
   Stack,
   Text,
   Textarea,
-  useCombobox,
 } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
-import { useDocumentCases } from '@/features/cases/hooks';
-import { handleApiErrors } from '@/lib/api';
-import { createOperation, useDocumentOperationTypes } from '../hooks/useCustody';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { CaseComboboxPicker, OperationTypeHeader } from '../components';
 import { DocumentOperationType } from '../types';
+import { useNewOperationForm } from './useNewOperationForm';
 
 interface NewOperationFormProps {
   onClose: () => void;
   onSuccess?: () => void;
+  preselectedType?: DocumentOperationType;
+  defaultStationId?: string | null;
 }
 
-const NewOperationForm: React.FC<NewOperationFormProps> = ({ onClose, onSuccess }) => {
-  const [operationTypeId, setOperationTypeId] = useState<string | null>(null);
-  const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
-  const [selectedCaseLabels, setSelectedCaseLabels] = useState<Record<string, string>>({});
-  const [stationId, setStationId] = useState<string | null>(null);
-  const [toStationId, setToStationId] = useState<string | null>(null);
-  const [notes, setNotes] = useState('');
-  const [caseSearch, setCaseSearch] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const NewOperationForm: React.FC<NewOperationFormProps> = ({
+  onClose,
+  onSuccess,
+  preselectedType,
+  defaultStationId,
+}) => {
+  const {
+    form,
+    selectedOpType,
+    operationTypeOptions,
+    stationOptions,
+    caseSearch,
+    setCaseSearch,
+    casesLoading,
+    availableCases,
+    caseLabels,
+    addCase,
+    removeCase,
+    watchedFoundCaseIds,
+    handleSubmit,
+  } = useNewOperationForm({ preselectedType, defaultStationId, onClose, onSuccess });
 
-  const combobox = useCombobox({ onDropdownClose: () => combobox.resetSelectedOption() });
+  const { isSubmitting, errors } = form.formState;
 
-  const { operationTypes } = useDocumentOperationTypes({ limit: 50 });
-  const { stations } = usePickupStations();
-
-  const { reports: cases, isLoading: casesLoading } = useDocumentCases({
-    caseType: 'FOUND',
-    limit: 20,
-    ...(caseSearch && { search: caseSearch }),
-    v: 'custom:include(foundDocumentCase,document:include(type))',
-  });
-
-  const selectedOpType = useMemo<DocumentOperationType | undefined>(
-    () => operationTypes.find((t) => t.id === operationTypeId),
-    [operationTypes, operationTypeId],
-  );
-
-  const operationTypeOptions = operationTypes.map((t) => ({
-    value: t.id,
-    label: t.name,
+  const caseOptions = availableCases.map((c) => ({
+    foundCaseId: c.foundDocumentCase?.id ?? '',
+    caseNumber: c.caseNumber,
+    typeName: c.document?.type?.name ?? '—',
   }));
-
-  const stationOptions = stations.map((s) => ({
-    value: s.id,
-    label: `${s.name} (${s.code})`,
-  }));
-
-  const availableCases = cases.filter((c) => !selectedCaseIds.includes(c.foundDocumentCase?.id ?? ''));
-
-  const addCase = (foundCaseId: string, label: string) => {
-    setSelectedCaseIds((prev) => [...prev, foundCaseId]);
-    setSelectedCaseLabels((prev) => ({ ...prev, [foundCaseId]: label }));
-    setCaseSearch('');
-    combobox.closeDropdown();
-  };
-
-  const removeCase = (foundCaseId: string) => {
-    setSelectedCaseIds((prev) => prev.filter((id) => id !== foundCaseId));
-    setSelectedCaseLabels((prev) => {
-      const next = { ...prev };
-      delete next[foundCaseId];
-      return next;
-    });
-  };
-
-  const handleSubmit = async () => {
-    if (!operationTypeId || selectedCaseIds.length === 0) return;
-    setError(null);
-    setIsLoading(true);
-    try {
-      await createOperation({
-        operationTypeId,
-        foundCaseIds: selectedCaseIds,
-        ...(stationId && { stationId }),
-        ...(toStationId && { toStationId }),
-        notes: notes || undefined,
-      });
-      showNotification({
-        title: 'Operation created',
-        message: `Draft operation created with ${selectedCaseIds.length} document(s).`,
-        color: 'teal',
-      });
-      onSuccess?.();
-      onClose();
-    } catch (err) {
-      const e = handleApiErrors<{}>(err);
-      setError(e.detail ?? 'Failed to create operation.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isValid = !!operationTypeId && selectedCaseIds.length > 0;
 
   return (
-    <Stack p="md" h="100%" justify="space-between">
-      <ScrollArea flex={1} offsetScrollbars>
-        <Stack gap="md">
-          <Select
-            label="Operation Type"
-            placeholder="Select operation type"
-            data={operationTypeOptions}
-            value={operationTypeId}
-            onChange={setOperationTypeId}
-            required
-            searchable
-          />
-
-          {selectedOpType && (
-            <Box>
-              <Text size="xs" c="dimmed" mb={4}>
-                {selectedOpType.description}
-              </Text>
-              <Group gap="xs">
-                {selectedOpType.requiresDestinationStation && (
-                  <Badge size="xs" variant="outline" color="orange">
-                    Requires destination station
-                  </Badge>
-                )}
-                {selectedOpType.isHighPrivilege && (
-                  <Badge size="xs" variant="outline" color="red">
-                    Requires approval
-                  </Badge>
-                )}
-              </Group>
-            </Box>
-          )}
-
-          {/* Document case multi-select */}
-          <Input.Wrapper label="Documents" required>
-            <Combobox store={combobox} onOptionSubmit={(val) => {
-              const c = cases.find((c) => c.foundDocumentCase?.id === val);
-              if (c) {
-                addCase(val, `${c.caseNumber} · ${c.document?.type?.name ?? 'Unknown'}`);
-              }
-            }}>
-              <Combobox.DropdownTarget>
-                <PillsInput onClick={() => combobox.openDropdown()}>
-                  <Pill.Group>
-                    {selectedCaseIds.map((id) => (
-                      <Pill key={id} withRemoveButton onRemove={() => removeCase(id)}>
-                        {selectedCaseLabels[id] ?? id}
-                      </Pill>
-                    ))}
-                    <Combobox.EventsTarget>
-                      <PillsInput.Field
-                        placeholder={selectedCaseIds.length === 0 ? 'Search by case number or document type…' : undefined}
-                        value={caseSearch}
-                        onChange={(e) => {
-                          setCaseSearch(e.currentTarget.value);
-                          combobox.openDropdown();
-                        }}
-                        onFocus={() => combobox.openDropdown()}
-                        onBlur={() => combobox.closeDropdown()}
-                      />
-                    </Combobox.EventsTarget>
-                  </Pill.Group>
-                </PillsInput>
-              </Combobox.DropdownTarget>
-
-              <Combobox.Dropdown>
-                <Combobox.Options>
-                  {casesLoading ? (
-                    <Combobox.Empty>Searching…</Combobox.Empty>
-                  ) : availableCases.length === 0 ? (
-                    <Combobox.Empty>No matching cases found</Combobox.Empty>
-                  ) : (
-                    availableCases.map((c) => (
-                      <Combobox.Option key={c.foundDocumentCase?.id} value={c.foundDocumentCase?.id ?? ''}>
-                        <Group gap="xs" wrap="nowrap">
-                          <Text size="sm" fw={500}>{c.caseNumber}</Text>
-                          <Text size="xs" c="dimmed">{c.document?.type?.name ?? '—'}</Text>
-                        </Group>
-                      </Combobox.Option>
-                    ))
+    <form
+      onSubmit={handleSubmit}
+      style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+    >
+      <Stack p="md" flex={1} style={{ overflow: 'hidden' }}>
+        <ScrollArea flex={1} offsetScrollbars>
+          <Stack gap="md">
+            {/* Operation type — locked header or selectable dropdown */}
+            {preselectedType ? (
+              <OperationTypeHeader opType={preselectedType} />
+            ) : (
+              <>
+                <Controller
+                  control={form.control}
+                  name="operationTypeId"
+                  render={({ field, fieldState }) => (
+                    <Select
+                      label="Operation Type"
+                      placeholder="Select operation type"
+                      data={operationTypeOptions}
+                      value={field.value || null}
+                      onChange={(v) => field.onChange(v ?? '')}
+                      error={fieldState.error?.message}
+                      required
+                      searchable
+                    />
                   )}
-                </Combobox.Options>
-              </Combobox.Dropdown>
-            </Combobox>
-          </Input.Wrapper>
+                />
+                {selectedOpType && (
+                  <Box>
+                    <Text size="xs" c="dimmed" mb={4}>
+                      {selectedOpType.description}
+                    </Text>
+                    <Group gap="xs">
+                      {selectedOpType.requiresDestinationStation && (
+                        <Badge size="xs" variant="outline" color="orange">
+                          Requires destination station
+                        </Badge>
+                      )}
+                      {selectedOpType.isHighPrivilege && (
+                        <Badge size="xs" variant="outline" color="red">
+                          Requires approval
+                        </Badge>
+                      )}
+                    </Group>
+                  </Box>
+                )}
+              </>
+            )}
 
-          {selectedOpType?.requiresDestinationStation && (
-            <Select
-              label="Destination Station"
-              placeholder="Select station"
-              data={stationOptions}
-              value={toStationId}
-              onChange={setToStationId}
-              required
-              searchable
+            {/* Document case multi-select */}
+            <CaseComboboxPicker
+              selectedIds={watchedFoundCaseIds}
+              labels={caseLabels}
+              options={caseOptions}
+              isLoading={casesLoading}
+              search={caseSearch}
+              error={errors.foundCaseIds?.message}
+              onSearchChange={setCaseSearch}
+              onAdd={addCase}
+              onRemove={removeCase}
             />
-          )}
 
-          <Select
-            label="From Station"
-            placeholder="Station performing this operation"
-            data={stationOptions}
-            value={stationId}
-            onChange={setStationId}
-            searchable
-            clearable
-          />
+            {/* Destination station — only when required by the op type */}
+            {selectedOpType?.requiresDestinationStation && (
+              <Controller
+                control={form.control}
+                name="toStationId"
+                render={({ field, fieldState }) => (
+                  <Select
+                    label="Destination Station"
+                    placeholder="Select destination station"
+                    data={stationOptions}
+                    value={field.value ?? null}
+                    onChange={(v) => field.onChange(v ?? null)}
+                    error={fieldState.error?.message}
+                    required
+                    searchable
+                    clearable
+                  />
+                )}
+              />
+            )}
 
-          <Textarea
-            label="Notes"
-            placeholder={selectedOpType?.requiresNotes ? 'Required for this operation type…' : 'Optional notes…'}
-            value={notes}
-            onChange={(e) => setNotes(e.currentTarget.value)}
-            rows={3}
-            required={selectedOpType?.requiresNotes}
-          />
+            {/* Performing station */}
+            <Controller
+              control={form.control}
+              name="stationId"
+              render={({ field, fieldState }) => (
+                <Select
+                  label={preselectedType ? 'Performing Station' : 'From Station'}
+                  description={
+                    preselectedType && defaultStationId
+                      ? 'Defaulted to your active station'
+                      : undefined
+                  }
+                  placeholder="Station performing this operation"
+                  data={stationOptions}
+                  value={field.value ?? null}
+                  onChange={(v) => field.onChange(v ?? null)}
+                  error={fieldState.error?.message}
+                  searchable
+                  clearable
+                />
+              )}
+            />
 
-          {error && (
-            <Alert variant="light" color="red" icon={<TablerIcon name="alertTriangle" size={16} />}>
-              {error}
-            </Alert>
-          )}
-        </Stack>
-      </ScrollArea>
+            {/* Notes */}
+            <Controller
+              control={form.control}
+              name="notes"
+              render={({ field, fieldState }) => (
+                <Textarea
+                  label="Notes"
+                  placeholder={
+                    selectedOpType?.requiresNotes
+                      ? 'Required for this operation type…'
+                      : 'Optional notes…'
+                  }
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  error={fieldState.error?.message}
+                  rows={3}
+                  required={selectedOpType?.requiresNotes}
+                />
+              )}
+            />
 
-      <Group gap={1} pt="md">
-        <Button flex={1} variant="default" radius={0} onClick={onClose} disabled={isLoading}>
+            {errors.root && (
+              <Alert
+                variant="light"
+                color="red"
+                icon={<TablerIcon name="alertTriangle" size={16} />}
+              >
+                {errors.root.message}
+              </Alert>
+            )}
+          </Stack>
+        </ScrollArea>
+      </Stack>
+
+      <Group gap={1} px="md" pb="md">
+        <Button flex={1} variant="default" radius={0} onClick={onClose} disabled={isSubmitting}>
           Cancel
         </Button>
         <Button
           flex={1}
           radius={0}
+          type="submit"
           leftSection={<TablerIcon name="plus" size={14} />}
-          loading={isLoading}
-          disabled={!isValid}
-          onClick={handleSubmit}
+          loading={isSubmitting}
         >
           Create Operation
         </Button>
       </Group>
-    </Stack>
+    </form>
   );
 };
 
