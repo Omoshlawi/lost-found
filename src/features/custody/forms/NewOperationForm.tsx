@@ -33,6 +33,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
   const {
     form,
     selectedOpType,
+    isRequisition,
     operationTypeOptions,
     stationOptions,
     caseSearch,
@@ -43,6 +44,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
     addCase,
     removeCase,
     watchedFoundCaseIds,
+    watchedFromStationId,
     handleSubmit,
   } = useNewOperationForm({ preselectedType, defaultStationId, onClose, onSuccess });
 
@@ -105,6 +107,31 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               </>
             )}
 
+            {/* Source station — REQUISITION: shown BEFORE document picker */}
+            {isRequisition && (
+              <Controller
+                control={form.control}
+                name="fromStationId"
+                render={({ field, fieldState }) => (
+                  <Select
+                    label="Source Station"
+                    description="Station currently holding the documents to be requested"
+                    placeholder="Select source station"
+                    data={stationOptions}
+                    value={field.value ?? null}
+                    onChange={(v) => {
+                      field.onChange(v ?? null);
+                      form.setValue('foundCaseIds', []);
+                    }}
+                    error={fieldState.error?.message}
+                    required
+                    searchable
+                    clearable
+                  />
+                )}
+              />
+            )}
+
             {/* Document case multi-select */}
             <CaseComboboxPicker
               selectedIds={watchedFoundCaseIds}
@@ -116,9 +143,10 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               onSearchChange={setCaseSearch}
               onAdd={addCase}
               onRemove={removeCase}
+              disabled={isRequisition && !watchedFromStationId}
             />
 
-            {/* Destination station — only when required by the op type */}
+            {/* Destination station — TRANSFER_OUT (requiresDestinationStation) */}
             {selectedOpType?.requiresDestinationStation && (
               <Controller
                 control={form.control}
@@ -126,7 +154,30 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                 render={({ field, fieldState }) => (
                   <Select
                     label="Destination Station"
+                    description="Station the documents are being sent to"
                     placeholder="Select destination station"
+                    data={stationOptions}
+                    value={field.value ?? null}
+                    onChange={(v) => field.onChange(v ?? null)}
+                    error={fieldState.error?.message}
+                    required
+                    searchable
+                    clearable
+                  />
+                )}
+              />
+            )}
+
+            {/* Source station — TRANSFER_IN: shown after document picker */}
+            {!isRequisition && selectedOpType?.requiresSourceStation && (
+              <Controller
+                control={form.control}
+                name="fromStationId"
+                render={({ field, fieldState }) => (
+                  <Select
+                    label="Source Station"
+                    description="Station that dispatched the documents"
+                    placeholder="Select source station"
                     data={stationOptions}
                     value={field.value ?? null}
                     onChange={(v) => field.onChange(v ?? null)}
@@ -145,13 +196,16 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               name="stationId"
               render={({ field, fieldState }) => (
                 <Select
-                  label={preselectedType ? 'Performing Station' : 'From Station'}
+                  label={preselectedType ? 'Performing Station' : 'Station'}
                   description={
-                    preselectedType && defaultStationId
-                      ? 'Defaulted to your active station'
-                      : undefined
+                    isRequisition
+                      ? 'Your active station (the requesting station)'
+                      : preselectedType && defaultStationId
+                        ? 'Defaulted to your active station'
+                        : undefined
                   }
                   placeholder="Station performing this operation"
+                  disabled={isRequisition}
                   data={stationOptions}
                   value={field.value ?? null}
                   onChange={(v) => field.onChange(v ?? null)}

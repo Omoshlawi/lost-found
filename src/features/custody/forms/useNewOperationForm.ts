@@ -26,16 +26,6 @@ export const useNewOperationForm = ({
   const [caseLabels, setCaseLabels] = useState<Record<string, string>>({});
   const [caseSearch, setCaseSearch] = useState('');
 
-  // ── Data fetching ──────────────────────────────────────────────────────────
-  const { operationTypes, isLoading: opTypesLoading } = useDocumentOperationTypes({ limit: 50 });
-  const { stations } = usePickupStations();
-  const { reports: cases, isLoading: casesLoading } = useDocumentCases({
-    caseType: 'FOUND',
-    limit: 20,
-    ...(caseSearch && { search: caseSearch }),
-    v: 'custom:include(foundDocumentCase,document:include(type))',
-  });
-
   // ── Dynamic Zod resolver via ref so the schema reflects the current op type ─
   const selectedOpTypeRef = useRef<DocumentOperationType | undefined>(preselectedType);
 
@@ -54,15 +44,21 @@ export const useNewOperationForm = ({
       foundCaseIds: [],
       stationId: defaultStationId ?? null,
       toStationId: null,
+      fromStationId: null,
       notes: '',
     },
     resolver,
     mode: 'onTouched',
   });
 
+  // ── Static data fetching (no dependencies) ────────────────────────────────
+  const { operationTypes, isLoading: opTypesLoading } = useDocumentOperationTypes({ limit: 50 });
+  const { stations } = usePickupStations();
+
   // ── Derived state ──────────────────────────────────────────────────────────
   const watchedTypeId = form.watch('operationTypeId');
   const watchedFoundCaseIds = form.watch('foundCaseIds');
+  const watchedFromStationId = form.watch('fromStationId');
 
   const selectedOpType = useMemo<DocumentOperationType | undefined>(
     () => preselectedType ?? operationTypes.find((t) => t.id === watchedTypeId),
@@ -71,6 +67,18 @@ export const useNewOperationForm = ({
 
   // Keep ref in sync so the resolver always uses the latest op type
   selectedOpTypeRef.current = selectedOpType;
+
+  const isRequisition = selectedOpType?.code === 'REQUISITION';
+
+  // ── Case fetching — filtered by source station when REQUISITION ───────────
+  const { reports: cases, isLoading: casesLoading } = useDocumentCases({
+    caseType: 'FOUND',
+    limit: 20,
+    ...(caseSearch && { search: caseSearch }),
+    // Only show documents currently at the selected source station for REQUISITION
+    ...(isRequisition && watchedFromStationId && { currentStationId: watchedFromStationId }),
+    v: 'custom:include(foundDocumentCase,document:include(type))',
+  });
 
   const operationTypeOptions = useMemo(
     () => operationTypes.map((t) => ({ value: t.id, label: t.name })),
@@ -95,11 +103,8 @@ export const useNewOperationForm = ({
   };
 
   const removeCase = (foundCaseId: string) => {
-    form.setValue(
-      'foundCaseIds',
-      watchedFoundCaseIds.filter((id) => id !== foundCaseId),
-      { shouldValidate: true },
-    );
+    const remaining = watchedFoundCaseIds.filter((id) => id !== foundCaseId);
+    form.setValue('foundCaseIds', remaining, { shouldValidate: true });
     setCaseLabels((prev) => {
       const next = { ...prev };
       delete next[foundCaseId];
@@ -115,6 +120,7 @@ export const useNewOperationForm = ({
         foundCaseIds: data.foundCaseIds,
         ...(data.stationId && { stationId: data.stationId }),
         ...(data.toStationId && { toStationId: data.toStationId }),
+        ...(data.fromStationId && { fromStationId: data.fromStationId }),
         notes: data.notes || undefined,
       });
       showNotification({
@@ -139,6 +145,7 @@ export const useNewOperationForm = ({
   return {
     form,
     selectedOpType,
+    isRequisition,
     opTypesLoading,
     operationTypeOptions,
     stationOptions,
@@ -152,6 +159,7 @@ export const useNewOperationForm = ({
     addCase,
     removeCase,
     watchedFoundCaseIds,
+    watchedFromStationId,
     // Submit
     handleSubmit: form.handleSubmit(onSubmit),
   };

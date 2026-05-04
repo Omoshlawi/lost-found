@@ -37,10 +37,19 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
     <Timeline active={operations.length - 1} bulletSize={28} lineWidth={2}>
       {operations.map((op) => {
         const iconName = OPERATION_ICON[op.operationType?.code ?? ''] ?? 'circle';
-        const stationLabel =
-          op.fromStation && op.toStation
-            ? `${op.fromStation.name} → ${op.toStation.name}`
-            : (op.station?.name ?? null);
+        const stationLabel = (() => {
+          const code = op.operationType?.code;
+          if (code === 'REQUISITION') {
+            const performer = op.station?.name;
+            const source = op.fromStation?.name;
+            if (performer && source) return `${performer} → requested from ${source}`;
+            if (source) return `Requested from: ${source}`;
+            return performer ?? null;
+          }
+          if (op.fromStation && op.toStation)
+            return `${op.fromStation.name} → ${op.toStation.name}`;
+          return op.station?.name ?? null;
+        })();
 
         return (
           <Timeline.Item

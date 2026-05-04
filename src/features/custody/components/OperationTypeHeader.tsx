@@ -45,6 +45,11 @@ export const OperationTypeHeader: React.FC<OperationTypeHeaderProps> = ({ opType
               Requires destination
             </Badge>
           )}
+          {opType.requiresSourceStation && (
+            <Badge size="xs" variant="light" color="civicBlue">
+              Requires source station
+            </Badge>
+          )}
           {opType.isFinalOperation && (
             <Badge size="xs" variant="light" color="red">
               Final operation
