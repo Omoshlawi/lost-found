@@ -36,6 +36,16 @@ export const useMyStations = (search: string = '', skip: boolean = false) => {
   return { stations: filtered, isLoading, error, mutate };
 };
 
+export const useMyStationOperations = (skip: boolean = false) => {
+  const { data, error, isLoading, mutate } = useSWR<
+    APIFetchResponse<{ results: MyStation[]; totalCount: number }>
+  >(skip ? null : constructUrl('/staff-station-operations/mine'));
+
+  const stations: MyStation[] = data?.data?.results ?? [];
+
+  return { stations, isLoading, error, mutate };
+};
+
 /**
  * Auto-selects the station when the user has exactly one assignment
  * and no station is currently active. Call once near the top of the

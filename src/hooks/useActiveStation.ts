@@ -23,14 +23,14 @@ export const useActiveStation = () => {
   const setStation = useCallback(
     async (id: string) => {
       await updateSessionStation(id);
-      await refetch();
+      refetch();
     },
-    [refetch],
+    [refetch]
   );
 
   const clearStation = useCallback(async () => {
     await updateSessionStation(null);
-    await refetch();
+    refetch();
   }, [refetch]);
 
   return {

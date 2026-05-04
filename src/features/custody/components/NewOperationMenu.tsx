@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import {
   Badge,
   Box,
@@ -12,68 +12,9 @@ import {
   TextInput,
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
-import { useActiveStation } from '@/hooks/useActiveStation';
-import { useMyStations } from '@/hooks/useMyStations';
-import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
-import { useStationOperationTypes } from '../hooks/useCustody';
+import { useNewOperationMenu } from '../hooks/useNewOperationMenu';
 import { DocumentOperationType } from '../types';
 import { getOperationIcon } from './operationIcons';
-
-// ── Hook ──────────────────────────────────────────────────────────────────────
-
-const useNewOperationMenu = () => {
-  const {
-    activeStation,
-    stationId: activeStationId,
-    isLoading: stationLoading,
-  } = useActiveStation();
-  const { stationOpTypes, isLoading: opTypesLoading } = useStationOperationTypes(
-    activeStationId ?? undefined
-  );
-
-  // Admins see all enabled station operations; non-admins only their granted ones.
-  // Uses the same permission as the station selector page.
-  const { hasAccess: isAdmin, isLoading: adminCheckLoading } = useUserHasSystemAccess({
-    documentOperationType: ['manage'],
-  });
-  const { stations: myStations } = useMyStations('', isAdmin);
-
-  const [search, setSearch] = useState('');
-
-  const availableOpTypes = useMemo<DocumentOperationType[]>(() => {
-    const enabled = stationOpTypes.filter((s) => s.isEnabled && s.operationType);
-    if (isAdmin) {
-      return enabled.map((s) => s.operationType!);
-    }
-    const myStation = myStations.find((s) => s.id === activeStationId);
-    const grantedIds = new Set((myStation?.operations ?? []).map((op) => op.id));
-    return enabled.filter((s) => grantedIds.has(s.operationType!.id)).map((s) => s.operationType!);
-  }, [isAdmin, stationOpTypes, myStations, activeStationId]);
-
-  const filteredOpTypes = useMemo<DocumentOperationType[]>(() => {
-    if (!search.trim()) {
-      return availableOpTypes;
-    }
-    const q = search.toLowerCase();
-    return availableOpTypes.filter(
-      (t) => t.name.toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q)
-    );
-  }, [availableOpTypes, search]);
-
-  return {
-    activeStation,
-    activeStationId,
-    isLoading: stationLoading || opTypesLoading || adminCheckLoading,
-    availableOpTypes,
-    standardOpTypes: filteredOpTypes.filter((t) => !t.isHighPrivilege),
-    privilegedOpTypes: filteredOpTypes.filter((t) => t.isHighPrivilege),
-    filteredOpTypes,
-    search,
-    setSearch,
-  };
-};
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 interface NewOperationMenuProps {
   onSelect: (opType: DocumentOperationType) => void;

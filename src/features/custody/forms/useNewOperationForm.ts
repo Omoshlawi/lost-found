@@ -4,7 +4,8 @@ import { Resolver, SubmitHandler, useForm } from 'react-hook-form';
 import { showNotification } from '@mantine/notifications';
 import { useDocumentCases } from '@/features/cases/hooks';
 import { handleApiErrors } from '@/lib/api';
-import { createOperation, useDocumentOperationTypes } from '../hooks/useCustody';
+import { useActiveStation } from '@/hooks/useActiveStation';
+import { createOperation, useAllowedOperations } from '../hooks/useCustody';
 import { usePickupStations } from '../hooks/usePickupStations';
 import { DocumentOperationType } from '../types';
 import { makeNewOperationSchema, NewOperationFormData } from '../utils/validation';
@@ -22,6 +23,8 @@ export const useNewOperationForm = ({
   onClose,
   onSuccess,
 }: UseNewOperationFormOptions) => {
+  const { stationId: activeStationId } = useActiveStation();
+
   // ── Case label tracking (pills display after search clears) ─────────────────
   const [caseLabels, setCaseLabels] = useState<Record<string, string>>({});
   const [caseSearch, setCaseSearch] = useState('');
@@ -42,7 +45,7 @@ export const useNewOperationForm = ({
     defaultValues: {
       operationTypeId: preselectedType?.id ?? '',
       foundCaseIds: [],
-      stationId: defaultStationId ?? null,
+      stationId: defaultStationId ?? activeStationId ?? null,
       toStationId: null,
       fromStationId: null,
       notes: '',
@@ -52,7 +55,9 @@ export const useNewOperationForm = ({
   });
 
   // ── Static data fetching (no dependencies) ────────────────────────────────
-  const { operationTypes, isLoading: opTypesLoading } = useDocumentOperationTypes({ limit: 50 });
+  const { allowedOperations, isLoading: opTypesLoading } = useAllowedOperations(
+    activeStationId || defaultStationId
+  );
   const { stations } = usePickupStations();
 
   // ── Derived state ──────────────────────────────────────────────────────────
@@ -61,8 +66,8 @@ export const useNewOperationForm = ({
   const watchedFromStationId = form.watch('fromStationId');
 
   const selectedOpType = useMemo<DocumentOperationType | undefined>(
-    () => preselectedType ?? operationTypes.find((t) => t.id === watchedTypeId),
-    [preselectedType, operationTypes, watchedTypeId],
+    () => preselectedType ?? allowedOperations.find((t) => t.id === watchedTypeId),
+    [preselectedType, allowedOperations, watchedTypeId]
   );
 
   // Keep ref in sync so the resolver always uses the latest op type
@@ -81,18 +86,18 @@ export const useNewOperationForm = ({
   });
 
   const operationTypeOptions = useMemo(
-    () => operationTypes.map((t) => ({ value: t.id, label: t.name })),
-    [operationTypes],
+    () => allowedOperations.map((t) => ({ value: t.id, label: t.name })),
+    [allowedOperations]
   );
 
   const stationOptions = useMemo(
     () => stations.map((s) => ({ value: s.id, label: `${s.name} (${s.code})` })),
-    [stations],
+    [stations]
   );
 
   const availableCases = useMemo(
     () => cases.filter((c) => !watchedFoundCaseIds.includes(c.foundDocumentCase?.id ?? '')),
-    [cases, watchedFoundCaseIds],
+    [cases, watchedFoundCaseIds]
   );
 
   // ── Case selection helpers ─────────────────────────────────────────────────
@@ -136,7 +141,7 @@ export const useNewOperationForm = ({
         form.setError('root', { message: e.detail });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof NewOperationFormData, { message: String(val) }),
+          form.setError(key as keyof NewOperationFormData, { message: String(val) })
         );
       }
     }

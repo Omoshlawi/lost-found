@@ -1,9 +1,9 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Group, Loader, Text, Tooltip, UnstyledButton } from '@mantine/core';
 import { TablerIcon } from '@/components';
-import { useMyStations } from '@/hooks/useMyStations';
 import { useActiveStation } from '@/hooks/useActiveStation';
+import { useMyStations } from '@/hooks/useMyStations';
 
 /**
  * Displayed in the app header next to the logo.
@@ -18,6 +18,10 @@ const StationIndicator: React.FC = () => {
   const navigate = useNavigate();
   const { stations, isLoading: grantsLoading } = useMyStations();
   const { activeStation, isLoading: stationLoading } = useActiveStation();
+  const { pathname, search, hash } = useLocation();
+  const callBackUrl = useMemo(() => {
+    return encodeURIComponent(`${pathname}${search}${hash}`);
+  }, [pathname, search, hash]);
 
   const isLoading = grantsLoading || stationLoading;
 
@@ -29,9 +33,7 @@ const StationIndicator: React.FC = () => {
     ? 'var(--mantine-color-civicBlue-6)'
     : 'var(--mantine-color-yellow-6)';
 
-  const dotColor = activeStation
-    ? 'var(--mantine-color-teal-5)'
-    : 'var(--mantine-color-yellow-5)';
+  const dotColor = activeStation ? 'var(--mantine-color-teal-5)' : 'var(--mantine-color-yellow-5)';
 
   const tooltipLabel = activeStation ? activeStation.name : 'Select a station';
 
@@ -40,7 +42,7 @@ const StationIndicator: React.FC = () => {
       {/* ── Desktop: full chip with name ── */}
       <UnstyledButton
         visibleFrom="sm"
-        onClick={() => navigate('/select-station')}
+        onClick={() => navigate(`/select-station?callBackUrl=${callBackUrl}`)}
         style={{ display: 'flex', alignItems: 'center' }}
       >
         <Group gap={6} align="center">
@@ -71,7 +73,7 @@ const StationIndicator: React.FC = () => {
       <Tooltip label={tooltipLabel} position="bottom" withArrow hiddenFrom="sm">
         <UnstyledButton
           hiddenFrom="sm"
-          onClick={() => navigate('/select-station')}
+          onClick={() => navigate(`/select-station?callBackUrl=${callBackUrl}`)}
           style={{ display: 'flex', alignItems: 'center', padding: 4 }}
           aria-label={tooltipLabel}
         >
