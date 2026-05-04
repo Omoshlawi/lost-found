@@ -31,7 +31,7 @@ const SelectableStationTile: FC<SelectableStationTileProps> = ({ station, value,
       <Box
         style={{
           border: `1px solid ${isSelected ? 'var(--mantine-color-civicBlue-6)' : defaultBorder}`,
-          borderLeft: `3px solid ${isSelected ? 'var(--mantine-color-civicBlue-6)' : 'transparent'}`,
+          borderLeft: `8px solid ${isSelected ? 'var(--mantine-color-civicBlue-6)' : defaultBorder}`,
           padding: 'var(--mantine-spacing-sm) var(--mantine-spacing-md)',
           backgroundColor: 'var(--mantine-color-body)',
           transition: 'border-color 150ms ease',
