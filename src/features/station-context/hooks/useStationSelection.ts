@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { mutate } from 'swr';
-import { usePickupStations } from '@/features/custody/hooks/usePickupStations';
-import { Station } from '@/features/custody/types';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { useMyStations } from '@/hooks/useMyStations';
 import {
@@ -39,12 +37,8 @@ export const useStationSelection = () => {
   const { hasAccess: isAdmin, isLoading: loadingPermisionCheck } = useUserHasSystemAccess({
     documentOperationType: ['manage'],
   });
-  const { stations: myStations, isLoading: myLoading } = useMyStations(search, isAdmin);
-  const { stations: allStations, isLoading: allLoading } = usePickupStations({ search }, !isAdmin);
-  // Only fetch all stations once we know the user has no grants (admin path)
-  const isLoading = myLoading || allLoading || loadingPermisionCheck;
-
-  const stations: SelectableStation[] = isAdmin ? allStations.map(toSelectable) : myStations;
+  const { stations, isLoading: loadingStations } = useMyStations(search);
+  const isLoading = loadingStations || loadingPermisionCheck;
 
   const { stationId, setStation } = useActiveStation();
   // Pre-select the currently active station when revisiting the page mid-session

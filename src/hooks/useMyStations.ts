@@ -12,12 +12,12 @@ export interface MyStation {
   operations: { id: string; code: string; name: string }[];
 }
 
-export const useMyStations = (search: string = '', skip: boolean = false) => {
-  const { data, error, isLoading, mutate } = useSWR<
-    APIFetchResponse<{ results: MyStation[]; totalCount: number }>
-  >(skip ? null : constructUrl('/staff-station-operations/mine', { search }));
+export const useMyStations = (search: string = '') => {
+  const { data, error, isLoading, mutate } = useSWR<APIFetchResponse<MyStation[]>>(
+    constructUrl('/pickup-stations/assigned', { search })
+  );
 
-  const stations: MyStation[] = data?.data?.results ?? [];
+  const stations: MyStation[] = data?.data ?? [];
 
   const filtered = useMemo(() => {
     return stations.filter((s) => {
@@ -34,16 +34,6 @@ export const useMyStations = (search: string = '', skip: boolean = false) => {
     });
   }, [search, stations]);
   return { stations: filtered, isLoading, error, mutate };
-};
-
-export const useMyStationOperations = (skip: boolean = false) => {
-  const { data, error, isLoading, mutate } = useSWR<
-    APIFetchResponse<{ results: MyStation[]; totalCount: number }>
-  >(skip ? null : constructUrl('/staff-station-operations/mine'));
-
-  const stations: MyStation[] = data?.data?.results ?? [];
-
-  return { stations, isLoading, error, mutate };
 };
 
 /**
