@@ -317,10 +317,9 @@ export const revokeStaffStationOperation = async (id: string) => {
 
 // ── Allowed Operations ────────────────────────────────────────────────────────
 
-export const useAllowedOperations = (stationId?: string, userId?: string) => {
+export const useAllowedOperations = (stationId: string | undefined) => {
   const url = constructUrl('/document-custody/allowed-operations', {
     stationId,
-    ...(userId && { userId }),
   });
   const {
     data,

@@ -10,23 +10,6 @@ import {
 } from '@/hooks/usePreferredStation';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 
-export interface SelectableStation {
-  id: string;
-  code: string;
-  name: string;
-  level1: string;
-  level2?: string | null;
-  operations: { id: string; code: string; name: string }[];
-}
-
-const toSelectable = (s: Station): SelectableStation => ({
-  id: s.id,
-  code: s.code,
-  name: s.name,
-  level1: s.level1,
-  level2: s.level2,
-  operations: [],
-});
 
 export const useStationSelection = () => {
   const navigate = useNavigate();
