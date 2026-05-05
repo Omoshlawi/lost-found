@@ -15,11 +15,13 @@ import {
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { useDocumentCases } from '@/features/cases/hooks';
+import { useActiveStation } from '@/hooks/useActiveStation';
 import { handleApiErrors } from '@/lib/api';
 import { addOperationItem } from '../hooks/useCustody';
+import { DocumentOperation, DocumentOperationTypeCode } from '../types';
 
 interface AddItemsFormProps {
-  operationId: string;
+  operation: DocumentOperation;
   /** IDs already on the operation — excluded from search results */
   existingFoundCaseIds: string[];
   onClose: () => void;
@@ -27,7 +29,7 @@ interface AddItemsFormProps {
 }
 
 const AddItemsForm: React.FC<AddItemsFormProps> = ({
-  operationId,
+  operation,
   existingFoundCaseIds,
   onClose,
   onSuccess,
@@ -37,6 +39,7 @@ const AddItemsForm: React.FC<AddItemsFormProps> = ({
   const [caseSearch, setCaseSearch] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { stationId, isLoading: stationIsLoading } = useActiveStation();
 
   const combobox = useCombobox({ onDropdownClose: () => combobox.resetSelectedOption() });
 
@@ -45,6 +48,10 @@ const AddItemsForm: React.FC<AddItemsFormProps> = ({
     limit: 20,
     ...(caseSearch && { search: caseSearch }),
     v: 'custom:include(foundDocumentCase,document:include(type))',
+    currentStationId:
+      operation.operationType?.code === DocumentOperationTypeCode.REQUISITION
+        ? stationId
+        : undefined,
   });
 
   const excludedIds = new Set([...existingFoundCaseIds, ...selectedCaseIds]);
@@ -67,12 +74,14 @@ const AddItemsForm: React.FC<AddItemsFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (selectedCaseIds.length === 0) return;
+    if (selectedCaseIds.length === 0) {
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
       for (const foundCaseId of selectedCaseIds) {
-        await addOperationItem(operationId, foundCaseId);
+        await addOperationItem(operation.id, foundCaseId);
       }
       showNotification({
         title: 'Documents added',
@@ -137,7 +146,7 @@ const AddItemsForm: React.FC<AddItemsFormProps> = ({
 
               <Combobox.Dropdown>
                 <Combobox.Options>
-                  {casesLoading ? (
+                  {casesLoading || stationIsLoading ? (
                     <Combobox.Empty>Searching…</Combobox.Empty>
                   ) : availableCases.length === 0 ? (
                     <Combobox.Empty>No matching cases found</Combobox.Empty>
@@ -164,11 +173,7 @@ const AddItemsForm: React.FC<AddItemsFormProps> = ({
           </Input.Wrapper>
 
           {error && (
-            <Alert
-              variant="light"
-              color="red"
-              icon={<TablerIcon name="alertTriangle" size={16} />}
-            >
+            <Alert variant="light" color="red" icon={<TablerIcon name="alertTriangle" size={16} />}>
               {error}
             </Alert>
           )}

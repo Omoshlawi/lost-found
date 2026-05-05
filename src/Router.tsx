@@ -162,7 +162,7 @@ const router = createBrowserRouter([
             ],
           },
           { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
-          { path: 'pickup-stations', element: <PickupStationsPage /> },
+          { path: 'stations', element: <PickupStationsPage /> },
           { path: 'staff-station-operations', element: <StaffStationOperationsPage /> },
           { path: 'components', element: <UiComponents /> },
           {

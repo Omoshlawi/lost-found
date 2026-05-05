@@ -47,7 +47,7 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
     const existingIds = operation.items?.map((i) => i.foundCaseId) ?? [];
     const close = launchWorkspace(
       <AddItemsForm
-        operationId={operation.id}
+        operation={operation}
         existingFoundCaseIds={existingIds}
         onClose={() => close()}
         onSuccess={onMutate}

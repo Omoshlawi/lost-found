@@ -247,7 +247,7 @@ export const deleteDocumentOperationType = async (id: string) => {
 // ── Station Operation Types ───────────────────────────────────────────────────
 
 export const useStationOperationTypes = (stationId?: string) => {
-  const url = constructUrl(`/pickup-stations/${stationId}/operation-types`, { limit: 50 });
+  const url = constructUrl(`/stations/${stationId}/operation-types`, { limit: 50 });
   const {
     data,
     error,
@@ -268,13 +268,13 @@ export const updateStationOperationType = async (
   payload: { isEnabled: boolean }
 ) => {
   const result = await apiFetch<StationOperationType>(
-    `/pickup-stations/${stationId}/operation-types/${id}`,
+    `/stations/${stationId}/operation-types/${id}`,
     {
       method: 'PATCH',
       data: payload,
     }
   );
-  mutate(`/pickup-stations/${stationId}/operation-types`);
+  mutate(`/stations/${stationId}/operation-types`);
   return result.data;
 };
 

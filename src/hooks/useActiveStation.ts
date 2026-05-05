@@ -16,7 +16,7 @@ export const useActiveStation = () => {
   const sessionStationId: string | null = (sessionData?.session as any)?.stationId ?? null;
 
   const { data: stationData, isLoading: stationLoading } = useSWR<APIFetchResponse<ActiveStation>>(
-    sessionStationId ? `/pickup-stations/${sessionStationId}` : null
+    sessionStationId ? `/stations/${sessionStationId}` : null
   );
   const activeStation: ActiveStation | null = stationData?.data ?? null;
 
@@ -48,7 +48,7 @@ export const useActiveStation = () => {
  */
 export const fetchStationById = async (stationId: string): Promise<ActiveStation | null> => {
   try {
-    const res = await apiFetch<ActiveStation>(`/pickup-stations/${stationId}`);
+    const res = await apiFetch<ActiveStation>(`/stations/${stationId}`);
     return res.data ?? null;
   } catch {
     return null;

@@ -7,7 +7,7 @@ import { useActiveStation } from './useActiveStation';
 export const useMyStations = (search: string = '') => {
   const { data, error, isLoading, mutate } = useSWR<
     APIFetchResponse<{ results: Station[]; totalCount: number }>
-  >(constructUrl('/pickup-stations/assigned', { search }));
+  >(constructUrl('/stations/assigned', { search }));
 
   const stations = data?.data?.results ?? [];
 

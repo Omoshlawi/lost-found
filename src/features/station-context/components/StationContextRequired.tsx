@@ -11,7 +11,7 @@ import { authClient } from '@/lib/api';
  * Ensures the session has a station the user may operate from.
  * Staff with grants: station must appear in `/staff-station-operations/mine`.
  * Users with `documentOperationType: manage` may check in to any station (same rule as
- * {@link StationSelectionPage}); session `stationId` is validated via `/pickup-stations/:id`.
+ * {@link StationSelectionPage}); session `stationId` is validated via `/stations/:id`.
  *
  * Saved preference (`preferred.station.id`) is applied into the session on load: staff via
  * the mine list branch; manage users who picked a station outside their grants via PATCH here.

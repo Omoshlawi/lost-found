@@ -30,11 +30,23 @@ export enum DocumentOperationItemStatus {
   SKIPPED = 'SKIPPED',
 }
 
+export enum DocumentOperationTypeCode {
+  RECEIPT = 'RECEIPT',
+  TRANSFER_OUT = 'TRANSFER_OUT',
+  TRANSFER_IN = 'TRANSFER_IN',
+  REQUISITION = 'REQUISITION',
+  HANDOVER = 'HANDOVER',
+  DISPOSAL = 'DISPOSAL',
+  RETURN = 'RETURN',
+  CONDITION_UPDATE = 'CONDITION_UPDATE',
+  AUDIT = 'AUDIT',
+}
+
 // ── Core types ────────────────────────────────────────────────────────────────
 
 export interface DocumentOperationType {
   id: string;
-  code: string;
+  code: DocumentOperationTypeCode;
   prefix: string;
   name: string;
   description?: string | null;

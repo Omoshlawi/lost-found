@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { useDebouncedValue } from '@mantine/hooks';
-import { APIFetchResponse, constructUrl, PaginatedData } from '@/lib/api';
 import { Station } from '@/features/custody/types';
+import { APIFetchResponse, constructUrl, PaginatedData } from '@/lib/api';
 
 export const useSearchStation = () => {
   const [search, setSearch] = useState<Record<string, any>>();
   const [debounced] = useDebouncedValue(search, 500);
-  const url = constructUrl('/pickup-stations', { limit: 20, ...debounced });
+  const url = constructUrl('/stations', { limit: 20, ...debounced });
   const { data, error, isLoading } = useSWR<APIFetchResponse<PaginatedData<Station>>>(
     debounced ? url : undefined
   );
