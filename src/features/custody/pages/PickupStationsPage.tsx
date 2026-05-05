@@ -1,15 +1,31 @@
 import React, { useMemo } from 'react';
 import { ColumnDef, Row } from '@tanstack/react-table';
-import { ActionIcon, Badge, Stack, Text } from '@mantine/core';
+import { Group, TextInput, ActionIcon, Badge, Stack, Text, Select } from '@mantine/core';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
+import { StationOperationsPanel } from '../components';
 import { usePickupStations } from '../hooks/usePickupStations';
 import { Station } from '../types';
-import { StationOperationsPanel } from '../components';
 
 const PickupStationsPage: React.FC = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const { stations, totalCount, isLoading, error } = usePickupStations({ page, limit: pageSize });
+  const {
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    search,
+    searchInput,
+    setSearchInput,
+    status,
+    setStatus,
+  } = useTableUrlFilters();
+  const { stations, totalCount, isLoading, error } = usePickupStations({
+    page,
+    limit: pageSize,
+    search,
+    includeVoided: status === 'inactive' || status === 'all',
+  });
 
   const columns = useMemo<ColumnDef<Station>[]>(
     () => [
@@ -33,7 +49,9 @@ const PickupStationsPage: React.FC = () => {
         header: 'Code',
         accessorKey: 'code',
         cell: ({ getValue }) => (
-          <Text size="sm" ff="monospace" fw={600}>{getValue() as string}</Text>
+          <Text size="sm" ff="monospace" fw={600}>
+            {getValue() as string}
+          </Text>
         ),
       },
       {
@@ -74,7 +92,7 @@ const PickupStationsPage: React.FC = () => {
   return (
     <Stack gap="md">
       <DashboardPageHeader
-        title="Pickup Stations"
+        title="Stations"
         subTitle="Configure which operations are available at each station"
         icon="buildingStore"
       />
@@ -83,8 +101,37 @@ const PickupStationsPage: React.FC = () => {
         isLoading={isLoading}
         error={error}
         columns={columns}
-        renderExpandedRow={(row: Row<Station>) => (
-          <StationOperationsPanel station={row.original} />
+        renderExpandedRow={(row: Row<Station>) => <StationOperationsPanel station={row.original} />}
+        renderActions={() => (
+          <Group gap="xs">
+            <TextInput
+              placeholder="Search stations..."
+              size="xs"
+              leftSection={<IconSearch size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.currentTarget.value)}
+              rightSection={
+                searchInput ? (
+                  <ActionIcon size="xs" variant="transparent" onClick={() => setSearchInput('')}>
+                    <IconX size={12} />
+                  </ActionIcon>
+                ) : null
+              }
+            />
+            <Select
+              size="xs"
+              placeholder="All Status"
+              value={status}
+              onChange={setStatus}
+              data={[
+                { label: 'Status: Active', value: '' },
+                { label: 'Status: All', value: 'all' },
+                { label: 'Status: Inactive', value: 'inactive' },
+              ]}
+              w={120}
+              clearable
+            />
+          </Group>
         )}
         pagination={{
           totalCount,

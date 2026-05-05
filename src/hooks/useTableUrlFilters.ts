@@ -52,17 +52,22 @@ export function useTableUrlFilters(options: UseTableUrlFiltersOptions = {}) {
     );
   }, [debouncedSearch]);
 
-  const setStatus = (value: string | null) => {
+  const setFilter = (key: string, value: string | null) => {
     setSearchParams(
       (prev) => {
-        if (value) { prev.set('status', value); }
-        else { prev.delete('status'); }
+        if (value) {
+          prev.set(key, value);
+        } else {
+          prev.delete(key);
+        }
         prev.set('page', '1');
         return prev;
       },
       { replace: true }
     );
   };
+
+  const setStatus = (value: string | null) => setFilter('status', value);
 
   const setPage = (p: number) => {
     setSearchParams(
@@ -96,7 +101,10 @@ export function useTableUrlFilters(options: UseTableUrlFiltersOptions = {}) {
     searchInput,
     /** Number of records per page, validated against allowed options. */
     pageSize,
+    /** The underlying search params object for custom filters. */
+    searchParams,
     setSearchInput,
+    setFilter,
     setStatus,
     setPage,
     setPageSize,

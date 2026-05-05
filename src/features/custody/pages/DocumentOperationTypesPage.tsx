@@ -1,14 +1,43 @@
 import React, { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge, Stack, Text } from '@mantine/core';
+import { Badge, Group, Stack, Text, TextInput, Select, ActionIcon } from '@mantine/core';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { useDocumentOperationTypes } from '../hooks/useCustody';
 import { DocumentOperationType } from '../types';
 
 const DocumentOperationTypesPage: React.FC = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const { operationTypes, totalCount, isLoading } = useDocumentOperationTypes({ page, limit: pageSize });
+  const {
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    search,
+    searchInput,
+    setSearchInput,
+    status,
+    setStatus,
+    searchParams,
+    setFilter,
+  } = useTableUrlFilters();
+
+  const getBoolFilter = (key: string) => {
+    const val = searchParams.get(key);
+    return val === 'true' ? 'true' : val === 'false' ? 'false' : '';
+  };
+
+  const { operationTypes, totalCount, isLoading } = useDocumentOperationTypes({
+    page,
+    limit: pageSize,
+    search,
+    includeVoided: status === 'inactive' || status === 'all',
+    isHighPrivilege: getBoolFilter('isHighPrivilege') === 'true' ? true : getBoolFilter('isHighPrivilege') === 'false' ? false : undefined,
+    requiresDestinationStation: getBoolFilter('requiresDestinationStation') === 'true' ? true : getBoolFilter('requiresDestinationStation') === 'false' ? false : undefined,
+    requiresSourceStation: getBoolFilter('requiresSourceStation') === 'true' ? true : getBoolFilter('requiresSourceStation') === 'false' ? false : undefined,
+    requiresNotes: getBoolFilter('requiresNotes') === 'true' ? true : getBoolFilter('requiresNotes') === 'false' ? false : undefined,
+    isFinalOperation: getBoolFilter('isFinalOperation') === 'true' ? true : getBoolFilter('isFinalOperation') === 'false' ? false : undefined,
+  });
 
   const columns = useMemo<ColumnDef<DocumentOperationType>[]>(
     () => [
@@ -69,6 +98,97 @@ const DocumentOperationTypesPage: React.FC = () => {
         data={operationTypes}
         isLoading={isLoading}
         columns={columns}
+        renderActions={() => (
+          <Group gap="xs">
+            <TextInput
+              placeholder="Search operations..."
+              size="xs"
+              leftSection={<IconSearch size={14} />}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.currentTarget.value)}
+              rightSection={
+                searchInput ? (
+                  <ActionIcon size="xs" variant="transparent" onClick={() => setSearchInput('')}>
+                    <IconX size={12} />
+                  </ActionIcon>
+                ) : null
+              }
+            />
+            <Select
+              size="xs"
+              placeholder="Status"
+              value={status}
+              onChange={setStatus}
+              data={[
+                { label: 'Status: Active', value: '' },
+                { label: 'Status: All', value: 'all' },
+                { label: 'Status: Inactive', value: 'inactive' },
+              ]}
+              w={110}
+              clearable
+            />
+            <Select
+              size="xs"
+              placeholder="Privilege"
+              value={getBoolFilter('isHighPrivilege')}
+              onChange={(v) => setFilter('isHighPrivilege', v)}
+              data={[
+                { label: 'Privilege: All', value: '' },
+                { label: 'High', value: 'true' },
+                { label: 'Standard', value: 'false' },
+              ]}
+              w={110}
+            />
+            <Select
+              size="xs"
+              placeholder="Source"
+              value={getBoolFilter('requiresSourceStation')}
+              onChange={(v) => setFilter('requiresSourceStation', v)}
+              data={[
+                { label: 'Source: All', value: '' },
+                { label: 'Required', value: 'true' },
+                { label: 'Not Req.', value: 'false' },
+              ]}
+              w={110}
+            />
+            <Select
+              size="xs"
+              placeholder="Destination"
+              value={getBoolFilter('requiresDestinationStation')}
+              onChange={(v) => setFilter('requiresDestinationStation', v)}
+              data={[
+                { label: 'Dest: All', value: '' },
+                { label: 'Required', value: 'true' },
+                { label: 'Not Req.', value: 'false' },
+              ]}
+              w={110}
+            />
+            <Select
+              size="xs"
+              placeholder="Notes"
+              value={getBoolFilter('requiresNotes')}
+              onChange={(v) => setFilter('requiresNotes', v)}
+              data={[
+                { label: 'Notes: All', value: '' },
+                { label: 'Required', value: 'true' },
+                { label: 'Not Req.', value: 'false' },
+              ]}
+              w={110}
+            />
+            <Select
+              size="xs"
+              placeholder="Final"
+              value={getBoolFilter('isFinalOperation')}
+              onChange={(v) => setFilter('isFinalOperation', v)}
+              data={[
+                { label: 'Final: All', value: '' },
+                { label: 'Yes', value: 'true' },
+                { label: 'No', value: 'false' },
+              ]}
+              w={110}
+            />
+          </Group>
+        )}
         pagination={{
           totalCount,
           currentPage: page,

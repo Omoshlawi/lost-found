@@ -179,8 +179,8 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
 
           {selectedStationId && !isLoadingOps && enabledOperationTypeOptions.length === 0 && (
             <Text size="xs" c="dimmed">
-              No operation types are enabled at this station. Configure them on the Pickup Stations
-              page first.
+              No operation types are enabled at this station. Configure them on the Stations page
+              first.
             </Text>
           )}
         </Stack>
