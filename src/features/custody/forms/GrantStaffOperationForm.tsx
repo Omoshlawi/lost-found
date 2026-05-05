@@ -31,7 +31,7 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
   // Watch stationId to drive operation type options
   const selectedStationId = form.watch('stationId');
   const { stationOpTypes, isLoading: isLoadingOps } = useStationOperationTypes(
-    selectedStationId || undefined
+    selectedStationId || ''
   );
 
   const enabledOperationTypeOptions = stationOpTypes
@@ -166,7 +166,9 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
                 value={field.value}
                 onChange={field.onChange}
                 error={fieldState.error?.message}
-                disabled={!selectedStationId || isLoadingOps || enabledOperationTypeOptions.length === 0}
+                disabled={
+                  !selectedStationId || isLoadingOps || enabledOperationTypeOptions.length === 0
+                }
                 rightSection={isLoadingOps ? <Loader size="xs" /> : undefined}
                 required
                 searchable
@@ -177,7 +179,8 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
 
           {selectedStationId && !isLoadingOps && enabledOperationTypeOptions.length === 0 && (
             <Text size="xs" c="dimmed">
-              No operation types are enabled at this station. Configure them on the Pickup Stations page first.
+              No operation types are enabled at this station. Configure them on the Pickup Stations
+              page first.
             </Text>
           )}
         </Stack>

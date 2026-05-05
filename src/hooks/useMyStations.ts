@@ -1,17 +1,28 @@
 import { useEffect } from 'react';
 import useSWR from 'swr';
 import { Station } from '@/features/custody/types';
-import { APIFetchResponse, constructUrl } from '@/lib/api';
+import { APIFetchResponse, authClient, constructUrl } from '@/lib/api';
 import { useActiveStation } from './useActiveStation';
 
 export const useMyStations = (search: string = '') => {
+  const {
+    data: session,
+    isPending: sessionIsPending,
+    error: sessionError,
+  } = authClient.useSession();
+  const userId = session?.user?.id;
   const { data, error, isLoading, mutate } = useSWR<
     APIFetchResponse<{ results: Station[]; totalCount: number }>
-  >(constructUrl('/stations/assigned', { search }));
+  >(constructUrl('/stations/assigned', { search, userId }));
 
   const stations = data?.data?.results ?? [];
 
-  return { stations, isLoading, error, mutate };
+  return {
+    stations,
+    isLoading: sessionIsPending || isLoading,
+    error: sessionError || error,
+    mutate,
+  };
 };
 
 /**

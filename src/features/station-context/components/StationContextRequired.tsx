@@ -9,7 +9,7 @@ import { authClient } from '@/lib/api';
 
 /**
  * Ensures the session has a station the user may operate from.
- * Staff with grants: station must appear in `/staff-station-operations/mine`.
+ * Staff with grants: station must appear in `/operation-scope/mine`.
  * Users with `documentOperationType: manage` may check in to any station (same rule as
  * {@link StationSelectionPage}); session `stationId` is validated via `/stations/:id`.
  *

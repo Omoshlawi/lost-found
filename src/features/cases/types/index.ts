@@ -136,7 +136,6 @@ export interface Document {
   note?: string;
   issuer: string;
   fullName?: string;
-  fullName: string;
   surname: string;
   givenNames: string[];
   typeId: string;

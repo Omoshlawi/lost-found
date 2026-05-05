@@ -46,7 +46,7 @@ const navConfig: NavEntry[] = [
     items: [
       { icon: 'buildingWarehouse', label: 'Custody Operation', href: 'custody' },
       { icon: 'buildingStore', label: 'Pickup Stations', href: 'stations' },
-      { icon: 'userCog', label: 'Staff Operations Scope', href: 'staff-station-operations' },
+      { icon: 'userCog', label: 'Staff Operations Scope', href: 'operation-scope' },
       { icon: 'settingsAutomation', label: 'Operation Types', href: 'document-operation-types' },
     ],
   },

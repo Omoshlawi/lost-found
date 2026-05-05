@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useActiveStation } from '@/hooks/useActiveStation';
-import { useAllowedOperations } from '../hooks/useCustody';
-import { DocumentOperationType } from '../types';
+import { useStaffAllowedOperations } from './useCustody';
 
 export const useNewOperationMenu = () => {
   const {
@@ -10,30 +9,20 @@ export const useNewOperationMenu = () => {
     isLoading: stationLoading,
   } = useActiveStation();
 
-  const { allowedOperations, isLoading: opTypesLoading } = useAllowedOperations(
-    activeStationId ?? undefined
-  );
-
   const [search, setSearch] = useState('');
-
-  const filteredOpTypes = useMemo<DocumentOperationType[]>(() => {
-    if (!search.trim()) {
-      return allowedOperations;
-    }
-    const q = search.toLowerCase();
-    return allowedOperations.filter(
-      (t) => t.name.toLowerCase().includes(q) || (t.description ?? '').toLowerCase().includes(q)
-    );
-  }, [allowedOperations, search]);
+  const { operations, isLoading: opTypesLoading } = useStaffAllowedOperations(
+    activeStationId ?? '',
+    search
+  );
 
   return {
     activeStation,
     activeStationId,
     isLoading: stationLoading || opTypesLoading,
-    availableOpTypes: allowedOperations,
-    standardOpTypes: filteredOpTypes.filter((t) => !t.isHighPrivilege),
-    privilegedOpTypes: filteredOpTypes.filter((t) => t.isHighPrivilege),
-    filteredOpTypes,
+    availableOpTypes: operations,
+    standardOpTypes: operations.filter((t) => !t.isHighPrivilege),
+    privilegedOpTypes: operations.filter((t) => t.isHighPrivilege),
+    filteredOpTypes: operations,
     search,
     setSearch,
   };

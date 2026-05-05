@@ -3,11 +3,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form';
 import { showNotification } from '@mantine/notifications';
 import { useDocumentCases } from '@/features/cases/hooks';
-import { handleApiErrors } from '@/lib/api';
 import { useActiveStation } from '@/hooks/useActiveStation';
-import { createOperation, useAllowedOperations } from '../hooks/useCustody';
+import { authClient, handleApiErrors } from '@/lib/api';
+import { createOperation, useStaffAllowedOperations } from '../hooks/useCustody';
 import { usePickupStations } from '../hooks/usePickupStations';
-import { DocumentOperationType } from '../types';
+import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
 import { makeNewOperationSchema, NewOperationFormData } from '../utils/validation';
 
 interface UseNewOperationFormOptions {
@@ -24,6 +24,8 @@ export const useNewOperationForm = ({
   onSuccess,
 }: UseNewOperationFormOptions) => {
   const { stationId: activeStationId } = useActiveStation();
+  const { data: sessionData } = authClient.useSession();
+  const sessionUserId: string | null = (sessionData?.user as any)?.id ?? null;
 
   // ── Case label tracking (pills display after search clears) ─────────────────
   const [caseLabels, setCaseLabels] = useState<Record<string, string>>({});
@@ -37,7 +39,7 @@ export const useNewOperationForm = ({
       const schema = makeNewOperationSchema(selectedOpTypeRef.current);
       return zodResolver(schema)(data, context, options);
     },
-    [], // stable — reads opType at call-time via ref
+    [] // stable — reads opType at call-time via ref
   );
 
   // ── RHF form ──────────────────────────────────────────────────────────────
@@ -48,15 +50,18 @@ export const useNewOperationForm = ({
       stationId: defaultStationId ?? activeStationId ?? null,
       toStationId: null,
       fromStationId: null,
+      responsiblePersonId: sessionUserId ?? undefined,
       notes: '',
+      receiptSubmissionMethod: null,
+      receiptAreaValue: '',
     },
     resolver,
     mode: 'onTouched',
   });
 
   // ── Static data fetching (no dependencies) ────────────────────────────────
-  const { allowedOperations, isLoading: opTypesLoading } = useAllowedOperations(
-    activeStationId || defaultStationId
+  const { operations, isLoading: opTypesLoading } = useStaffAllowedOperations(
+    activeStationId ?? defaultStationId ?? ''
   );
   const { stations } = usePickupStations();
 
@@ -64,30 +69,45 @@ export const useNewOperationForm = ({
   const watchedTypeId = form.watch('operationTypeId');
   const watchedFoundCaseIds = form.watch('foundCaseIds');
   const watchedFromStationId = form.watch('fromStationId');
+  const watchedReceiptMethod = form.watch('receiptSubmissionMethod');
+  const watchedAreaValue = form.watch('receiptAreaValue');
 
   const selectedOpType = useMemo<DocumentOperationType | undefined>(
-    () => preselectedType ?? allowedOperations.find((t) => t.id === watchedTypeId),
-    [preselectedType, allowedOperations, watchedTypeId]
+    () => preselectedType ?? operations.find((s) => s.id === watchedTypeId),
+    [preselectedType, operations, watchedTypeId]
   );
 
   // Keep ref in sync so the resolver always uses the latest op type
   selectedOpTypeRef.current = selectedOpType;
 
-  const isRequisition = selectedOpType?.code === 'REQUISITION';
+  const isRequisition = selectedOpType?.code === DocumentOperationTypeCode.REQUISITION;
+  const isReceipt = selectedOpType?.code === DocumentOperationTypeCode.RECEIPT;
 
-  // ── Case fetching — filtered by source station when REQUISITION ───────────
+  // ── Case fetching — filtered based on operation type ──────────────────────
   const { reports: cases, isLoading: casesLoading } = useDocumentCases({
     caseType: 'FOUND',
     limit: 20,
     ...(caseSearch && { search: caseSearch }),
-    // Only show documents currently at the selected source station for REQUISITION
+    // REQUISITION: only show docs at the selected source station
     ...(isRequisition && watchedFromStationId && { currentStationId: watchedFromStationId }),
+    // RECEIPT DROPOFF: filter by submission method + pickup station
+    ...(isReceipt &&
+      watchedReceiptMethod === 'DROPOFF' && {
+        submissionMethod: 'DROPOFF',
+        ...(activeStationId && { pickupStationId: activeStationId }),
+      }),
+    // RECEIPT PICKUP: filter by submission method + collection area
+    ...(isReceipt &&
+      watchedReceiptMethod === 'PICKUP' && {
+        submissionMethod: 'PICKUP',
+        ...(watchedAreaValue && { collectionAreaValue: watchedAreaValue }),
+      }),
     v: 'custom:include(foundDocumentCase,document:include(type))',
   });
 
   const operationTypeOptions = useMemo(
-    () => allowedOperations.map((t) => ({ value: t.id, label: t.name })),
-    [allowedOperations]
+    () => operations.map((t) => ({ value: t.id, label: t.name })),
+    [operations]
   );
 
   const stationOptions = useMemo(
@@ -126,6 +146,7 @@ export const useNewOperationForm = ({
         ...(data.stationId && { stationId: data.stationId }),
         ...(data.toStationId && { toStationId: data.toStationId }),
         ...(data.fromStationId && { fromStationId: data.fromStationId }),
+        responsiblePersonId: data.responsiblePersonId ?? null,
         notes: data.notes || undefined,
       });
       showNotification({
@@ -151,6 +172,7 @@ export const useNewOperationForm = ({
     form,
     selectedOpType,
     isRequisition,
+    isReceipt,
     opTypesLoading,
     operationTypeOptions,
     stationOptions,
@@ -165,6 +187,8 @@ export const useNewOperationForm = ({
     removeCase,
     watchedFoundCaseIds,
     watchedFromStationId,
+    watchedReceiptMethod,
+    watchedAreaValue,
     // Submit
     handleSubmit: form.handleSubmit(onSubmit),
   };

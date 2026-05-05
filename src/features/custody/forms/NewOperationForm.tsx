@@ -6,13 +6,17 @@ import {
   Box,
   Button,
   Group,
+  Loader,
   ScrollArea,
+  SegmentedControl,
   Select,
   Stack,
   Text,
   Textarea,
+  TextInput,
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
+import { useSearchUser } from '@/hooks/usesearchUser';
 import { CaseComboboxPicker, OperationTypeHeader } from '../components';
 import { DocumentOperationType } from '../types';
 import { useNewOperationForm } from './useNewOperationForm';
@@ -34,6 +38,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
     form,
     selectedOpType,
     isRequisition,
+    isReceipt,
     operationTypeOptions,
     stationOptions,
     caseSearch,
@@ -45,10 +50,24 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
     removeCase,
     watchedFoundCaseIds,
     watchedFromStationId,
+    watchedReceiptMethod,
     handleSubmit,
   } = useNewOperationForm({ preselectedType, defaultStationId, onClose, onSuccess });
 
   const { isSubmitting, errors } = form.formState;
+
+  const userSearch = useSearchUser();
+  const [responsibleUserOption, setResponsibleUserOption] = React.useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+
+  const responsibleUserOptions = [
+    ...(responsibleUserOption ? [responsibleUserOption] : []),
+    ...userSearch.users
+      .filter((u) => u.id !== responsibleUserOption?.value)
+      .map((u) => ({ value: u.id, label: u.name ?? u.email })),
+  ];
 
   const caseOptions = availableCases.map((c) => ({
     foundCaseId: c.foundDocumentCase?.id ?? '',
@@ -132,6 +151,55 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               />
             )}
 
+            {/* RECEIPT: submission method toggle + area filter */}
+            {isReceipt && (
+              <Stack gap="xs">
+                <Text size="sm" fw={500}>
+                  Collection Method
+                </Text>
+                <Controller
+                  control={form.control}
+                  name="receiptSubmissionMethod"
+                  render={({ field }) => (
+                    <SegmentedControl
+                      data={[
+                        { label: 'Drop-off at Station', value: 'DROPOFF' },
+                        { label: 'Pickup at Address', value: 'PICKUP' },
+                      ]}
+                      value={field.value ?? ''}
+                      onChange={(v) => {
+                        field.onChange(v || null);
+                        form.setValue('foundCaseIds', []);
+                        form.setValue('receiptAreaValue', '');
+                      }}
+                    />
+                  )}
+                />
+                {watchedReceiptMethod === 'PICKUP' && (
+                  <Controller
+                    control={form.control}
+                    name="receiptAreaValue"
+                    render={({ field, fieldState }) => (
+                      <TextInput
+                        label="Collection Area"
+                        description="Filter by area (e.g. ward/neighbourhood). Matches the area level configured in system settings."
+                        placeholder="e.g. Westlands"
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        error={fieldState.error?.message}
+                        onBlur={() => form.setValue('foundCaseIds', [])}
+                      />
+                    )}
+                  />
+                )}
+                {watchedReceiptMethod === 'DROPOFF' && (
+                  <Text size="xs" c="dimmed">
+                    Showing drop-off cases assigned to your active station.
+                  </Text>
+                )}
+              </Stack>
+            )}
+
             {/* Document case multi-select */}
             <CaseComboboxPicker
               selectedIds={watchedFoundCaseIds}
@@ -143,7 +211,9 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               onSearchChange={setCaseSearch}
               onAdd={addCase}
               onRemove={removeCase}
-              disabled={isRequisition && !watchedFromStationId}
+              disabled={
+                (isRequisition && !watchedFromStationId) || (isReceipt && !watchedReceiptMethod)
+              }
             />
 
             {/* Destination station — TRANSFER_OUT (requiresDestinationStation) */}
@@ -212,6 +282,36 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                   error={fieldState.error?.message}
                   searchable
                   clearable
+                />
+              )}
+            />
+
+            {/* Responsible person */}
+            <Controller
+              control={form.control}
+              name="responsiblePersonId"
+              render={({ field, fieldState }) => (
+                <Select
+                  label="Responsible Person"
+                  description="Staff member physically executing this operation. Defaults to you."
+                  placeholder="Search by email…"
+                  data={responsibleUserOptions}
+                  value={field.value ?? null}
+                  onChange={(value, option) => {
+                    field.onChange(value ?? null);
+                    setResponsibleUserOption(value ? { value, label: option.label } : null);
+                  }}
+                  onSearchChange={(searchValue) =>
+                    userSearch.setFilters(
+                      searchValue ? { searchField: 'email', searchValue } : undefined
+                    )
+                  }
+                  filter={({ options }) => options}
+                  searchable
+                  clearable
+                  nothingFoundMessage={userSearch.isLoading ? 'Searching…' : 'No users found'}
+                  rightSection={userSearch.isLoading ? <Loader size="xs" /> : undefined}
+                  error={fieldState.error?.message}
                 />
               )}
             />

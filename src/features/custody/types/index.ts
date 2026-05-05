@@ -72,7 +72,7 @@ export interface StationOperationType {
   updatedAt: string;
 }
 
-export interface StaffStationOperation {
+export interface StaffOperationScope {
   id: string;
   userId: string;
   stationId: string;
@@ -80,7 +80,7 @@ export interface StaffStationOperation {
   grantedById: string;
   user?: { id: string; name: string };
   station?: { id: string; name: string; code: string };
-  operationType?: { id: string; code: string; name: string };
+  operationType?: DocumentOperationType;
   grantedBy?: { id: string; name: string };
   voided: boolean;
   voidedAt?: string | null;
@@ -143,6 +143,8 @@ export interface DocumentOperation {
   requestedByStation?: { id: string; name: string; code: string } | null;
   createdById: string;
   createdBy?: { id: string; name: string } | null;
+  responsiblePersonId?: string | null;
+  responsiblePerson?: { id: string; name: string } | null;
   notes?: string | null;
   completedAt?: string | null;
   items: DocumentOperationItem[];
@@ -159,6 +161,7 @@ export interface CreateOperationPayload {
   fromStationId?: string;
   toStationId?: string;
   requestedByStationId?: string;
+  responsiblePersonId?: string | null;
   notes?: string;
 }
 
@@ -166,6 +169,7 @@ export interface UpdateOperationPayload {
   stationId?: string | null;
   fromStationId?: string | null;
   toStationId?: string | null;
+  responsiblePersonId?: string | null;
   notes?: string | null;
 }
 
@@ -173,13 +177,13 @@ export interface UpdateOperationPayload {
 
 export type StationGroup = {
   stationId: string;
-  station?: StaffStationOperation['station'];
-  operations: StaffStationOperation[];
+  station?: StaffOperationScope['station'];
+  operations: StaffOperationScope[];
 };
 
 export type GroupedStaffGrant = {
   userId: string;
-  user?: StaffStationOperation['user'];
+  user?: StaffOperationScope['user'];
   stations: StationGroup[];
   totalOperations: number;
   latestGrantedAt: string;

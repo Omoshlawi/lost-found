@@ -90,7 +90,7 @@ const StationSelectionPage: React.FC = () => {
                   <SelectableStationTile
                     key={station.id}
                     station={station}
-                    value={selectedId}
+                    value={selectedId ?? undefined}
                     onChange={setSelectedId}
                   />
                 );

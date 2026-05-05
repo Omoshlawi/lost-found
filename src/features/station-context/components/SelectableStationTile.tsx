@@ -3,7 +3,6 @@ import {
   Badge,
   Box,
   Group,
-  Loader,
   Radio,
   Skeleton,
   Stack,
@@ -11,7 +10,7 @@ import {
   UnstyledButton,
   useComputedColorScheme,
 } from '@mantine/core';
-import { useAllowedOperations } from '@/features/custody/hooks/useCustody';
+import { useStaffAllowedOperations } from '@/features/custody/hooks/useCustody';
 import { Station } from '@/features/custody/types';
 
 type SelectableStationTileProps = {
@@ -22,7 +21,10 @@ type SelectableStationTileProps = {
 const SelectableStationTile: FC<SelectableStationTileProps> = ({ station, value, onChange }) => {
   const isSelected = station.id === value;
   const colorScheme = useComputedColorScheme();
-  const { allowedOperations, isLoading: opTypesLoading } = useAllowedOperations(station.id);
+  const { operations: allowedOperations, isLoading: opTypesLoading } = useStaffAllowedOperations(
+    station.id
+  );
+
   const defaultBorder =
     colorScheme === 'dark' ? 'var(--mantine-color-dark-4)' : 'var(--mantine-color-gray-3)';
 

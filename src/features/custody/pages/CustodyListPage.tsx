@@ -141,9 +141,10 @@ const CustodyListPage: React.FC = () => {
         ),
       },
       {
-        header: 'Created By',
-        id: 'createdBy',
-        cell: ({ row: { original } }) => original.createdBy?.name ?? '—',
+        header: 'Responsible',
+        id: 'responsiblePerson',
+        cell: ({ row: { original } }) =>
+          original.responsiblePerson?.name ?? original.createdBy?.name ?? '—',
       },
       {
         header: 'Date',

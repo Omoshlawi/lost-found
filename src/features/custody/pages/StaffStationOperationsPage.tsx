@@ -9,12 +9,12 @@ import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
 import { ExpandedGrantRow } from '../components';
 import GrantStaffOperationForm from '../forms/GrantStaffOperationForm';
-import { revokeStaffStationOperation, useStaffStationOperations } from '../hooks/useCustody';
-import { GroupedStaffGrant, StaffStationOperation } from '../types';
+import { revokeStaffStationOperation, useStaffOperationScope } from '../hooks/useCustody';
+import { GroupedStaffGrant, StaffOperationScope } from '../types';
 
 // ─── Grouping helper ──────────────────────────────────────────────────────────
 
-function groupByUser(grants: StaffStationOperation[]): GroupedStaffGrant[] {
+function groupByUser(grants: StaffOperationScope[]): GroupedStaffGrant[] {
   const map = new Map<string, GroupedStaffGrant>();
 
   for (const grant of grants) {
@@ -51,14 +51,14 @@ function groupByUser(grants: StaffStationOperation[]): GroupedStaffGrant[] {
 
 const StaffStationOperationsPage: React.FC = () => {
   const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const { grants, totalCount, isLoading, mutate, error } = useStaffStationOperations({
+  const { grants, totalCount, isLoading, mutate, error } = useStaffOperationScope({
     page,
     limit: pageSize,
   });
 
   const grouped = useMemo(() => groupByUser(grants), [grants]);
 
-  const handleRevoke = (grant: StaffStationOperation) => {
+  const handleRevoke = (grant: StaffOperationScope) => {
     modals.openConfirmModal({
       title: 'Revoke Operation Grant',
       children: (

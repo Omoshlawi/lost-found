@@ -31,9 +31,13 @@ export const makeNewOperationSchema = (opType?: {
       stationId: z.string().nullable().optional(),
       toStationId: z.string().nullable().optional(),
       fromStationId: z.string().nullable().optional(),
+      responsiblePersonId: z.string().nullable().optional(),
       notes: opType?.requiresNotes
         ? z.string().min(1, 'Notes are required for this operation type')
         : z.string().optional(),
+      // RECEIPT-specific filter fields (only used in the UI to populate foundCaseIds)
+      receiptSubmissionMethod: z.enum(['DROPOFF', 'PICKUP']).nullable().optional(),
+      receiptAreaValue: z.string().optional(),
     })
     .superRefine((data, ctx) => {
       if (opType?.requiresDestinationStation && !data.toStationId) {

@@ -1,9 +1,19 @@
-import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
+import { useMemo } from 'react';
+import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
+import {
+  apiFetch,
+  APIFetchResponse,
+  authClient,
+  constructUrl,
+  mutate,
+  PaginatedData,
+  useApi,
+} from '@/lib/api';
 import {
   CreateOperationPayload,
   DocumentOperation,
   DocumentOperationType,
-  StaffStationOperation,
+  StaffOperationScope,
   StationOperationType,
   UpdateOperationPayload,
 } from '../types';
@@ -246,14 +256,24 @@ export const deleteDocumentOperationType = async (id: string) => {
 
 // ── Station Operation Types ───────────────────────────────────────────────────
 
-export const useStationOperationTypes = (stationId?: string) => {
-  const url = constructUrl(`/stations/${stationId}/operation-types`, { limit: 50 });
+export const useStationOperationTypes = (
+  stationId: string,
+  params: Record<string, any> = {},
+  enabled: boolean = true
+) => {
+  const url = constructUrl(`/stations/${stationId}/operation-types`, {
+    limit: 50,
+    v: 'custom:include(operationType)',
+    ...params,
+  });
   const {
     data,
     error,
     isLoading,
     mutate: swrMutate,
-  } = useApi<APIFetchResponse<PaginatedData<StationOperationType>>>(stationId ? url : null);
+  } = useApi<APIFetchResponse<PaginatedData<StationOperationType>>>(
+    enabled && stationId ? url : null
+  );
   return {
     stationOpTypes: data?.data?.results ?? [],
     isLoading,
@@ -280,14 +300,17 @@ export const updateStationOperationType = async (
 
 // ── Staff Station Operations ──────────────────────────────────────────────────
 
-export const useStaffStationOperations = (params: Record<string, any> = {}) => {
-  const url = constructUrl('/staff-station-operations', params);
+export const useStaffOperationScope = (
+  params: Record<string, any> = {},
+  enabled: boolean = true
+) => {
+  const url = constructUrl('/operation-scope', params);
   const {
     data,
     error,
     isLoading,
     mutate: swrMutate,
-  } = useApi<APIFetchResponse<PaginatedData<StaffStationOperation>>>(url);
+  } = useApi<APIFetchResponse<PaginatedData<StaffOperationScope>>>(enabled ? url : null);
   return {
     grants: data?.data?.results ?? [],
     totalCount: data?.data?.totalCount ?? 0,
@@ -302,37 +325,58 @@ export const grantStaffStationOperation = async (payload: {
   stationId: string;
   operationTypeIds: string[];
 }) => {
-  const result = await apiFetch<StaffStationOperation[]>('/staff-station-operations', {
+  const result = await apiFetch<StaffOperationScope[]>('/operation-scope', {
     method: 'POST',
     data: payload,
   });
-  mutate('/staff-station-operations');
+  mutate('/operation-scope');
   return result.data;
 };
 
 export const revokeStaffStationOperation = async (id: string) => {
-  await apiFetch(`/staff-station-operations/${id}`, { method: 'DELETE' });
-  mutate('/staff-station-operations');
+  await apiFetch(`/operation-scope/${id}`, { method: 'DELETE' });
+  mutate('/operation-scope');
 };
 
-// ── Allowed Operations ────────────────────────────────────────────────────────
-
-export const useAllowedOperations = (stationId: string | undefined) => {
-  const url = constructUrl('/document-custody/allowed-operations', {
-    stationId,
-  });
+export const useStaffAllowedOperations = (stationId: string, search?: string) => {
   const {
-    data,
-    error,
-    isLoading,
-    mutate: swrMutate,
-  } = useApi<APIFetchResponse<{ allowedOperations: DocumentOperationType[] }>>(
-    stationId ? url : null
+    data: session,
+    isPending: sessionIsPending,
+    error: sessionError,
+  } = authClient.useSession();
+  const userId = session?.user?.id;
+  const {
+    hasAccess,
+    error: permisionError,
+    isLoading: permissionIsLoading,
+  } = useUserHasSystemAccess({
+    staffOperationScope: ['manage'],
+  });
+  const { grants, isLoading, error, mutate } = useStaffOperationScope(
+    {
+      stationId,
+      search,
+      userId,
+    },
+    !hasAccess && !!stationId
+  );
+  const {
+    stationOpTypes,
+    isLoading: stationOpTypeLoading,
+    error: stationOpTypeError,
+  } = useStationOperationTypes(stationId, { search, userId, isEnabled: true }, hasAccess);
+
+  const operations = useMemo(
+    () =>
+      hasAccess
+        ? stationOpTypes.map((st) => st.operationType!)
+        : grants.map((grant) => grant.operationType!),
+    [grants, hasAccess]
   );
   return {
-    allowedOperations: data?.data?.allowedOperations ?? [],
-    isLoading,
-    error,
-    mutate: swrMutate,
+    operations,
+    isLoading: sessionIsPending || permissionIsLoading || isLoading || stationOpTypeLoading,
+    error: sessionError || permisionError || error || stationOpTypeError,
+    mutate,
   };
 };

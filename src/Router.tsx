@@ -163,7 +163,7 @@ const router = createBrowserRouter([
           },
           { path: 'document-operation-types', element: <DocumentOperationTypesPage /> },
           { path: 'stations', element: <PickupStationsPage /> },
-          { path: 'staff-station-operations', element: <StaffStationOperationsPage /> },
+          { path: 'operation-scope', element: <StaffStationOperationsPage /> },
           { path: 'components', element: <UiComponents /> },
           {
             path: 'document-types',

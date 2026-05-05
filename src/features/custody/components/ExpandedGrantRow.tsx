@@ -1,11 +1,11 @@
 import React from 'react';
 import { ActionIcon, Badge, Box, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
 import { TablerIcon } from '@/components';
-import { GroupedStaffGrant, StaffStationOperation } from '../types';
+import { GroupedStaffGrant, StaffOperationScope } from '../types';
 
 type ExpandedGrantRowProps = {
   group: GroupedStaffGrant;
-  onRevoke: (grant: StaffStationOperation) => void;
+  onRevoke: (grant: StaffOperationScope) => void;
 };
 
 export const ExpandedGrantRow: React.FC<ExpandedGrantRowProps> = ({ group, onRevoke }) => (
