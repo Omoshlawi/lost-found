@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import { APIFetchResponse, authClient, constructUrl } from '@/lib/api';
 import { apiFetch } from '@/lib/api/apiFetch';
 import useApi from '@/lib/api/useApi';
-import { BanUserPayload, User, UserRolePayload, UserSession } from '../types';
+import { BanUserFormData, CreateUserFormData, User, UserRolePayload, UserSession } from '../types';
 
 export const useUsersApi = () => {
   const getUsers = async () => {
@@ -20,7 +20,7 @@ export const useUsersApi = () => {
     return authClient.admin.setRole(payload as { userId: string; role: 'admin' | 'user' });
   };
 
-  const banUser = async (payload: BanUserPayload) => {
+  const banUser = async (payload: BanUserFormData) => {
     return authClient.admin.banUser(payload);
   };
 
@@ -40,13 +40,11 @@ export const useUsersApi = () => {
     return authClient.admin.removeUser({ userId });
   };
 
-  const createUser = async (payload: {
-    name: string;
-    email: string;
-    password: string;
-    role?: string;
-  }) => {
-    return authClient.admin.createUser(payload as any);
+  const createUser = async (data: CreateUserFormData) => {
+    return apiFetch('/extended/auth/users', {
+      method: 'POST',
+      data,
+    });
   };
 
   const setUserPassword = async (userId: string, newPassword: string) => {

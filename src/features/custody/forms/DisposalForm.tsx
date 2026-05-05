@@ -4,7 +4,7 @@ import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { recordDisposal } from '../hooks/useCustody';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { useStations } from '../hooks/useStations';
 
 interface DisposalFormProps {
   foundCaseId: string;
@@ -24,7 +24,7 @@ const DisposalForm: React.FC<DisposalFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { stations } = usePickupStations();
+  const { stations } = useStations();
   const stationOptions = stations.map((s) => ({ label: `${s.name} (${s.code})`, value: s.id }));
 
   const handleSubmit = async () => {

@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { ColumnDef, Row } from '@tanstack/react-table';
-import { Group, TextInput, ActionIcon, Badge, Stack, Text, Select } from '@mantine/core';
-import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { IconSearch, IconX } from '@tabler/icons-react';
+import { ColumnDef, Row } from '@tanstack/react-table';
+import { ActionIcon, Badge, Group, Select, Stack, Text, TextInput } from '@mantine/core';
+import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { StationOperationsPanel } from '../components';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { useStations } from '../hooks/useStations';
 import { Station } from '../types';
 
 const PickupStationsPage: React.FC = () => {
@@ -20,7 +20,7 @@ const PickupStationsPage: React.FC = () => {
     status,
     setStatus,
   } = useTableUrlFilters();
-  const { stations, totalCount, isLoading, error } = usePickupStations({
+  const { stations, totalCount, isLoading, error } = useStations({
     page,
     limit: pageSize,
     search,

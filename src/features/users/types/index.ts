@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import { BanUserSchema, ChangePasswordSchema, CreateUserSchema, SetRoleSchema } from '../utils';
+
 export interface User {
   id: string;
   name: string;
@@ -34,8 +37,10 @@ export type UserRolePayload = {
   role: string | string[] | null;
 };
 
-export type BanUserPayload = {
-  userId: string;
-  banReason?: string;
-  banExpiresIn?: number;
-};
+export type CreateUserFormData = z.infer<typeof CreateUserSchema>;
+export type BanUserFormData = z.infer<typeof BanUserSchema>;
+export type ChangePasswordFormData = z.infer<typeof ChangePasswordSchema>;
+export type SetRoleFormData = z.infer<typeof SetRoleSchema>;
+
+/** @deprecated Use BanUserFormData — kept for hook backwards compatibility */
+export type BanUserPayload = BanUserFormData;

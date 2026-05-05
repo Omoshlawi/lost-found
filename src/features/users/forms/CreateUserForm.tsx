@@ -1,19 +1,13 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button, Group, MultiSelect, PasswordInput, Stack, TextInput } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useRoles } from '@/features/admin/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useUsersApi } from '../hooks';
-
-const CreateUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  roles: z.array(z.string()).default(['user']),
-});
+import { CreateUserFormData } from '../types';
+import { CreateUserSchema } from '../utils';
 
 type CreateUserFormProps = {
   onSuccess?: () => void;
@@ -21,10 +15,12 @@ type CreateUserFormProps = {
 };
 
 const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess, closeWorkspace }) => {
-  const form = useForm({
+  const form = useForm<CreateUserFormData>({
     defaultValues: {
       name: '',
       email: '',
+      username: '',
+      phoneNumber: '',
       password: '',
       roles: ['user'],
     },
@@ -34,41 +30,23 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess, closeWorkspa
   const { roles } = useRoles();
   const { createUser } = useUsersApi();
 
-  const handleSubmit: SubmitHandler<z.infer<typeof CreateUserSchema>> = async (data) => {
+  const handleSubmit: SubmitHandler<CreateUserFormData> = async (data) => {
     try {
-      const { error } = await createUser({
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        role: data.roles.join(','),
-      });
+      const { error } = await createUser(data);
       if (error) {
-        showNotification({
-          title: 'Error',
-          color: 'red',
-          message: error.message || 'Failed to create user',
-        });
+        showNotification({ title: 'Error', color: 'red', message: error.message || 'Failed to create user' });
         return;
       }
       onSuccess?.();
-      showNotification({
-        title: 'User created',
-        color: 'green',
-        message: `${data.name} has been added successfully.`,
-      });
+      showNotification({ title: 'User created', color: 'green', message: `${data.name} has been added successfully.` });
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<z.infer<typeof CreateUserSchema>>(error);
+      const e = handleApiErrors<CreateUserFormData>(error);
       if (e.detail) {
-        showNotification({
-          title: 'Error creating user',
-          message: e.detail,
-          color: 'red',
-          position: 'top-right',
-        });
+        showNotification({ title: 'Error creating user', message: e.detail, color: 'red', position: 'top-right' });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof z.infer<typeof CreateUserSchema>, { message: val })
+          form.setError(key as keyof CreateUserFormData, { message: val })
         );
       }
     }
@@ -81,24 +59,68 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess, closeWorkspa
     >
       <Stack p="md" h="100%" justify="space-between">
         <Stack gap="md">
-          <TextInput
-            label="Full Name"
-            placeholder="Jane Doe"
-            {...form.register('name')}
-            error={form.formState.errors.name?.message}
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <TextInput
+                {...field}
+                label="Full Name"
+                placeholder="Jane Doe"
+                error={fieldState.error?.message}
+              />
+            )}
           />
-          <TextInput
-            label="Email Address"
-            placeholder="jane@example.com"
-            type="email"
-            {...form.register('email')}
-            error={form.formState.errors.email?.message}
+          <Controller
+            control={form.control}
+            name="username"
+            render={({ field, fieldState }) => (
+              <TextInput
+                {...field}
+                label="Username"
+                placeholder="janedoe"
+                description="Optional. Must be at least 3 characters."
+                error={fieldState.error?.message}
+              />
+            )}
           />
-          <PasswordInput
-            label="Password"
-            placeholder="Min. 8 characters"
-            {...form.register('password')}
-            error={form.formState.errors.password?.message}
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <TextInput
+                {...field}
+                label="Email Address"
+                placeholder="jane@example.com"
+                type="email"
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="phoneNumber"
+            render={({ field, fieldState }) => (
+              <TextInput
+                {...field}
+                label="Phone Number"
+                placeholder="712345678"
+                description="Optional. Subscriber digits only, no country code."
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <PasswordInput
+                {...field}
+                label="Password"
+                placeholder="Min. 8 characters"
+                error={fieldState.error?.message}
+              />
+            )}
           />
           <Controller
             control={form.control}

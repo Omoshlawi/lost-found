@@ -4,7 +4,7 @@ import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { initiateTransfer } from '../hooks/useCustody';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { useStations } from '../hooks/useStations';
 
 interface TransferOutFormProps {
   foundCaseId: string;
@@ -24,18 +24,24 @@ const TransferOutForm: React.FC<TransferOutFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { stations } = usePickupStations();
+  const { stations } = useStations();
   const stationOptions = stations
     .filter((s) => s.id !== currentStationId)
     .map((s) => ({ label: `${s.name} (${s.code})`, value: s.id }));
 
   const handleSubmit = async () => {
-    if (!toStationId) {return;}
+    if (!toStationId) {
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
       await initiateTransfer(foundCaseId, { toStationId, notes: notes || undefined });
-      showNotification({ title: 'Transfer initiated', message: 'Document is now in transit.', color: 'teal' });
+      showNotification({
+        title: 'Transfer initiated',
+        message: 'Document is now in transit.',
+        color: 'teal',
+      });
       onSuccess?.();
       onClose();
     } catch (err) {

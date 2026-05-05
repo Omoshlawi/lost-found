@@ -1,18 +1,11 @@
+import React, { useMemo } from 'react';
+import { ColumnDef } from '@tanstack/react-table';
+import { useSearchParams } from 'react-router-dom';
+import { ActionIcon, Badge, Select, Stack, Text, TextInput } from '@mantine/core';
 import { DashboardPageHeader, StateFullDataTable, TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { formatDate } from '@/lib/utils/helpers';
-import {
-  ActionIcon,
-  Badge,
-  Select,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
-import { ColumnDef } from '@tanstack/react-table';
-import React, { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import {
   DocumentOperationStatusBadge,
   ExpandedOperationItems,
@@ -20,11 +13,8 @@ import {
   OperationActionsMenu,
 } from '../components';
 import NewOperationForm from '../forms/NewOperationForm';
-import {
-  useDocumentOperations,
-  useDocumentOperationTypes,
-} from '../hooks/useCustody';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { useDocumentOperations, useDocumentOperationTypes } from '../hooks/useCustody';
+import { useStations } from '../hooks/useStations';
 import { DocumentOperation, DocumentOperationStatus, DocumentOperationType } from '../types';
 
 const STATUS_OPTIONS = [
@@ -53,11 +43,11 @@ const CustodyListPage: React.FC = () => {
         prev.set('page', '1');
         return prev;
       },
-      { replace: true },
+      { replace: true }
     );
   };
 
-  const { stations } = usePickupStations();
+  const { stations } = useStations();
   const { operationTypes } = useDocumentOperationTypes({ limit: 50 });
   const { stationId: activeStationId } = useActiveStation();
 
@@ -81,7 +71,7 @@ const CustodyListPage: React.FC = () => {
         onClose={() => close()}
         onSuccess={() => operationsAsync.mutate()}
       />,
-      { title: opType.name },
+      { title: opType.name }
     );
   };
 
@@ -98,10 +88,7 @@ const CustodyListPage: React.FC = () => {
             onClick={() => row.toggleExpanded()}
             aria-label="Expand row"
           >
-            <TablerIcon
-              name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'}
-              size={14}
-            />
+            <TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={14} />
           </ActionIcon>
         ),
       },
@@ -121,15 +108,12 @@ const CustodyListPage: React.FC = () => {
       {
         header: 'Status',
         id: 'status',
-        cell: ({ row: { original } }) => (
-          <DocumentOperationStatusBadge status={original.status} />
-        ),
+        cell: ({ row: { original } }) => <DocumentOperationStatusBadge status={original.status} />,
       },
       {
         header: 'Station',
         id: 'station',
-        cell: ({ row: { original } }) =>
-          original.station?.name ?? original.toStation?.name ?? '—',
+        cell: ({ row: { original } }) => original.station?.name ?? original.toStation?.name ?? '—',
       },
       {
         header: 'Documents',
@@ -152,7 +136,7 @@ const CustodyListPage: React.FC = () => {
         cell: ({ row: { original } }) => formatDate(original.createdAt),
       },
     ],
-    [],
+    []
   );
 
   const actionsColumn: ColumnDef<DocumentOperation> = {
@@ -229,7 +213,7 @@ const CustodyListPage: React.FC = () => {
                 prev.set('page', String(p));
                 return prev;
               },
-              { replace: true },
+              { replace: true }
             ),
           onPageSizeChange: (ps) =>
             setSearchParams(
@@ -238,7 +222,7 @@ const CustodyListPage: React.FC = () => {
                 prev.set('page', '1');
                 return prev;
               },
-              { replace: true },
+              { replace: true }
             ),
         }}
       />

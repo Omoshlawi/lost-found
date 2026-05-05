@@ -1,22 +1,12 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Button, Group, PasswordInput, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { handleApiErrors } from '@/lib/api';
 import { useUsersApi } from '../hooks';
-import { User } from '../types';
-
-const ChangePasswordSchema = z
-  .object({
-    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm the password'),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+import { ChangePasswordFormData, User } from '../types';
+import { ChangePasswordSchema } from '../utils';
 
 type ChangeUserPasswordFormProps = {
   user: User;
@@ -29,14 +19,14 @@ const ChangeUserPasswordForm: React.FC<ChangeUserPasswordFormProps> = ({
   onSuccess,
   closeWorkspace,
 }) => {
-  const form = useForm({
+  const form = useForm<ChangePasswordFormData>({
     defaultValues: { newPassword: '', confirmPassword: '' },
     resolver: zodResolver(ChangePasswordSchema),
   });
 
   const { setUserPassword } = useUsersApi();
 
-  const handleSubmit: SubmitHandler<z.infer<typeof ChangePasswordSchema>> = async (data) => {
+  const handleSubmit: SubmitHandler<ChangePasswordFormData> = async (data) => {
     try {
       const { error } = await setUserPassword(user.id, data.newPassword);
       if (error) {
@@ -55,7 +45,7 @@ const ChangeUserPasswordForm: React.FC<ChangeUserPasswordFormProps> = ({
       });
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<z.infer<typeof ChangePasswordSchema>>(error);
+      const e = handleApiErrors<ChangePasswordFormData>(error);
       if (e.detail) {
         showNotification({
           title: 'Error changing password',
@@ -65,7 +55,7 @@ const ChangeUserPasswordForm: React.FC<ChangeUserPasswordFormProps> = ({
         });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof z.infer<typeof ChangePasswordSchema>, { message: val })
+          form.setError(key as keyof ChangePasswordFormData, { message: val })
         );
       }
     }
@@ -85,17 +75,29 @@ const ChangeUserPasswordForm: React.FC<ChangeUserPasswordFormProps> = ({
             </Text>
             . Their existing sessions will remain active.
           </Text>
-          <PasswordInput
-            label="New Password"
-            placeholder="Min. 8 characters"
-            {...form.register('newPassword')}
-            error={form.formState.errors.newPassword?.message}
+          <Controller
+            control={form.control}
+            name="newPassword"
+            render={({ field, fieldState }) => (
+              <PasswordInput
+                {...field}
+                label="New Password"
+                placeholder="Min. 8 characters"
+                error={fieldState.error?.message}
+              />
+            )}
           />
-          <PasswordInput
-            label="Confirm Password"
-            placeholder="Re-enter new password"
-            {...form.register('confirmPassword')}
-            error={form.formState.errors.confirmPassword?.message}
+          <Controller
+            control={form.control}
+            name="confirmPassword"
+            render={({ field, fieldState }) => (
+              <PasswordInput
+                {...field}
+                label="Confirm Password"
+                placeholder="Re-enter new password"
+                error={fieldState.error?.message}
+              />
+            )}
           />
         </Stack>
         <Group gap={1}>

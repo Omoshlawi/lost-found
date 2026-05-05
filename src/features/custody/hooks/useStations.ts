@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import { APIFetchResponse, constructUrl, PaginatedData } from '@/lib/api';
 import { Station } from '../types';
 
-export const usePickupStations = (params: Record<string, any> = {}, skip: boolean = false) => {
+export const useStations = (params: Record<string, any> = {}, skip: boolean = false) => {
   const url = constructUrl('/stations', { limit: 100, ...params });
   const { data, error, isLoading, mutate } = useSWR<APIFetchResponse<PaginatedData<Station>>>(
     skip ? null : url
@@ -16,7 +16,7 @@ export const usePickupStations = (params: Record<string, any> = {}, skip: boolea
   };
 };
 
-export const usePickupStation = (id: string) => {
+export const useStation = (id: string) => {
   const url = constructUrl(`/stations/${id}`);
   const { data, error, isLoading, mutate } = useSWR<APIFetchResponse<Station>>(url);
   return {

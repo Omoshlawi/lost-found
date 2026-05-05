@@ -6,7 +6,7 @@ import { useDocumentCases } from '@/features/cases/hooks';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { authClient, handleApiErrors } from '@/lib/api';
 import { createOperation, useStaffAllowedOperations } from '../hooks/useCustody';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { useStations } from '../hooks/useStations';
 import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
 import { makeNewOperationSchema, NewOperationFormData } from '../utils/validation';
 
@@ -63,7 +63,7 @@ export const useNewOperationForm = ({
   const { operations, isLoading: opTypesLoading } = useStaffAllowedOperations(
     activeStationId ?? defaultStationId ?? ''
   );
-  const { stations } = usePickupStations();
+  const { stations } = useStations();
 
   // ── Derived state ──────────────────────────────────────────────────────────
   const watchedTypeId = form.watch('operationTypeId');

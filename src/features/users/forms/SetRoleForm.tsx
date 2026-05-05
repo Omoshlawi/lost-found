@@ -1,18 +1,13 @@
 import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button, Group, MultiSelect, Stack } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useRoles } from '@/features/admin/hooks';
 import { handleApiErrors } from '@/lib/api';
 import { useUsersApi } from '../hooks';
-import { User } from '../types';
-
-const SetRoleSchema = z.object({
-  userId: z.string(),
-  roles: z.array(z.string()).default(['user']),
-});
+import { SetRoleFormData, User } from '../types';
+import { SetRoleSchema } from '../utils';
 
 type SetRoleFormProps = {
   user: User;
@@ -21,48 +16,35 @@ type SetRoleFormProps = {
 };
 
 const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspace }) => {
-  const form = useForm({
+  const form = useForm<SetRoleFormData>({
     defaultValues: {
       userId: user.id,
       roles: user.role?.split(',').filter(Boolean) ?? ['user'],
     },
     resolver: zodResolver(SetRoleSchema),
   });
-  const { roles } = useRoles();
 
+  const { roles } = useRoles();
   const { setRole } = useUsersApi();
 
-  const handleSubmit: SubmitHandler<z.infer<typeof SetRoleSchema>> = async (data) => {
+  const handleSubmit: SubmitHandler<SetRoleFormData> = async (data) => {
     try {
       const { data: responseData, error } = await setRole({ ...data, role: data.roles });
       if (error) {
-        showNotification({
-          title: 'Error',
-          color: 'red',
-          message: error.message || 'Failed to set role',
-        });
+        showNotification({ title: 'Error', color: 'red', message: error.message || 'Failed to set role' });
         return;
       }
       const updatedUser = (responseData as any)?.user || responseData;
       onSuccess?.(updatedUser);
-      showNotification({
-        title: 'Success',
-        color: 'green',
-        message: `Role for ${user.name} updated successfully.`,
-      });
+      showNotification({ title: 'Success', color: 'green', message: `Role for ${user.name} updated successfully.` });
       closeWorkspace?.();
     } catch (error) {
-      const e = handleApiErrors<z.infer<typeof SetRoleSchema>>(error);
+      const e = handleApiErrors<SetRoleFormData>(error);
       if (e.detail) {
-        showNotification({
-          title: 'Error updating role',
-          message: e.detail,
-          color: 'red',
-          position: 'top-right',
-        });
+        showNotification({ title: 'Error updating role', message: e.detail, color: 'red', position: 'top-right' });
       } else {
         Object.entries(e).forEach(([key, val]) =>
-          form.setError(key as keyof z.infer<typeof SetRoleSchema>, { message: val })
+          form.setError(key as keyof SetRoleFormData, { message: val })
         );
       }
     }
@@ -71,11 +53,7 @@ const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspa
   return (
     <form
       onSubmit={form.handleSubmit(handleSubmit)}
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-      }}
+      style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}
     >
       <Stack p="md" h="100%" justify="space-between">
         <Stack gap="md">
@@ -86,9 +64,9 @@ const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspa
               <MultiSelect
                 data={roles}
                 label={`Select Role for ${user.name}`}
-                value={field.value}
                 placeholder="User Role"
-                onChange={(_value) => field.onChange(_value)}
+                value={field.value}
+                onChange={field.onChange}
                 error={fieldState.error?.message}
                 ref={field.ref}
                 clearable
@@ -101,9 +79,8 @@ const SetRoleForm: React.FC<SetRoleFormProps> = ({ user, onSuccess, closeWorkspa
             Cancel
           </Button>
           <Button
-            radius={0}
             flex={1}
-            fullWidth
+            radius={0}
             type="submit"
             variant="filled"
             loading={form.formState.isSubmitting}

@@ -4,7 +4,7 @@ import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { recordConditionUpdate } from '../hooks/useCustody';
-import { usePickupStations } from '../hooks/usePickupStations';
+import { useStations } from '../hooks/useStations';
 
 interface ConditionUpdateFormProps {
   foundCaseId: string;
@@ -24,16 +24,22 @@ const ConditionUpdateForm: React.FC<ConditionUpdateFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { stations } = usePickupStations();
+  const { stations } = useStations();
   const stationOptions = stations.map((s) => ({ label: `${s.name} (${s.code})`, value: s.id }));
 
   const handleSubmit = async () => {
-    if (!stationId || !notes.trim()) {return;}
+    if (!stationId || !notes.trim()) {
+      return;
+    }
     setError(null);
     setIsLoading(true);
     try {
       await recordConditionUpdate(foundCaseId, { stationId, notes });
-      showNotification({ title: 'Condition updated', message: 'Document condition has been recorded.', color: 'teal' });
+      showNotification({
+        title: 'Condition updated',
+        message: 'Document condition has been recorded.',
+        color: 'teal',
+      });
       onSuccess?.();
       onClose();
     } catch (err) {
