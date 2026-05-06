@@ -18,7 +18,7 @@ import {
 import { TablerIcon } from '@/components';
 import { useSearchUser } from '@/hooks/usesearchUser';
 import { CaseComboboxPicker, OperationTypeHeader } from '../components';
-import { DocumentOperationType } from '../types';
+import { DocumentOperationType, DocumentOperationTypeCode, SubmissionMethod } from '../types';
 import { useNewOperationForm } from './useNewOperationForm';
 
 interface NewOperationFormProps {
@@ -37,8 +37,6 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
   const {
     form,
     selectedOpType,
-    isRequisition,
-    isReceipt,
     operationTypeOptions,
     stationOptions,
     caseSearch,
@@ -127,7 +125,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
             )}
 
             {/* Source station — REQUISITION: shown BEFORE document picker */}
-            {isRequisition && (
+            {selectedOpType?.code === DocumentOperationTypeCode.REQUISITION && (
               <Controller
                 control={form.control}
                 name="fromStationId"
@@ -152,7 +150,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
             )}
 
             {/* RECEIPT: submission method toggle + area filter */}
-            {isReceipt && (
+            {selectedOpType?.code === DocumentOperationTypeCode.RECEIPT && (
               <Stack gap="xs">
                 <Text size="sm" fw={500}>
                   Collection Method
@@ -163,8 +161,8 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                   render={({ field }) => (
                     <SegmentedControl
                       data={[
-                        { label: 'Drop-off at Station', value: 'DROPOFF' },
-                        { label: 'Pickup at Address', value: 'PICKUP' },
+                        { label: 'Drop-off at Station', value: SubmissionMethod.DROPOFF },
+                        { label: 'Pickup at Address', value: SubmissionMethod.PICKUP },
                       ]}
                       value={field.value ?? ''}
                       onChange={(v) => {
@@ -212,9 +210,32 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               onAdd={addCase}
               onRemove={removeCase}
               disabled={
-                (isRequisition && !watchedFromStationId) || (isReceipt && !watchedReceiptMethod)
+                (selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
+                  !watchedFromStationId) ||
+                (selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
+                  !watchedReceiptMethod)
               }
             />
+
+            {/* Target area — HANDOVER / RECEIPT */}
+            {selectedOpType?.requiresTargetArea && (
+              <Controller
+                control={form.control}
+                name="targetArea"
+                render={({ field, fieldState }) => (
+                  <TextInput
+                    label="Target Area"
+                    description="Geographic zone for this operation batch (e.g. Westlands, CBD Zone A)."
+                    placeholder="e.g. Westlands"
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    error={fieldState.error?.message}
+                    required
+                  />
+                )}
+              />
+            )}
 
             {/* Destination station — TRANSFER_OUT (requiresDestinationStation) */}
             {selectedOpType?.requiresDestinationStation && (
@@ -239,26 +260,27 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
             )}
 
             {/* Source station — TRANSFER_IN: shown after document picker */}
-            {!isRequisition && selectedOpType?.requiresSourceStation && (
-              <Controller
-                control={form.control}
-                name="fromStationId"
-                render={({ field, fieldState }) => (
-                  <Select
-                    label="Source Station"
-                    description="Station that dispatched the documents"
-                    placeholder="Select source station"
-                    data={stationOptions}
-                    value={field.value ?? null}
-                    onChange={(v) => field.onChange(v ?? null)}
-                    error={fieldState.error?.message}
-                    required
-                    searchable
-                    clearable
-                  />
-                )}
-              />
-            )}
+            {selectedOpType?.code !== DocumentOperationTypeCode.REQUISITION &&
+              selectedOpType?.requiresSourceStation && (
+                <Controller
+                  control={form.control}
+                  name="fromStationId"
+                  render={({ field, fieldState }) => (
+                    <Select
+                      label="Source Station"
+                      description="Station that dispatched the documents"
+                      placeholder="Select source station"
+                      data={stationOptions}
+                      value={field.value ?? null}
+                      onChange={(v) => field.onChange(v ?? null)}
+                      error={fieldState.error?.message}
+                      required
+                      searchable
+                      clearable
+                    />
+                  )}
+                />
+              )}
 
             {/* Performing station */}
             <Controller
@@ -268,14 +290,14 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                 <Select
                   label={preselectedType ? 'Performing Station' : 'Station'}
                   description={
-                    isRequisition
+                    selectedOpType?.code === DocumentOperationTypeCode.REQUISITION
                       ? 'Your active station (the requesting station)'
                       : preselectedType && defaultStationId
                         ? 'Defaulted to your active station'
                         : undefined
                   }
                   placeholder="Station performing this operation"
-                  disabled={isRequisition}
+                  disabled={selectedOpType?.code === DocumentOperationTypeCode.REQUISITION}
                   data={stationOptions}
                   value={field.value ?? null}
                   onChange={(v) => field.onChange(v ?? null)}

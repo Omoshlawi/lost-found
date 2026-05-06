@@ -38,8 +38,11 @@ export enum DocumentOperationTypeCode {
   HANDOVER = 'HANDOVER',
   DISPOSAL = 'DISPOSAL',
   RETURN = 'RETURN',
-  CONDITION_UPDATE = 'CONDITION_UPDATE',
-  AUDIT = 'AUDIT',
+}
+
+export enum SubmissionMethod {
+  DROPOFF = 'DROPOFF',
+  PICKUP = 'PICKUP',
 }
 
 // ── Core types ────────────────────────────────────────────────────────────────
@@ -55,6 +58,8 @@ export interface DocumentOperationType {
   requiresNotes: boolean;
   isHighPrivilege: boolean;
   isFinalOperation: boolean;
+  requiresTargetArea: boolean;
+  requiresItemAddresses: boolean;
   metadata?: Record<string, unknown> | null;
   voided: boolean;
   createdAt: string;
@@ -123,6 +128,8 @@ export interface DocumentOperationItem {
   status: DocumentOperationItemStatus;
   custodyStatusBefore?: CustodyStatus | null;
   custodyStatusAfter?: CustodyStatus | null;
+  userAddressId?: string | null;
+  userAddress?: { id: string; name: string; formatted?: string | null } | null;
   notes?: string | null;
   createdAt: string;
 }
@@ -146,6 +153,7 @@ export interface DocumentOperation {
   responsiblePersonId?: string | null;
   responsiblePerson?: { id: string; name: string } | null;
   notes?: string | null;
+  targetArea?: string | null;
   completedAt?: string | null;
   items: DocumentOperationItem[];
   createdAt: string;
@@ -163,6 +171,7 @@ export interface CreateOperationPayload {
   requestedByStationId?: string;
   responsiblePersonId?: string | null;
   notes?: string;
+  targetArea?: string;
 }
 
 export interface UpdateOperationPayload {
@@ -171,6 +180,7 @@ export interface UpdateOperationPayload {
   toStationId?: string | null;
   responsiblePersonId?: string | null;
   notes?: string | null;
+  targetArea?: string | null;
 }
 
 // ── Staff grant grouping ──────────────────────────────────────────────────────

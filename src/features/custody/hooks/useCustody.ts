@@ -169,14 +169,6 @@ const singleItemOp = async (
   return executeOperation(created!.id);
 };
 
-export const recordAudit = (foundCaseId: string, data: { stationId: string; notes?: string }) =>
-  singleItemOp(foundCaseId, 'AUDIT', 'stationId', data.stationId, data.notes);
-
-export const recordConditionUpdate = (
-  foundCaseId: string,
-  data: { stationId: string; notes: string }
-) => singleItemOp(foundCaseId, 'CONDITION_UPDATE', 'stationId', data.stationId, data.notes);
-
 export const recordDisposal = (foundCaseId: string, data: { stationId: string; notes: string }) =>
   singleItemOp(foundCaseId, 'DISPOSAL', 'stationId', data.stationId, data.notes);
 

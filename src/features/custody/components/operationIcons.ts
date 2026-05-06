@@ -9,8 +9,6 @@ export const OPERATION_ICONS: Record<string, TablerIconName> = {
   HANDOVER:         'userCheck',        // final handover to owner
   DISPOSAL:         'trash',            // permanent write-off
   RETURN:           'arrowBack',        // return after failed delivery
-  AUDIT:            'clipboardCheck',   // location audit / no-op
-  CONDITION_UPDATE: 'alertCircle',      // condition note / no-op
 };
 
 export const getOperationIcon = (code: string): TablerIconName =>

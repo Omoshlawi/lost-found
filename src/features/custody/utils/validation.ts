@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SubmissionMethod } from '../types';
 
 export const GrantStaffOperationSchema = z.object({
   userId: z.string().nonempty('Please select a staff member'),
@@ -15,7 +16,7 @@ export const GrantStaffOperationSchema = z.object({
  * Conditional rules:
  *   requiresDestinationStation → toStationId required    (e.g. TRANSFER_OUT)
  *   requiresSourceStation      → fromStationId required  (e.g. TRANSFER_IN)
- *   requiresNotes              → notes required           (e.g. DISPOSAL, CONDITION_UPDATE)
+ *   requiresNotes              → notes required           (e.g. DISPOSAL)
  *   code === REQUISITION       → requestedByStationId required
  */
 export const makeNewOperationSchema = (opType?: {
@@ -23,6 +24,7 @@ export const makeNewOperationSchema = (opType?: {
   requiresNotes?: boolean;
   requiresDestinationStation?: boolean;
   requiresSourceStation?: boolean;
+  requiresTargetArea?: boolean;
 }) =>
   z
     .object({
@@ -35,8 +37,12 @@ export const makeNewOperationSchema = (opType?: {
       notes: opType?.requiresNotes
         ? z.string().min(1, 'Notes are required for this operation type')
         : z.string().optional(),
+      targetArea: z.string().optional(),
       // RECEIPT-specific filter fields (only used in the UI to populate foundCaseIds)
-      receiptSubmissionMethod: z.enum(['DROPOFF', 'PICKUP']).nullable().optional(),
+      receiptSubmissionMethod: z
+        .enum([SubmissionMethod.DROPOFF, SubmissionMethod.PICKUP])
+        .nullable()
+        .optional(),
       receiptAreaValue: z.string().optional(),
     })
     .superRefine((data, ctx) => {
@@ -52,6 +58,13 @@ export const makeNewOperationSchema = (opType?: {
           code: z.ZodIssueCode.custom,
           message: 'Source station is required for this operation type',
           path: ['fromStationId'],
+        });
+      }
+      if (opType?.requiresTargetArea && !data.targetArea?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Target area is required for this operation type',
+          path: ['targetArea'],
         });
       }
     });

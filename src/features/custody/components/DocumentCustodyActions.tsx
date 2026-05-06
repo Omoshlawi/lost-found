@@ -3,11 +3,8 @@ import { Button, Group, Menu } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
-import { handleApiErrors } from '@/lib/api';
-import ConditionUpdateForm from '../forms/ConditionUpdateForm';
 import DisposalForm from '../forms/DisposalForm';
 import TransferOutForm from '../forms/TransferOutForm';
-import { recordAudit } from '../hooks/useCustody';
 import { CustodyStatus } from '../types';
 
 interface DocumentCustodyActionsProps {
@@ -27,28 +24,6 @@ const DocumentCustodyActions: React.FC<DocumentCustodyActionsProps> = ({
   const isInTransit = custodyStatus === CustodyStatus.IN_TRANSIT;
   const isTerminal =
     custodyStatus === CustodyStatus.HANDED_OVER || custodyStatus === CustodyStatus.DISPOSED;
-
-  const handleAudit = async () => {
-    if (!currentStationId) {
-      return;
-    }
-    try {
-      await recordAudit(foundCaseId, { stationId: currentStationId });
-      showNotification({
-        title: 'Audit recorded',
-        message: 'Location audit confirmed.',
-        color: 'teal',
-      });
-      onActionComplete?.();
-    } catch (err) {
-      const e = handleApiErrors<{}>(err);
-      showNotification({
-        title: 'Error',
-        message: e.detail ?? 'Failed to record audit.',
-        color: 'red',
-      });
-    }
-  };
 
   const openTransferOut = () => {
     const close = launchWorkspace(
@@ -71,18 +46,6 @@ const DocumentCustodyActions: React.FC<DocumentCustodyActionsProps> = ({
         onSuccess={onActionComplete}
       />,
       { title: 'Dispose Document' }
-    );
-  };
-
-  const openConditionUpdate = () => {
-    const close = launchWorkspace(
-      <ConditionUpdateForm
-        foundCaseId={foundCaseId}
-        currentStationId={currentStationId}
-        onClose={() => close()}
-        onSuccess={onActionComplete}
-      />,
-      { title: 'Record Condition' }
     );
   };
 
@@ -115,25 +78,6 @@ const DocumentCustodyActions: React.FC<DocumentCustodyActionsProps> = ({
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Custody Operations</Menu.Label>
-
-          {isInCustody && (
-            <Menu.Item
-              leftSection={<TablerIcon name="clipboardCheck" size={14} />}
-              onClick={handleAudit}
-              disabled={!currentStationId}
-            >
-              Confirm Location (Audit)
-            </Menu.Item>
-          )}
-
-          {!isTerminal && (
-            <Menu.Item
-              leftSection={<TablerIcon name="alertCircle" size={14} />}
-              onClick={openConditionUpdate}
-            >
-              Record Condition
-            </Menu.Item>
-          )}
 
           {isInCustody && (
             <>

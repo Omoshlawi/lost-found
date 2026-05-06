@@ -4,23 +4,12 @@ import { TablerIcon } from '@/components';
 import { formatDate } from '@/lib/utils/helpers';
 import { DocumentOperation } from '../types';
 import { CustodyStatusBadge } from './CustodyStatusBadge';
+import { OPERATION_ICONS } from './operationIcons';
 
 interface OperationHistoryTimelineProps {
   operations: DocumentOperation[];
   isLoading?: boolean;
 }
-
-const OPERATION_ICON: Record<string, string> = {
-  RECEIPT: 'packageImport',
-  TRANSFER_OUT: 'arrowRight',
-  TRANSFER_IN: 'arrowLeft',
-  REQUISITION: 'fileText',
-  HANDOVER: 'handStop',
-  DISPOSAL: 'trash',
-  RETURN: 'arrowBack',
-  AUDIT: 'clipboardCheck',
-  CONDITION_UPDATE: 'alertCircle',
-};
 
 export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> = ({
   operations,
@@ -36,18 +25,23 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
   return (
     <Timeline active={operations.length - 1} bulletSize={28} lineWidth={2}>
       {operations.map((op) => {
-        const iconName = OPERATION_ICON[op.operationType?.code ?? ''] ?? 'circle';
+        const iconName = OPERATION_ICONS[op.operationType?.code ?? ''] ?? 'circle';
         const stationLabel = (() => {
           const code = op.operationType?.code;
           if (code === 'REQUISITION') {
             const performer = op.station?.name;
             const source = op.fromStation?.name;
-            if (performer && source) return `${performer} → requested from ${source}`;
-            if (source) return `Requested from: ${source}`;
+            if (performer && source) {
+              return `${performer} → requested from ${source}`;
+            }
+            if (source) {
+              return `Requested from: ${source}`;
+            }
             return performer ?? null;
           }
-          if (op.fromStation && op.toStation)
+          if (op.fromStation && op.toStation) {
             return `${op.fromStation.name} → ${op.toStation.name}`;
+          }
           return op.station?.name ?? null;
         })();
 

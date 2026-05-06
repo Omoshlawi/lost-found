@@ -52,6 +52,7 @@ export const useNewOperationForm = ({
       fromStationId: null,
       responsiblePersonId: sessionUserId ?? undefined,
       notes: '',
+      targetArea: '',
       receiptSubmissionMethod: null,
       receiptAreaValue: '',
     },
@@ -71,6 +72,7 @@ export const useNewOperationForm = ({
   const watchedFromStationId = form.watch('fromStationId');
   const watchedReceiptMethod = form.watch('receiptSubmissionMethod');
   const watchedAreaValue = form.watch('receiptAreaValue');
+  const watchedTargetArea = form.watch('targetArea');
 
   const selectedOpType = useMemo<DocumentOperationType | undefined>(
     () => preselectedType ?? operations.find((s) => s.id === watchedTypeId),
@@ -80,26 +82,25 @@ export const useNewOperationForm = ({
   // Keep ref in sync so the resolver always uses the latest op type
   selectedOpTypeRef.current = selectedOpType;
 
-  const isRequisition = selectedOpType?.code === DocumentOperationTypeCode.REQUISITION;
-  const isReceipt = selectedOpType?.code === DocumentOperationTypeCode.RECEIPT;
-
   // ── Case fetching — filtered based on operation type ──────────────────────
   const { reports: cases, isLoading: casesLoading } = useDocumentCases({
     caseType: 'FOUND',
     limit: 20,
     ...(caseSearch && { search: caseSearch }),
     // REQUISITION: only show docs at the selected source station
-    ...(isRequisition && watchedFromStationId && { currentStationId: watchedFromStationId }),
+    ...(selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
+      watchedFromStationId && { currentStationId: watchedFromStationId }),
     // RECEIPT DROPOFF: filter by submission method + pickup station
-    ...(isReceipt &&
+    ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
       watchedReceiptMethod === 'DROPOFF' && {
         submissionMethod: 'DROPOFF',
         ...(activeStationId && { pickupStationId: activeStationId }),
       }),
-    // RECEIPT PICKUP: filter by submission method + collection area
-    ...(isReceipt &&
+    // RECEIPT PICKUP: PICKUP submission method guarantees a collection address exists
+    ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
       watchedReceiptMethod === 'PICKUP' && {
         submissionMethod: 'PICKUP',
+        custodyStatus: 'WITH_FINDER',
         ...(watchedAreaValue && { collectionAreaValue: watchedAreaValue }),
       }),
     v: 'custom:include(foundDocumentCase,document:include(type))',
@@ -148,6 +149,7 @@ export const useNewOperationForm = ({
         ...(data.fromStationId && { fromStationId: data.fromStationId }),
         responsiblePersonId: data.responsiblePersonId ?? null,
         notes: data.notes || undefined,
+        ...(data.targetArea?.trim() && { targetArea: data.targetArea.trim() }),
       });
       showNotification({
         title: 'Operation created',
@@ -171,8 +173,6 @@ export const useNewOperationForm = ({
   return {
     form,
     selectedOpType,
-    isRequisition,
-    isReceipt,
     opTypesLoading,
     operationTypeOptions,
     stationOptions,
@@ -189,6 +189,7 @@ export const useNewOperationForm = ({
     watchedFromStationId,
     watchedReceiptMethod,
     watchedAreaValue,
+    watchedTargetArea,
     // Submit
     handleSubmit: form.handleSubmit(onSubmit),
   };

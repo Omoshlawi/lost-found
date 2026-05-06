@@ -27,16 +27,23 @@ const DocumentOperationTypesPage: React.FC = () => {
     return val === 'true' ? 'true' : val === 'false' ? 'false' : '';
   };
 
+  const parseBoolFilter = (key: string) => {
+    const v = getBoolFilter(key);
+    return v === 'true' ? true : v === 'false' ? false : undefined;
+  };
+
   const { operationTypes, totalCount, isLoading } = useDocumentOperationTypes({
     page,
     limit: pageSize,
     search,
     includeVoided: status === 'inactive' || status === 'all',
-    isHighPrivilege: getBoolFilter('isHighPrivilege') === 'true' ? true : getBoolFilter('isHighPrivilege') === 'false' ? false : undefined,
-    requiresDestinationStation: getBoolFilter('requiresDestinationStation') === 'true' ? true : getBoolFilter('requiresDestinationStation') === 'false' ? false : undefined,
-    requiresSourceStation: getBoolFilter('requiresSourceStation') === 'true' ? true : getBoolFilter('requiresSourceStation') === 'false' ? false : undefined,
-    requiresNotes: getBoolFilter('requiresNotes') === 'true' ? true : getBoolFilter('requiresNotes') === 'false' ? false : undefined,
-    isFinalOperation: getBoolFilter('isFinalOperation') === 'true' ? true : getBoolFilter('isFinalOperation') === 'false' ? false : undefined,
+    isHighPrivilege: parseBoolFilter('isHighPrivilege'),
+    requiresDestinationStation: parseBoolFilter('requiresDestinationStation'),
+    requiresSourceStation: parseBoolFilter('requiresSourceStation'),
+    requiresNotes: parseBoolFilter('requiresNotes'),
+    isFinalOperation: parseBoolFilter('isFinalOperation'),
+    requiresTargetArea: parseBoolFilter('requiresTargetArea'),
+    requiresItemAddresses: parseBoolFilter('requiresItemAddresses'),
   });
 
   const columns = useMemo<ColumnDef<DocumentOperationType>[]>(
@@ -71,6 +78,8 @@ const DocumentOperationTypesPage: React.FC = () => {
             {original.requiresSourceStation && <Badge size="xs" color="gray">Req. Source</Badge>}
             {original.isHighPrivilege && <Badge size="xs" color="red">High Privilege</Badge>}
             {original.isFinalOperation && <Badge size="xs" color="orange">Final</Badge>}
+            {original.requiresTargetArea && <Badge size="xs" color="teal">Req. Target Area</Badge>}
+            {original.requiresItemAddresses && <Badge size="xs" color="teal">Req. Addresses</Badge>}
           </Stack>
         ),
       },
@@ -186,6 +195,30 @@ const DocumentOperationTypesPage: React.FC = () => {
                 { label: 'No', value: 'false' },
               ]}
               w={110}
+            />
+            <Select
+              size="xs"
+              placeholder="Target Area"
+              value={getBoolFilter('requiresTargetArea')}
+              onChange={(v) => setFilter('requiresTargetArea', v)}
+              data={[
+                { label: 'Target Area: All', value: '' },
+                { label: 'Required', value: 'true' },
+                { label: 'Not Req.', value: 'false' },
+              ]}
+              w={130}
+            />
+            <Select
+              size="xs"
+              placeholder="Addresses"
+              value={getBoolFilter('requiresItemAddresses')}
+              onChange={(v) => setFilter('requiresItemAddresses', v)}
+              data={[
+                { label: 'Addresses: All', value: '' },
+                { label: 'Required', value: 'true' },
+                { label: 'Not Req.', value: 'false' },
+              ]}
+              w={130}
             />
           </Group>
         )}
