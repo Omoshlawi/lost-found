@@ -13,12 +13,13 @@ import {
   Stack,
   Text,
   Textarea,
-  TextInput,
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
+import { SubmissionMethod } from '@/features/cases/types';
 import { useSearchUser } from '@/hooks/usesearchUser';
 import { CaseComboboxPicker, OperationTypeHeader } from '../components';
-import { DocumentOperationType, DocumentOperationTypeCode, SubmissionMethod } from '../types';
+import TargetAreaSeletor from '../components/TargetAreaSeletor';
+import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
 import { useNewOperationForm } from './useNewOperationForm';
 
 interface NewOperationFormProps {
@@ -149,6 +150,16 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               />
             )}
 
+            {/* Target area — HANDOVER / RECEIPT */}
+            {selectedOpType?.requiresTargetArea && (
+              <TargetAreaSeletor
+                control={form.control}
+                name="targetArea"
+                label="Target Area"
+                description="Geographic zone for this operation (e.g. Westlands, Juja)."
+                placeholder="e.g. Westlands"
+              />
+            )}
             {/* RECEIPT: submission method toggle + area filter */}
             {selectedOpType?.code === DocumentOperationTypeCode.RECEIPT && (
               <Stack gap="xs">
@@ -168,33 +179,15 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                       onChange={(v) => {
                         field.onChange(v || null);
                         form.setValue('foundCaseIds', []);
-                        form.setValue('receiptAreaValue', '');
                       }}
                     />
                   )}
                 />
-                {watchedReceiptMethod === 'PICKUP' && (
-                  <Controller
-                    control={form.control}
-                    name="receiptAreaValue"
-                    render={({ field, fieldState }) => (
-                      <TextInput
-                        label="Collection Area"
-                        description="Filter by area (e.g. ward/neighbourhood). Matches the area level configured in system settings."
-                        placeholder="e.g. Westlands"
-                        value={field.value ?? ''}
-                        onChange={field.onChange}
-                        error={fieldState.error?.message}
-                        onBlur={() => form.setValue('foundCaseIds', [])}
-                      />
-                    )}
-                  />
-                )}
-                {watchedReceiptMethod === 'DROPOFF' && (
-                  <Text size="xs" c="dimmed">
-                    Showing drop-off cases assigned to your active station.
-                  </Text>
-                )}
+                <Text size="xs" c="dimmed">
+                  {watchedReceiptMethod === 'DROPOFF'
+                    ? 'Showing drop-off cases assigned to your active station.'
+                    : 'Showing pick-up cases within the target area'}
+                </Text>
               </Stack>
             )}
 
@@ -216,26 +209,6 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                   !watchedReceiptMethod)
               }
             />
-
-            {/* Target area — HANDOVER / RECEIPT */}
-            {selectedOpType?.requiresTargetArea && (
-              <Controller
-                control={form.control}
-                name="targetArea"
-                render={({ field, fieldState }) => (
-                  <TextInput
-                    label="Target Area"
-                    description="Geographic zone for this operation batch (e.g. Westlands, CBD Zone A)."
-                    placeholder="e.g. Westlands"
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={fieldState.error?.message}
-                    required
-                  />
-                )}
-              />
-            )}
 
             {/* Destination station — TRANSFER_OUT (requiresDestinationStation) */}
             {selectedOpType?.requiresDestinationStation && (
@@ -304,6 +277,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                   error={fieldState.error?.message}
                   searchable
                   clearable
+                  readOnly
                 />
               )}
             />

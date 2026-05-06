@@ -23,6 +23,11 @@ export interface DocumentCase {
   document?: Document;
 }
 
+export enum CaseType {
+  FOUND = 'FOUND',
+  LOST = 'LOST',
+}
+
 export enum LostDocumentCaseStatus {
   DRAFT = 'DRAFT', // When the lost case is in draft status
   SUBMITTED = 'SUBMITTED', // When user submit lost document info
@@ -253,8 +258,6 @@ export interface SecurityQuestion {
   question: string;
   answer: string;
 }
-
-export type CaseType = 'LOST' | 'FOUND';
 
 export type FoundDocumentCaseFormData = z.infer<typeof FoundDocumentCaseSchema>;
 

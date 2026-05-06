@@ -3,11 +3,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form';
 import { showNotification } from '@mantine/notifications';
 import { useDocumentCases } from '@/features/cases/hooks';
+import { CaseType, FoundDocumentCaseStatus, SubmissionMethod } from '@/features/cases/types';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { authClient, handleApiErrors } from '@/lib/api';
 import { createOperation, useStaffAllowedOperations } from '../hooks/useCustody';
 import { useStations } from '../hooks/useStations';
-import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
+import { CustodyStatus, DocumentOperationType, DocumentOperationTypeCode } from '../types';
 import { makeNewOperationSchema, NewOperationFormData } from '../utils/validation';
 
 interface UseNewOperationFormOptions {
@@ -54,7 +55,6 @@ export const useNewOperationForm = ({
       notes: '',
       targetArea: '',
       receiptSubmissionMethod: null,
-      receiptAreaValue: '',
     },
     resolver,
     mode: 'onTouched',
@@ -71,7 +71,6 @@ export const useNewOperationForm = ({
   const watchedFoundCaseIds = form.watch('foundCaseIds');
   const watchedFromStationId = form.watch('fromStationId');
   const watchedReceiptMethod = form.watch('receiptSubmissionMethod');
-  const watchedAreaValue = form.watch('receiptAreaValue');
   const watchedTargetArea = form.watch('targetArea');
 
   const selectedOpType = useMemo<DocumentOperationType | undefined>(
@@ -82,26 +81,29 @@ export const useNewOperationForm = ({
   // Keep ref in sync so the resolver always uses the latest op type
   selectedOpTypeRef.current = selectedOpType;
 
-  // ── Case fetching — filtered based on operation type ──────────────────────
+  //  Case fetching — filtered based on operation type
   const { reports: cases, isLoading: casesLoading } = useDocumentCases({
-    caseType: 'FOUND',
-    limit: 20,
+    caseType: CaseType.FOUND,
+    limit: 8,
     ...(caseSearch && { search: caseSearch }),
     // REQUISITION: only show docs at the selected source station
     ...(selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
       watchedFromStationId && { currentStationId: watchedFromStationId }),
     // RECEIPT DROPOFF: filter by submission method + pickup station
     ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
-      watchedReceiptMethod === 'DROPOFF' && {
-        submissionMethod: 'DROPOFF',
+      watchedReceiptMethod === SubmissionMethod.DROPOFF && {
+        submissionMethod: SubmissionMethod.DROPOFF,
+        status: FoundDocumentCaseStatus.DRAFT,
+        custodyStatus: CustodyStatus.WITH_FINDER,
         ...(activeStationId && { pickupStationId: activeStationId }),
       }),
     // RECEIPT PICKUP: PICKUP submission method guarantees a collection address exists
     ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
-      watchedReceiptMethod === 'PICKUP' && {
-        submissionMethod: 'PICKUP',
-        custodyStatus: 'WITH_FINDER',
-        ...(watchedAreaValue && { collectionAreaValue: watchedAreaValue }),
+      watchedReceiptMethod === SubmissionMethod.PICKUP && {
+        submissionMethod: SubmissionMethod.PICKUP,
+        custodyStatus: CustodyStatus.WITH_FINDER,
+        status: FoundDocumentCaseStatus.DRAFT,
+        ...(watchedTargetArea && { collectionArea: watchedTargetArea }),
       }),
     v: 'custom:include(foundDocumentCase,document:include(type))',
   });
@@ -121,7 +123,7 @@ export const useNewOperationForm = ({
     [cases, watchedFoundCaseIds]
   );
 
-  // ── Case selection helpers ─────────────────────────────────────────────────
+  // Case selection helpers
   const addCase = (foundCaseId: string, label: string) => {
     form.setValue('foundCaseIds', [...watchedFoundCaseIds, foundCaseId], { shouldValidate: true });
     setCaseLabels((prev) => ({ ...prev, [foundCaseId]: label }));
@@ -188,7 +190,6 @@ export const useNewOperationForm = ({
     watchedFoundCaseIds,
     watchedFromStationId,
     watchedReceiptMethod,
-    watchedAreaValue,
     watchedTargetArea,
     // Submit
     handleSubmit: form.handleSubmit(onSubmit),

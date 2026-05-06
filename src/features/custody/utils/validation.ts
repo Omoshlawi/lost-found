@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SubmissionMethod } from '../types';
+import { SubmissionMethod } from '@/features/cases/types';
 
 export const GrantStaffOperationSchema = z.object({
   userId: z.string().nonempty('Please select a staff member'),
@@ -34,16 +34,13 @@ export const makeNewOperationSchema = (opType?: {
       toStationId: z.string().nullable().optional(),
       fromStationId: z.string().nullable().optional(),
       responsiblePersonId: z.string().nullable().optional(),
-      notes: opType?.requiresNotes
-        ? z.string().min(1, 'Notes are required for this operation type')
-        : z.string().optional(),
+      notes: z.string().optional().nullable(),
       targetArea: z.string().optional(),
       // RECEIPT-specific filter fields (only used in the UI to populate foundCaseIds)
       receiptSubmissionMethod: z
         .enum([SubmissionMethod.DROPOFF, SubmissionMethod.PICKUP])
         .nullable()
         .optional(),
-      receiptAreaValue: z.string().optional(),
     })
     .superRefine((data, ctx) => {
       if (opType?.requiresDestinationStation && !data.toStationId) {
@@ -65,6 +62,13 @@ export const makeNewOperationSchema = (opType?: {
           code: z.ZodIssueCode.custom,
           message: 'Target area is required for this operation type',
           path: ['targetArea'],
+        });
+      }
+      if (opType?.requiresNotes && !data.notes?.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Notes are required for this operation type',
+          path: ['notes'],
         });
       }
     });

@@ -32,18 +32,23 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onSuccess, closeWorkspa
 
   const handleSubmit: SubmitHandler<CreateUserFormData> = async (data) => {
     try {
-      const { error } = await createUser(data);
-      if (error) {
-        showNotification({ title: 'Error', color: 'red', message: error.message || 'Failed to create user' });
-        return;
-      }
+      await createUser(data);
       onSuccess?.();
-      showNotification({ title: 'User created', color: 'green', message: `${data.name} has been added successfully.` });
+      showNotification({
+        title: 'User created',
+        color: 'green',
+        message: `${data.name} has been added successfully.`,
+      });
       closeWorkspace?.();
     } catch (error) {
       const e = handleApiErrors<CreateUserFormData>(error);
       if (e.detail) {
-        showNotification({ title: 'Error creating user', message: e.detail, color: 'red', position: 'top-right' });
+        showNotification({
+          title: 'Error creating user',
+          message: e.detail,
+          color: 'red',
+          position: 'top-right',
+        });
       } else {
         Object.entries(e).forEach(([key, val]) =>
           form.setError(key as keyof CreateUserFormData, { message: val })

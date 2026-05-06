@@ -39,12 +39,6 @@ export enum DocumentOperationTypeCode {
   DISPOSAL = 'DISPOSAL',
   RETURN = 'RETURN',
 }
-
-export enum SubmissionMethod {
-  DROPOFF = 'DROPOFF',
-  PICKUP = 'PICKUP',
-}
-
 // ── Core types ────────────────────────────────────────────────────────────────
 
 export interface DocumentOperationType {

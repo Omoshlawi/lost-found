@@ -39,7 +39,7 @@ const DocumentCaseDetail = () => {
   }
 
   const isLostCase = !!reportData.lostDocumentCase;
-  const reportType: CaseType = isLostCase ? 'LOST' : 'FOUND';
+  const reportType: CaseType = isLostCase ? CaseType.LOST : CaseType.FOUND;
   const docType = reportData.document?.type?.name || 'Unknown';
   const caseNumber = reportData.caseNumber || 'Unknown';
   const status = isLostCase
