@@ -47,8 +47,7 @@ export interface DocumentOperationType {
   prefix: string;
   name: string;
   description?: string | null;
-  requiresDestinationStation: boolean;
-  requiresSourceStation: boolean;
+  requiresCounterpartStation: boolean;
   requiresNotes: boolean;
   isHighPrivilege: boolean;
   isFinalOperation: boolean;

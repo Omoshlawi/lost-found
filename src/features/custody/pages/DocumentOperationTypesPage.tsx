@@ -38,8 +38,7 @@ const DocumentOperationTypesPage: React.FC = () => {
     search,
     includeVoided: status === 'inactive' || status === 'all',
     isHighPrivilege: parseBoolFilter('isHighPrivilege'),
-    requiresDestinationStation: parseBoolFilter('requiresDestinationStation'),
-    requiresSourceStation: parseBoolFilter('requiresSourceStation'),
+    requiresCounterpartStation: parseBoolFilter('requiresCounterpartStation'),
     requiresNotes: parseBoolFilter('requiresNotes'),
     isFinalOperation: parseBoolFilter('isFinalOperation'),
     requiresTargetArea: parseBoolFilter('requiresTargetArea'),
@@ -74,8 +73,7 @@ const DocumentOperationTypesPage: React.FC = () => {
         cell: ({ row: { original } }) => (
           <Stack gap={2}>
             {original.requiresNotes && <Badge size="xs" color="gray">Requires Notes</Badge>}
-            {original.requiresDestinationStation && <Badge size="xs" color="gray">Req. Destination</Badge>}
-            {original.requiresSourceStation && <Badge size="xs" color="gray">Req. Source</Badge>}
+            {original.requiresCounterpartStation && <Badge size="xs" color="gray">Req. Counterpart</Badge>}
             {original.isHighPrivilege && <Badge size="xs" color="red">High Privilege</Badge>}
             {original.isFinalOperation && <Badge size="xs" color="orange">Final</Badge>}
             {original.requiresTargetArea && <Badge size="xs" color="teal">Req. Target Area</Badge>}
@@ -150,27 +148,15 @@ const DocumentOperationTypesPage: React.FC = () => {
             />
             <Select
               size="xs"
-              placeholder="Source"
-              value={getBoolFilter('requiresSourceStation')}
-              onChange={(v) => setFilter('requiresSourceStation', v)}
+              placeholder="Counterpart"
+              value={getBoolFilter('requiresCounterpartStation')}
+              onChange={(v) => setFilter('requiresCounterpartStation', v)}
               data={[
-                { label: 'Source: All', value: '' },
+                { label: 'Counterpart: All', value: '' },
                 { label: 'Required', value: 'true' },
                 { label: 'Not Req.', value: 'false' },
               ]}
-              w={110}
-            />
-            <Select
-              size="xs"
-              placeholder="Destination"
-              value={getBoolFilter('requiresDestinationStation')}
-              onChange={(v) => setFilter('requiresDestinationStation', v)}
-              data={[
-                { label: 'Dest: All', value: '' },
-                { label: 'Required', value: 'true' },
-                { label: 'Not Req.', value: 'false' },
-              ]}
-              w={110}
+              w={130}
             />
             <Select
               size="xs"

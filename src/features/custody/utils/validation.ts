@@ -14,15 +14,13 @@ export const GrantStaffOperationSchema = z.object({
  * conditional required rules are enforced by Zod rather than ad-hoc checks.
  *
  * Conditional rules:
- *   requiresDestinationStation → counterpartStationId required  (e.g. TRANSFER_OUT)
- *   requiresSourceStation      → counterpartStationId required  (e.g. TRANSFER_IN, REQUISITION)
+ *   requiresCounterpartStation → counterpartStationId required  (e.g. TRANSFER_OUT, TRANSFER_IN, REQUISITION)
  *   requiresNotes              → notes required                  (e.g. DISPOSAL)
  */
 export const makeNewOperationSchema = (opType?: {
   code?: string;
   requiresNotes?: boolean;
-  requiresDestinationStation?: boolean;
-  requiresSourceStation?: boolean;
+  requiresCounterpartStation?: boolean;
   requiresTargetArea?: boolean;
 }) =>
   z
@@ -41,10 +39,7 @@ export const makeNewOperationSchema = (opType?: {
         .optional(),
     })
     .superRefine((data, ctx) => {
-      if (
-        (opType?.requiresDestinationStation || opType?.requiresSourceStation) &&
-        !data.counterpartStationId
-      ) {
+      if (opType?.requiresCounterpartStation && !data.counterpartStationId) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: 'Counterpart station is required for this operation type',

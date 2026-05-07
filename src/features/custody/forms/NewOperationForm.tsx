@@ -19,6 +19,7 @@ import { SubmissionMethod } from '@/features/cases/types';
 import { TargetAreaSeletor } from '../../../components/form-components';
 import { CaseComboboxPicker, OperationTypeHeader } from '../components';
 import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
+import { getCounterpartLabel } from '../utils/operationLabels';
 import { useNewOperationForm } from './useNewOperationForm';
 
 interface NewOperationFormProps {
@@ -97,9 +98,9 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                       {selectedOpType.description}
                     </Text>
                     <Group gap="xs">
-                      {selectedOpType.requiresDestinationStation && (
+                      {selectedOpType.requiresCounterpartStation && (
                         <Badge size="xs" variant="outline" color="orange">
-                          Requires destination station
+                          Requires {getCounterpartLabel(selectedOpType.code).toLowerCase()}
                         </Badge>
                       )}
                       {selectedOpType.isHighPrivilege && (
@@ -204,39 +205,21 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               }
             />
 
-            {/* Destination station — TRANSFER_OUT (requiresDestinationStation) */}
-            {selectedOpType?.requiresDestinationStation && (
-              <Controller
-                control={form.control}
-                name="counterpartStationId"
-                render={({ field, fieldState }) => (
-                  <Select
-                    label="Destination Station"
-                    description="Station the documents are being sent to"
-                    placeholder="Select destination station"
-                    data={stationOptions}
-                    value={field.value ?? null}
-                    onChange={(v) => field.onChange(v ?? null)}
-                    error={fieldState.error?.message}
-                    required
-                    searchable
-                    clearable
-                  />
-                )}
-              />
-            )}
-
-            {/* Source station — TRANSFER_IN: shown after document picker */}
-            {selectedOpType?.code !== DocumentOperationTypeCode.REQUISITION &&
-              selectedOpType?.requiresSourceStation && (
+            {/* Counterpart station — TRANSFER_OUT (destination) and TRANSFER_IN (source) */}
+            {selectedOpType?.requiresCounterpartStation &&
+              selectedOpType?.code !== DocumentOperationTypeCode.REQUISITION && (
                 <Controller
                   control={form.control}
                   name="counterpartStationId"
                   render={({ field, fieldState }) => (
                     <Select
-                      label="Source Station"
-                      description="Station that dispatched the documents"
-                      placeholder="Select source station"
+                      label={getCounterpartLabel(selectedOpType.code)}
+                      description={
+                        selectedOpType.code === DocumentOperationTypeCode.TRANSFER_OUT
+                          ? 'Station the documents are being sent to'
+                          : 'Station that dispatched the documents'
+                      }
+                      placeholder={`Select ${getCounterpartLabel(selectedOpType.code).toLowerCase()}`}
                       data={stationOptions}
                       value={field.value ?? null}
                       onChange={(v) => field.onChange(v ?? null)}

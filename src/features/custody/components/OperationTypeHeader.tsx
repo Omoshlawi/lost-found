@@ -2,6 +2,7 @@ import React from 'react';
 import { Badge, Box, Group, Text, ThemeIcon } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { DocumentOperationType } from '../types';
+import { getCounterpartLabel } from '../utils/operationLabels';
 import { getOperationIcon } from './operationIcons';
 
 interface OperationTypeHeaderProps {
@@ -40,14 +41,9 @@ export const OperationTypeHeader: React.FC<OperationTypeHeaderProps> = ({ opType
               Requires approval
             </Badge>
           )}
-          {opType.requiresDestinationStation && (
+          {opType.requiresCounterpartStation && (
             <Badge size="xs" variant="light" color="civicBlue">
-              Requires destination
-            </Badge>
-          )}
-          {opType.requiresSourceStation && (
-            <Badge size="xs" variant="light" color="civicBlue">
-              Requires source station
+              Requires {getCounterpartLabel(opType.code).toLowerCase()}
             </Badge>
           )}
           {opType.isFinalOperation && (
