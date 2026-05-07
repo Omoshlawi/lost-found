@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActionIcon, Menu } from '@mantine/core';
+import { ActionIcon, Menu, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
@@ -30,7 +31,9 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
     operation.status === DocumentOperationStatus.COMPLETED ||
     operation.status === DocumentOperationStatus.CANCELLED;
 
-  if (isTerminal) { return null; }
+  if (isTerminal) {
+    return null;
+  }
 
   const handleAction = async (actionFn: () => Promise<any>, successMsg: string) => {
     try {
@@ -52,9 +55,75 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
         onClose={() => close()}
         onSuccess={onMutate}
       />,
-      { title: `Add Documents — ${operation.operationNumber}` },
+      { title: `Add Documents — ${operation.operationNumber}` }
     );
   };
+
+  const confirmExecute = () =>
+    modals.openConfirmModal({
+      title: 'Execute Operation',
+      children: (
+        <Text size="sm">
+          Execute <strong>{operation.operationNumber}</strong>? This will process all pending
+          items and apply custody transitions.
+        </Text>
+      ),
+      labels: { confirm: 'Execute', cancel: 'Cancel' },
+      onConfirm: () => handleAction(() => executeOperation(operation.id), 'Operation executed successfully.'),
+    });
+
+  const confirmSubmit = () =>
+    modals.openConfirmModal({
+      title: 'Submit for Approval',
+      children: (
+        <Text size="sm">
+          Submit <strong>{operation.operationNumber}</strong> for supervisor approval? The
+          operation will be locked for editing once submitted.
+        </Text>
+      ),
+      labels: { confirm: 'Submit', cancel: 'Cancel' },
+      onConfirm: () => handleAction(() => submitOperation(operation.id), 'Operation submitted for approval.'),
+    });
+
+  const confirmApprove = () =>
+    modals.openConfirmModal({
+      title: 'Approve Operation',
+      children: (
+        <Text size="sm">
+          Approve <strong>{operation.operationNumber}</strong>? It will be ready for execution.
+        </Text>
+      ),
+      labels: { confirm: 'Approve', cancel: 'Cancel' },
+      confirmProps: { color: 'teal' },
+      onConfirm: () => handleAction(() => approveOperation(operation.id), 'Operation approved.'),
+    });
+
+  const confirmReject = () =>
+    modals.openConfirmModal({
+      title: 'Reject Operation',
+      children: (
+        <Text size="sm">
+          Reject <strong>{operation.operationNumber}</strong>? The creator will need to revise
+          and resubmit.
+        </Text>
+      ),
+      labels: { confirm: 'Reject', cancel: 'Cancel' },
+      confirmProps: { color: 'orange' },
+      onConfirm: () => handleAction(() => rejectOperation(operation.id, 'OTHER'), 'Operation rejected.'),
+    });
+
+  const confirmCancel = () =>
+    modals.openConfirmModal({
+      title: 'Cancel Operation',
+      children: (
+        <Text size="sm">
+          Cancel <strong>{operation.operationNumber}</strong>? This cannot be undone.
+        </Text>
+      ),
+      labels: { confirm: 'Cancel Operation', cancel: 'Keep' },
+      confirmProps: { color: 'red' },
+      onConfirm: () => handleAction(() => cancelOperation(operation.id, 'CREATED_IN_ERROR'), 'Operation cancelled.'),
+    });
 
   return (
     <Menu position="bottom-end" width={180}>
@@ -75,13 +144,13 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
             <Menu.Divider />
             <Menu.Item
               leftSection={<TablerIcon name="bolt" size={14} />}
-              onClick={() => handleAction(() => executeOperation(operation.id), 'Operation executed successfully.')}
+              onClick={confirmExecute}
             >
               Execute
             </Menu.Item>
             <Menu.Item
               leftSection={<TablerIcon name="send" size={14} />}
-              onClick={() => handleAction(() => submitOperation(operation.id), 'Operation submitted for approval.')}
+              onClick={confirmSubmit}
             >
               Submit for Approval
             </Menu.Item>
@@ -92,14 +161,14 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
             <Menu.Item
               leftSection={<TablerIcon name="check" size={14} />}
               color="teal"
-              onClick={() => handleAction(() => approveOperation(operation.id), 'Operation approved.')}
+              onClick={confirmApprove}
             >
               Approve
             </Menu.Item>
             <Menu.Item
               leftSection={<TablerIcon name="x" size={14} />}
               color="orange"
-              onClick={() => handleAction(() => rejectOperation(operation.id, 'OTHER'), 'Operation rejected.')}
+              onClick={confirmReject}
             >
               Reject
             </Menu.Item>
@@ -108,7 +177,7 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
         {isApproved && (
           <Menu.Item
             leftSection={<TablerIcon name="bolt" size={14} />}
-            onClick={() => handleAction(() => executeOperation(operation.id), 'Operation executed successfully.')}
+            onClick={confirmExecute}
           >
             Execute
           </Menu.Item>
@@ -118,7 +187,7 @@ export const OperationActionsMenu: React.FC<OperationActionsMenuProps> = ({
           <Menu.Item
             leftSection={<TablerIcon name="ban" size={14} />}
             color="red"
-            onClick={() => handleAction(() => cancelOperation(operation.id, 'CREATED_IN_ERROR'), 'Operation cancelled.')}
+            onClick={confirmCancel}
           >
             Cancel
           </Menu.Item>

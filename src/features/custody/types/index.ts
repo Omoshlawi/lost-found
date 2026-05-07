@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Address } from '@/features/addresses/types';
 import { GrantStaffOperationSchema } from '../utils/validation';
 
 export type GrantStaffOperationFormData = z.infer<typeof GrantStaffOperationSchema>;
@@ -111,7 +112,9 @@ export interface DocumentOperationItem {
   foundCaseId: string;
   foundCase?: {
     id: string;
+    status: string;
     custodyStatus: CustodyStatus;
+    collections?: Array<{ status: string; expiresAt: string | null }>;
     case: {
       caseNumber: string;
       document?: { type?: { name: string } } | null;
@@ -122,7 +125,7 @@ export interface DocumentOperationItem {
   custodyStatusBefore?: CustodyStatus | null;
   custodyStatusAfter?: CustodyStatus | null;
   userAddressId?: string | null;
-  userAddress?: { id: string; name: string; formatted?: string | null } | null;
+  userAddress?: Address | null;
   notes?: string | null;
   createdAt: string;
 }

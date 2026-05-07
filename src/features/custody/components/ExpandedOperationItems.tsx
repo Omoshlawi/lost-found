@@ -1,16 +1,36 @@
 import React from 'react';
-import { ActionIcon, Badge, Box, Group, Table, Text } from '@mantine/core';
-import { showNotification } from '@mantine/notifications';
 import { Row } from '@tanstack/react-table';
+import { ActionIcon, Badge, Box, Group, Table, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { removeOperationItem, skipOperationItem } from '../hooks/useCustody';
-import { DocumentOperation, DocumentOperationStatus } from '../types';
+import {
+  DocumentOperation,
+  DocumentOperationItem,
+  DocumentOperationStatus,
+  DocumentOperationTypeCode,
+} from '../types';
 import { CustodyStatusBadge } from './CustodyStatusBadge';
 
 interface ExpandedOperationItemsProps {
   row: Row<DocumentOperation>;
   onMutate: () => void;
+}
+
+function CollectionStatusBadge({ item }: { item: DocumentOperationItem }) {
+  const fc = item.foundCase;
+  if (!fc) {
+    return <Text size="xs" c="dimmed">—</Text>;
+  }
+  if (fc.status === 'SUBMITTED') {
+    return <Badge size="xs" variant="light" color="civicGreen">Collected</Badge>;
+  }
+  if (fc.collections?.some((c) => c.status === 'PENDING')) {
+    return <Badge size="xs" variant="light" color="orange">Code Sent</Badge>;
+  }
+  return <Badge size="xs" variant="light" color="gray">Awaiting</Badge>;
 }
 
 export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
@@ -22,6 +42,7 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
   const isApproved = op.status === DocumentOperationStatus.APPROVED;
   const canRemove = isDraft;
   const canSkip = isDraft || isApproved;
+  const isReceiptOp = op.operationType?.code === DocumentOperationTypeCode.RECEIPT;
 
   const handleItemAction = async (actionFn: () => Promise<any>, successMsg: string) => {
     try {
@@ -32,6 +53,36 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
       const e = handleApiErrors<{}>(err);
       showNotification({ title: 'Error', message: e.detail ?? 'Action failed.', color: 'red' });
     }
+  };
+
+  const confirmSkip = (item: DocumentOperationItem) => {
+    const label = item.foundCase?.case?.caseNumber ?? item.foundCaseId.slice(0, 8);
+    modals.openConfirmModal({
+      title: 'Skip Document',
+      children: (
+        <Text size="sm">
+          Skip case <strong>{label}</strong>? It will be excluded from execution.
+        </Text>
+      ),
+      labels: { confirm: 'Skip', cancel: 'Cancel' },
+      confirmProps: { color: 'orange' },
+      onConfirm: () => handleItemAction(() => skipOperationItem(op.id, item.id), 'Item skipped.'),
+    });
+  };
+
+  const confirmRemove = (item: DocumentOperationItem) => {
+    const label = item.foundCase?.case?.caseNumber ?? item.foundCaseId.slice(0, 8);
+    modals.openConfirmModal({
+      title: 'Remove Document',
+      children: (
+        <Text size="sm">
+          Remove case <strong>{label}</strong> from this operation?
+        </Text>
+      ),
+      labels: { confirm: 'Remove', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: () => handleItemAction(() => removeOperationItem(op.id, item.id), 'Item removed.'),
+    });
   };
 
   if (!op.items || op.items.length === 0) {
@@ -51,6 +102,8 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
             <Table.Th>Document Type</Table.Th>
             <Table.Th>Custody Change</Table.Th>
             <Table.Th>Item Status</Table.Th>
+            {isReceiptOp && <Table.Th>Collection</Table.Th>}
+            <Table.Th>Address</Table.Th>
             {(canRemove || canSkip) && <Table.Th style={{ width: 60 }} />}
           </Table.Tr>
         </Table.Thead>
@@ -64,7 +117,7 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
                     size="sm"
                     fw={500}
                     component="a"
-                    href={`/dashboard/custody/${item.foundCaseId}`}
+                    href={`/dashboard/cases/${item.foundCaseId}`}
                     style={{ textDecoration: 'none' }}
                   >
                     {item.foundCase?.case?.caseNumber ?? item.foundCaseId.slice(0, 8)}
@@ -105,6 +158,24 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
                     {item.status}
                   </Badge>
                 </Table.Td>
+                {isReceiptOp && (
+                  <Table.Td>
+                    <CollectionStatusBadge item={item} />
+                  </Table.Td>
+                )}
+                <Table.Td>
+                  <Text size="xs" c="dimmed">
+                    {item.userAddressId
+                      ? [
+                          item.userAddress?.level2,
+                          item.userAddress?.level3,
+                          item.userAddress?.address1,
+                        ]
+                          .filter(Boolean)
+                          .join(', ')
+                      : '--'}
+                  </Text>
+                </Table.Td>
                 {(canRemove || canSkip) && (
                   <Table.Td>
                     {isPending && (
@@ -115,12 +186,7 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
                             color="orange"
                             size="xs"
                             title="Skip item"
-                            onClick={() =>
-                              handleItemAction(
-                                () => skipOperationItem(op.id, item.id),
-                                'Item skipped.',
-                              )
-                            }
+                            onClick={() => confirmSkip(item)}
                           >
                             <TablerIcon name="playerSkipForward" size={12} />
                           </ActionIcon>
@@ -131,12 +197,7 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
                             color="red"
                             size="xs"
                             title="Remove item"
-                            onClick={() =>
-                              handleItemAction(
-                                () => removeOperationItem(op.id, item.id),
-                                'Item removed.',
-                              )
-                            }
+                            onClick={() => confirmRemove(item)}
                           >
                             <TablerIcon name="trash" size={12} />
                           </ActionIcon>
