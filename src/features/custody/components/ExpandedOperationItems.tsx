@@ -22,15 +22,31 @@ interface ExpandedOperationItemsProps {
 function CollectionStatusBadge({ item }: { item: DocumentOperationItem }) {
   const fc = item.foundCase;
   if (!fc) {
-    return <Text size="xs" c="dimmed">—</Text>;
+    return (
+      <Text size="xs" c="dimmed">
+        —
+      </Text>
+    );
   }
   if (fc.status === 'SUBMITTED') {
-    return <Badge size="xs" variant="light" color="civicGreen">Collected</Badge>;
+    return (
+      <Badge size="xs" variant="light" color="civicGreen">
+        Collected
+      </Badge>
+    );
   }
   if (fc.collections?.some((c) => c.status === 'PENDING')) {
-    return <Badge size="xs" variant="light" color="orange">Code Sent</Badge>;
+    return (
+      <Badge size="xs" variant="light" color="orange">
+        Code Sent
+      </Badge>
+    );
   }
-  return <Badge size="xs" variant="light" color="gray">Awaiting</Badge>;
+  return (
+    <Badge size="xs" variant="light" color="gray">
+      Awaiting
+    </Badge>
+  );
 }
 
 export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
@@ -117,7 +133,7 @@ export const ExpandedOperationItems: React.FC<ExpandedOperationItemsProps> = ({
                     size="sm"
                     fw={500}
                     component="a"
-                    href={`/dashboard/cases/${item.foundCaseId}`}
+                    href={`/dashboard/cases/${item.foundCase?.case?.id}`}
                     style={{ textDecoration: 'none' }}
                   >
                     {item.foundCase?.case?.caseNumber ?? item.foundCaseId.slice(0, 8)}

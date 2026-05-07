@@ -103,6 +103,7 @@ export interface FoundDocumentCase {
   status: FoundDocumentCaseStatus;
   submissionMethod?: SubmissionMethod;
   custodyStatus?: CustodyStatus;
+  collections?: Array<{ status: string; expiresAt: string | null }>;
   currentStationId?: string;
   currentStation?: Station;
   createdAt: string;
