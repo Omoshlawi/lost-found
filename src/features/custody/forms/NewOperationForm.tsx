@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Group,
-  Loader,
   ScrollArea,
   SegmentedControl,
   Select,
@@ -15,10 +14,10 @@ import {
   Textarea,
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
+import { UserSelect } from '@/components/form-components';
 import { SubmissionMethod } from '@/features/cases/types';
-import { useSearchUser } from '@/hooks/usesearchUser';
+import { TargetAreaSeletor } from '../../../components/form-components';
 import { CaseComboboxPicker, OperationTypeHeader } from '../components';
-import TargetAreaSeletor from '../components/TargetAreaSeletor';
 import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
 import { useNewOperationForm } from './useNewOperationForm';
 
@@ -51,22 +50,11 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
     watchedFromStationId,
     watchedReceiptMethod,
     handleSubmit,
+    watchedTargetArea,
+    sessionUserEmail,
   } = useNewOperationForm({ preselectedType, defaultStationId, onClose, onSuccess });
 
   const { isSubmitting, errors } = form.formState;
-
-  const userSearch = useSearchUser();
-  const [responsibleUserOption, setResponsibleUserOption] = React.useState<{
-    value: string;
-    label: string;
-  } | null>(null);
-
-  const responsibleUserOptions = [
-    ...(responsibleUserOption ? [responsibleUserOption] : []),
-    ...userSearch.users
-      .filter((u) => u.id !== responsibleUserOption?.value)
-      .map((u) => ({ value: u.id, label: u.name ?? u.email })),
-  ];
 
   const caseOptions = availableCases.map((c) => ({
     foundCaseId: c.foundDocumentCase?.id ?? '',
@@ -206,7 +194,13 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                 (selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
                   !watchedFromStationId) ||
                 (selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
-                  !watchedReceiptMethod)
+                  (!watchedReceiptMethod || !watchedTargetArea))
+              }
+              placeholder={
+                selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
+                (!watchedReceiptMethod || !watchedTargetArea)
+                  ? 'Select target area/collection method first'
+                  : undefined
               }
             />
 
@@ -283,34 +277,16 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
             />
 
             {/* Responsible person */}
-            <Controller
-              control={form.control}
-              name="responsiblePersonId"
-              render={({ field, fieldState }) => (
-                <Select
-                  label="Responsible Person"
-                  description="Staff member physically executing this operation. Defaults to you."
-                  placeholder="Search by email…"
-                  data={responsibleUserOptions}
-                  value={field.value ?? null}
-                  onChange={(value, option) => {
-                    field.onChange(value ?? null);
-                    setResponsibleUserOption(value ? { value, label: option.label } : null);
-                  }}
-                  onSearchChange={(searchValue) =>
-                    userSearch.setFilters(
-                      searchValue ? { searchField: 'email', searchValue } : undefined
-                    )
-                  }
-                  filter={({ options }) => options}
-                  searchable
-                  clearable
-                  nothingFoundMessage={userSearch.isLoading ? 'Searching…' : 'No users found'}
-                  rightSection={userSearch.isLoading ? <Loader size="xs" /> : undefined}
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
+            {sessionUserEmail && (
+              <UserSelect
+                control={form.control}
+                name="responsiblePersonId"
+                label="Responsible Person"
+                description="Staff member physically executing this operation. Defaults to you."
+                placeholder="Search by email…"
+                defaultSearch={sessionUserEmail}
+              />
+            )}
 
             {/* Notes */}
             <Controller

@@ -18,6 +18,7 @@ interface CaseComboboxPickerProps {
   onSearchChange: (value: string) => void;
   onAdd: (foundCaseId: string, label: string) => void;
   onRemove: (foundCaseId: string) => void;
+  placeholder?: string;
 }
 
 export const CaseComboboxPicker: React.FC<CaseComboboxPickerProps> = ({
@@ -31,6 +32,7 @@ export const CaseComboboxPicker: React.FC<CaseComboboxPickerProps> = ({
   onSearchChange,
   onAdd,
   onRemove,
+  placeholder = 'Search by case number or document type…',
 }) => {
   const combobox = useCombobox({ onDropdownClose: () => combobox.resetSelectedOption() });
 
@@ -60,13 +62,7 @@ export const CaseComboboxPicker: React.FC<CaseComboboxPickerProps> = ({
               ))}
               <Combobox.EventsTarget>
                 <PillsInput.Field
-                  placeholder={
-                    disabled
-                      ? 'Select a source station first'
-                      : selectedIds.length === 0
-                        ? 'Search by case number or document type…'
-                        : undefined
-                  }
+                  placeholder={placeholder}
                   value={search}
                   disabled={disabled}
                   onChange={(e) => {

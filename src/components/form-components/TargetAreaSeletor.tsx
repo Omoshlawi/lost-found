@@ -7,14 +7,12 @@ import { useAddressHierarchy } from '@/features/addresses/hooks';
 type TargetAreaSeletorProps<T extends FieldValues> = SelectProps & {
   control: Control<T>;
   name: Path<T>;
-  label: string;
   placeholder?: string;
   description?: string;
 };
 
-const TargetAreaSeletor = <T extends FieldValues>({
+export const TargetAreaSeletor = <T extends FieldValues>({
   control,
-  label,
   name,
   placeholder = 'Select option',
   ...selectProps
@@ -31,7 +29,6 @@ const TargetAreaSeletor = <T extends FieldValues>({
         <Select
           {...selectProps}
           {...field}
-          label={label}
           placeholder={placeholder}
           data={uniqueAddressList}
           searchable
@@ -44,10 +41,9 @@ const TargetAreaSeletor = <T extends FieldValues>({
             field.onChange('');
             setSearch('');
           }}
+          nothingFoundMessage={isLoading ? 'Searching…' : 'No areas found'}
         />
       )}
     />
   );
 };
-
-export default TargetAreaSeletor;

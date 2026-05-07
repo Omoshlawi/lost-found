@@ -26,7 +26,8 @@ export const useNewOperationForm = ({
 }: UseNewOperationFormOptions) => {
   const { stationId: activeStationId } = useActiveStation();
   const { data: sessionData } = authClient.useSession();
-  const sessionUserId: string | null = (sessionData?.user as any)?.id ?? null;
+  const sessionUserId: string | null = sessionData?.user?.id ?? null;
+  const sessionUserEmail: string | null = sessionData?.user?.email ?? null;
 
   // ── Case label tracking (pills display after search clears) ─────────────────
   const [caseLabels, setCaseLabels] = useState<Record<string, string>>({});
@@ -45,7 +46,7 @@ export const useNewOperationForm = ({
 
   // ── RHF form ──────────────────────────────────────────────────────────────
   const form = useForm<NewOperationFormData>({
-    defaultValues: {
+    values: {
       operationTypeId: preselectedType?.id ?? '',
       foundCaseIds: [],
       stationId: defaultStationId ?? activeStationId ?? null,
@@ -178,6 +179,7 @@ export const useNewOperationForm = ({
     opTypesLoading,
     operationTypeOptions,
     stationOptions,
+    sessionUserEmail,
     // Case picker
     caseSearch,
     setCaseSearch,
