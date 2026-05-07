@@ -47,7 +47,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
     addCase,
     removeCase,
     watchedFoundCaseIds,
-    watchedFromStationId,
+    watchedCounterpartStationId,
     watchedReceiptMethod,
     handleSubmit,
     watchedTargetArea,
@@ -117,7 +117,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
             {selectedOpType?.code === DocumentOperationTypeCode.REQUISITION && (
               <Controller
                 control={form.control}
-                name="fromStationId"
+                name="counterpartStationId"
                 render={({ field, fieldState }) => (
                   <Select
                     label="Source Station"
@@ -192,7 +192,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               onRemove={removeCase}
               disabled={
                 (selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
-                  !watchedFromStationId) ||
+                  !watchedCounterpartStationId) ||
                 (selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
                   (!watchedReceiptMethod || !watchedTargetArea))
               }
@@ -208,7 +208,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
             {selectedOpType?.requiresDestinationStation && (
               <Controller
                 control={form.control}
-                name="toStationId"
+                name="counterpartStationId"
                 render={({ field, fieldState }) => (
                   <Select
                     label="Destination Station"
@@ -231,7 +231,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
               selectedOpType?.requiresSourceStation && (
                 <Controller
                   control={form.control}
-                  name="fromStationId"
+                  name="counterpartStationId"
                   render={({ field, fieldState }) => (
                     <Select
                       label="Source Station"

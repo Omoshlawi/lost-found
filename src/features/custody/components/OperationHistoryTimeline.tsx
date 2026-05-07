@@ -30,7 +30,7 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
           const code = op.operationType?.code;
           if (code === 'REQUISITION') {
             const performer = op.station?.name;
-            const source = op.fromStation?.name;
+            const source = op.counterpartStation?.name;
             if (performer && source) {
               return `${performer} → requested from ${source}`;
             }
@@ -39,10 +39,10 @@ export const OperationHistoryTimeline: React.FC<OperationHistoryTimelineProps> =
             }
             return performer ?? null;
           }
-          if (op.fromStation && op.toStation) {
-            return `${op.fromStation.name} → ${op.toStation.name}`;
+          if (op.station && op.counterpartStation) {
+            return `${op.station.name} → ${op.counterpartStation.name}`;
           }
-          return op.station?.name ?? null;
+          return op.station?.name ?? op.counterpartStation?.name ?? null;
         })();
 
         return (

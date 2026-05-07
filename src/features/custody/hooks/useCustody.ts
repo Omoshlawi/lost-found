@@ -151,7 +151,7 @@ export const cancelOperation = async (id: string, reasonCode: string, comment?: 
 const singleItemOp = async (
   foundCaseId: string,
   opCode: string,
-  stationKey: 'stationId' | 'toStationId',
+  stationKey: 'stationId' | 'counterpartStationId',
   stationId?: string,
   notes?: string
 ) => {
@@ -174,8 +174,8 @@ export const recordDisposal = (foundCaseId: string, data: { stationId: string; n
 
 export const initiateTransfer = (
   foundCaseId: string,
-  data: { toStationId: string; notes?: string }
-) => singleItemOp(foundCaseId, 'TRANSFER_OUT', 'toStationId', data.toStationId, data.notes);
+  data: { counterpartStationId: string; notes?: string }
+) => singleItemOp(foundCaseId, 'TRANSFER_OUT', 'counterpartStationId', data.counterpartStationId, data.notes);
 
 export const recordReturn = (foundCaseId: string, data: { stationId: string; notes?: string }) =>
   singleItemOp(foundCaseId, 'RETURN', 'stationId', data.stationId, data.notes);

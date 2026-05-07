@@ -19,7 +19,7 @@ const TransferOutForm: React.FC<TransferOutFormProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [toStationId, setToStationId] = useState<string | null>(null);
+  const [counterpartStationId, setCounterpartStationId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,13 +30,13 @@ const TransferOutForm: React.FC<TransferOutFormProps> = ({
     .map((s) => ({ label: `${s.name} (${s.code})`, value: s.id }));
 
   const handleSubmit = async () => {
-    if (!toStationId) {
+    if (!counterpartStationId) {
       return;
     }
     setError(null);
     setIsLoading(true);
     try {
-      await initiateTransfer(foundCaseId, { toStationId, notes: notes || undefined });
+      await initiateTransfer(foundCaseId, { counterpartStationId, notes: notes || undefined });
       showNotification({
         title: 'Transfer initiated',
         message: 'Document is now in transit.',
@@ -59,8 +59,8 @@ const TransferOutForm: React.FC<TransferOutFormProps> = ({
           label="Destination Station"
           placeholder="Select station"
           data={stationOptions}
-          value={toStationId}
-          onChange={setToStationId}
+          value={counterpartStationId}
+          onChange={setCounterpartStationId}
           required
           searchable
         />
@@ -86,7 +86,7 @@ const TransferOutForm: React.FC<TransferOutFormProps> = ({
           radius={0}
           leftSection={<TablerIcon name="arrowRight" size={14} />}
           loading={isLoading}
-          disabled={!toStationId}
+          disabled={!counterpartStationId}
           onClick={handleSubmit}
         >
           Initiate Transfer

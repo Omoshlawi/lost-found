@@ -14,10 +14,9 @@ export const GrantStaffOperationSchema = z.object({
  * conditional required rules are enforced by Zod rather than ad-hoc checks.
  *
  * Conditional rules:
- *   requiresDestinationStation → toStationId required    (e.g. TRANSFER_OUT)
- *   requiresSourceStation      → fromStationId required  (e.g. TRANSFER_IN)
- *   requiresNotes              → notes required           (e.g. DISPOSAL)
- *   code === REQUISITION       → requestedByStationId required
+ *   requiresDestinationStation → counterpartStationId required  (e.g. TRANSFER_OUT)
+ *   requiresSourceStation      → counterpartStationId required  (e.g. TRANSFER_IN, REQUISITION)
+ *   requiresNotes              → notes required                  (e.g. DISPOSAL)
  */
 export const makeNewOperationSchema = (opType?: {
   code?: string;
@@ -31,8 +30,7 @@ export const makeNewOperationSchema = (opType?: {
       operationTypeId: z.string().min(1, 'Select an operation type'),
       foundCaseIds: z.array(z.string()).min(1, 'Select at least one document'),
       stationId: z.string().nullable().optional(),
-      toStationId: z.string().nullable().optional(),
-      fromStationId: z.string().nullable().optional(),
+      counterpartStationId: z.string().nullable().optional(),
       responsiblePersonId: z.string().nullable().optional(),
       notes: z.string().optional().nullable(),
       targetArea: z.string().optional(),
@@ -43,18 +41,14 @@ export const makeNewOperationSchema = (opType?: {
         .optional(),
     })
     .superRefine((data, ctx) => {
-      if (opType?.requiresDestinationStation && !data.toStationId) {
+      if (
+        (opType?.requiresDestinationStation || opType?.requiresSourceStation) &&
+        !data.counterpartStationId
+      ) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Destination station is required for this operation type',
-          path: ['toStationId'],
-        });
-      }
-      if (opType?.requiresSourceStation && !data.fromStationId) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Source station is required for this operation type',
-          path: ['fromStationId'],
+          message: 'Counterpart station is required for this operation type',
+          path: ['counterpartStationId'],
         });
       }
       if (opType?.requiresTargetArea && !data.targetArea?.trim()) {

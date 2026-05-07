@@ -50,8 +50,7 @@ export const useNewOperationForm = ({
       operationTypeId: preselectedType?.id ?? '',
       foundCaseIds: [],
       stationId: defaultStationId ?? activeStationId ?? null,
-      toStationId: null,
-      fromStationId: null,
+      counterpartStationId: null,
       responsiblePersonId: sessionUserId ?? undefined,
       notes: '',
       targetArea: '',
@@ -70,7 +69,7 @@ export const useNewOperationForm = ({
   // ── Derived state ──────────────────────────────────────────────────────────
   const watchedTypeId = form.watch('operationTypeId');
   const watchedFoundCaseIds = form.watch('foundCaseIds');
-  const watchedFromStationId = form.watch('fromStationId');
+  const watchedCounterpartStationId = form.watch('counterpartStationId');
   const watchedReceiptMethod = form.watch('receiptSubmissionMethod');
   const watchedTargetArea = form.watch('targetArea');
 
@@ -89,7 +88,7 @@ export const useNewOperationForm = ({
     ...(caseSearch && { search: caseSearch }),
     // REQUISITION: only show docs at the selected source station
     ...(selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
-      watchedFromStationId && { currentStationId: watchedFromStationId }),
+      watchedCounterpartStationId && { currentStationId: watchedCounterpartStationId }),
     // RECEIPT DROPOFF: filter by submission method + pickup station
     ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
       watchedReceiptMethod === SubmissionMethod.DROPOFF && {
@@ -148,8 +147,7 @@ export const useNewOperationForm = ({
         operationTypeId: data.operationTypeId,
         foundCaseIds: data.foundCaseIds,
         ...(data.stationId && { stationId: data.stationId }),
-        ...(data.toStationId && { toStationId: data.toStationId }),
-        ...(data.fromStationId && { fromStationId: data.fromStationId }),
+        ...(data.counterpartStationId && { counterpartStationId: data.counterpartStationId }),
         responsiblePersonId: data.responsiblePersonId ?? null,
         notes: data.notes || undefined,
         ...(data.targetArea?.trim() && { targetArea: data.targetArea.trim() }),
@@ -190,7 +188,7 @@ export const useNewOperationForm = ({
     addCase,
     removeCase,
     watchedFoundCaseIds,
-    watchedFromStationId,
+    watchedCounterpartStationId,
     watchedReceiptMethod,
     watchedTargetArea,
     // Submit

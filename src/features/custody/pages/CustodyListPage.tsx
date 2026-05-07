@@ -113,7 +113,7 @@ const CustodyListPage: React.FC = () => {
       {
         header: 'Station',
         id: 'station',
-        cell: ({ row: { original } }) => original.station?.name ?? original.toStation?.name ?? '—',
+        cell: ({ row: { original } }) => original.station?.name ?? original.counterpartStation?.name ?? '—',
       },
       {
         header: 'Documents',

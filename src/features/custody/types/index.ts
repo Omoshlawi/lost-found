@@ -136,12 +136,8 @@ export interface DocumentOperation {
   status: DocumentOperationStatus;
   stationId?: string | null;
   station?: { id: string; name: string; code: string } | null;
-  fromStationId?: string | null;
-  fromStation?: { id: string; name: string; code: string } | null;
-  toStationId?: string | null;
-  toStation?: { id: string; name: string; code: string } | null;
-  requestedByStationId?: string | null;
-  requestedByStation?: { id: string; name: string; code: string } | null;
+  counterpartStationId?: string | null;
+  counterpartStation?: { id: string; name: string; code: string } | null;
   createdById: string;
   createdBy?: { id: string; name: string } | null;
   responsiblePersonId?: string | null;
@@ -160,9 +156,7 @@ export interface CreateOperationPayload {
   operationTypeId: string;
   foundCaseIds: string[];
   stationId?: string;
-  fromStationId?: string;
-  toStationId?: string;
-  requestedByStationId?: string;
+  counterpartStationId?: string;
   responsiblePersonId?: string | null;
   notes?: string;
   targetArea?: string;
@@ -170,8 +164,7 @@ export interface CreateOperationPayload {
 
 export interface UpdateOperationPayload {
   stationId?: string | null;
-  fromStationId?: string | null;
-  toStationId?: string | null;
+  counterpartStationId?: string | null;
   responsiblePersonId?: string | null;
   notes?: string | null;
   targetArea?: string | null;
