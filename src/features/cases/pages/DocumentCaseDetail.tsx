@@ -14,7 +14,7 @@ import {
   LocationInformation,
   ReportDetails,
 } from '../components';
-import { useActiveCollection, useDocumentCase } from '../hooks';
+import { useActiveExchange, useDocumentCase } from '../hooks';
 import {
   CaseType,
   ExtractionStatus,
@@ -29,7 +29,7 @@ const DocumentCaseDetail = () => {
 
   // Must be before any early returns — SWR skips fetch when foundCaseId is undefined
   const foundCaseId = reportData?.foundDocumentCase?.id;
-  const { hasActiveCollection } = useActiveCollection(foundCaseId);
+  const { hasActiveVerification } = useActiveExchange(foundCaseId);
 
   if (isLoading) {
     return <DocumentCaseDetailSkeleton />;
@@ -85,7 +85,7 @@ const DocumentCaseDetail = () => {
         lostAuto={reportData.lostDocumentCase?.auto}
       />
 
-      {hasActiveCollection && <CaseCollectionAlert documentCase={reportData} />}
+      {hasActiveVerification && <CaseCollectionAlert documentCase={reportData} />}
 
       <Tabs defaultValue="document" variant="default">
         <Tabs.List>

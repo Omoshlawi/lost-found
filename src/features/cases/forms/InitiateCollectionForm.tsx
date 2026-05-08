@@ -19,7 +19,7 @@ const InitiateCollectionForm: React.FC<InitiateCollectionFormProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { initiateCollection } = useDocumentCaseApi();
+  const { initiateExchange } = useDocumentCaseApi();
 
   const doc = documentCase.document;
 
@@ -34,9 +34,9 @@ const InitiateCollectionForm: React.FC<InitiateCollectionFormProps> = ({
     setError(null);
     setIsLoading(true);
     try {
-      await initiateCollection(documentCase.foundDocumentCase!.id);
+      await initiateExchange(documentCase.foundDocumentCase!.id);
       showNotification({
-        title: 'Collection initiated',
+        title: 'Exchange initiated',
         message: 'Handover code sent to the finder. Ask them to share it with you.',
         color: 'green',
       });
@@ -44,7 +44,7 @@ const InitiateCollectionForm: React.FC<InitiateCollectionFormProps> = ({
       onClose();
     } catch (err) {
       const e = handleApiErrors<{}>(err);
-      setError(e.detail ?? 'Failed to initiate collection. Please try again.');
+      setError(e.detail ?? 'Failed to initiate exchange. Please try again.');
     } finally {
       setIsLoading(false);
     }

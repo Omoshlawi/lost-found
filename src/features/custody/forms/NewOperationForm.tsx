@@ -15,10 +15,9 @@ import {
 } from '@mantine/core';
 import { TablerIcon } from '@/components';
 import { UserSelect } from '@/components/form-components';
-import { SubmissionMethod } from '@/features/cases/types';
 import { TargetAreaSeletor } from '../../../components/form-components';
 import { CaseComboboxPicker, OperationTypeHeader } from '../components';
-import { DocumentOperationType, DocumentOperationTypeCode } from '../types';
+import { DocumentOperationType, DocumentOperationTypeCode, SubmissionMethod } from '../types';
 import { getCounterpartLabel } from '../utils/operationLabels';
 import { useNewOperationForm } from './useNewOperationForm';
 
@@ -161,8 +160,8 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                   render={({ field }) => (
                     <SegmentedControl
                       data={[
-                        { label: 'Drop-off at Station', value: SubmissionMethod.DROPOFF },
-                        { label: 'Pickup at Address', value: SubmissionMethod.PICKUP },
+                        { label: 'Drop-off at Station', value: SubmissionMethod.STATION_DROPOFF },
+                        { label: 'Pickup at Address', value: SubmissionMethod.AGENT_PICKUP },
                       ]}
                       value={field.value ?? ''}
                       onChange={(v) => {
@@ -173,7 +172,7 @@ const NewOperationForm: React.FC<NewOperationFormProps> = ({
                   )}
                 />
                 <Text size="xs" c="dimmed">
-                  {watchedReceiptMethod === 'DROPOFF'
+                  {watchedReceiptMethod === SubmissionMethod.STATION_DROPOFF
                     ? 'Showing drop-off cases assigned to your active station.'
                     : 'Showing pick-up cases within the target area'}
                 </Text>

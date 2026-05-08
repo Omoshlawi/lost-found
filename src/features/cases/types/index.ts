@@ -86,9 +86,13 @@ export interface LostDocumentCase {
   updatedAt: string;
   voided: boolean;
 }
-/** Response from GET /documents/cases/found/:id/collect/active */
-export interface ActiveCollectionState {
-  hasActiveCollection: boolean;
+/** Response from GET /exchange/inbound/:foundCaseId/active */
+export interface ActiveExchangeState {
+  hasActiveExchange: boolean;
+  exchangeId?: string;
+  exchangeNumber?: string;
+  status?: ExchangeStatus;
+  scheduledAt?: string;
   expiresAt?: string;
   attempts?: number;
   maxAttempts?: number;
@@ -101,9 +105,8 @@ export interface FoundDocumentCase {
   caseId: string;
   case?: DocumentCase;
   status: FoundDocumentCaseStatus;
-  submissionMethod?: SubmissionMethod;
   custodyStatus?: CustodyStatus;
-  collections?: Array<{ status: string; expiresAt: string | null }>;
+  exchanges?: Array<{ status: ExchangeStatus; scheduledAt: string }>;
   currentStationId?: string;
   currentStation?: Station;
   createdAt: string;
@@ -214,9 +217,12 @@ export enum ExtractionStatus {
   FAILED = 'FAILED',
 }
 
-export enum SubmissionMethod {
-  DROPOFF = 'DROPOFF',
-  PICKUP = 'PICKUP',
+export enum ExchangeStatus {
+  SCHEDULED = 'SCHEDULED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum CustodyStatus {

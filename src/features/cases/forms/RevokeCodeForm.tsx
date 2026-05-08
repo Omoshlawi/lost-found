@@ -6,7 +6,7 @@ import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { z } from 'zod';
-import { useActiveExchange, useDocumentCaseApi } from '../hooks';
+import { useDocumentCaseApi } from '../hooks';
 import { DocumentCase } from '../types';
 
 const schema = z.object({
@@ -15,30 +15,25 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-type CancelCollectionFormProps = {
+type RevokeCodeFormProps = {
   documentCase: DocumentCase;
   onClose: () => void;
   onSuccess?: () => void;
 };
 
-const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
-  documentCase,
-  onClose,
-  onSuccess,
-}) => {
+const RevokeCodeForm: React.FC<RevokeCodeFormProps> = ({ documentCase, onClose, onSuccess }) => {
   const form = useForm<FormData>({
     defaultValues: { reason: '' },
     resolver: zodResolver(schema),
   });
-  const { cancelExchange } = useDocumentCaseApi();
-  const { exchange } = useActiveExchange(documentCase.foundDocumentCase?.id);
+  const { cancelVerification } = useDocumentCaseApi();
 
   const handleSubmit: SubmitHandler<FormData> = async ({ reason }) => {
     try {
-      await cancelExchange(documentCase.foundDocumentCase!.id, { reason });
+      await cancelVerification(documentCase.foundDocumentCase!.id, { reason });
       showNotification({
-        title: 'Collection cancelled',
-        message: 'The collection has been cancelled. Case editing is now unlocked.',
+        title: 'Code revoked',
+        message: 'The verification code has been cancelled. The exchange remains scheduled.',
         color: 'orange',
       });
       onSuccess?.();
@@ -47,7 +42,7 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
       const e = handleApiErrors<FormData>(error);
       if (e.detail) {
         showNotification({
-          title: 'Error cancelling collection',
+          title: 'Error revoking code',
           message: e.detail,
           color: 'red',
         });
@@ -67,10 +62,10 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
             variant="light"
             color="orange"
             icon={<TablerIcon name="alertTriangle" size={16} />}
-            title="Cancel collection in progress"
+            title="Revoke verification code"
           >
-            This will void the current handover code and notify the finder. A reason is required for
-            the audit trail.
+            This will void the current code and notify the finder. The exchange stays scheduled — you
+            can issue a new code when ready.
           </Alert>
           <Controller
             control={form.control}
@@ -78,8 +73,8 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
             render={({ field, fieldState }) => (
               <Textarea
                 {...field}
-                label="Reason for cancellation"
-                placeholder="e.g. Finder was unavailable, document field discrepancy found..."
+                label="Reason"
+                placeholder="e.g. Code sent in error, finder not yet present..."
                 error={fieldState.error?.message}
                 minRows={3}
                 autosize
@@ -95,13 +90,13 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
             flex={1}
             radius={0}
             type="submit"
-            color="red"
+            color="orange"
             variant="filled"
             leftSection={<TablerIcon name="circleX" size={14} />}
             loading={form.formState.isSubmitting}
             disabled={form.formState.isSubmitting}
           >
-            Cancel Collection
+            Revoke Code
           </Button>
         </Group>
       </Stack>
@@ -109,4 +104,4 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
   );
 };
 
-export default CancelCollectionForm;
+export default RevokeCodeForm;

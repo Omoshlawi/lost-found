@@ -1,18 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Group, Menu } from '@mantine/core';
-import { closeModal, openModal } from '@mantine/modals';
 import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
-import CancelCollectionForm from '../forms/CancelCollectionForm';
-import ConfirmCollectionForm from '../forms/ConfirmCollectionForm';
-import InitiateCollectionForm from '../forms/InitiateCollectionForm';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
-import { useActiveCollection } from '../hooks';
+import { useActiveExchange } from '../hooks';
 import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import {
+  CancelDocumentCollection,
+  IssueDocumentCollectionCode,
+  RevokeDocumentCollection,
+  VerifyDocumentCollectionCode,
+} from './form-actions';
 
 interface DocumentCaseActionsProps {
   caseId: string;
@@ -28,40 +30,15 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
   reportType,
   status,
 }) => {
-  const { hasAccess: canCollect } = useUserHasSystemAccess({ documentCase: ['collect'] });
   const { hasAccess: canVerify } = useUserHasSystemAccess({ documentCase: ['verify'] });
   const { hasAccess: canReject } = useUserHasSystemAccess({ documentCase: ['reject'] });
 
   const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
   const isDraft =
     status === FoundDocumentCaseStatus.DRAFT || status === LostDocumentCaseStatus.DRAFT;
-  const extractionComplete = documentCase.extraction?.extractionStatus === 'COMPLETED';
-  const { hasActiveCollection: hasPendingCollection } = useActiveCollection(
+  const { hasActiveExchange, hasActiveVerification } = useActiveExchange(
     reportType === 'FOUND' ? documentCase.foundDocumentCase?.id : undefined
   );
-
-  const openInitiate = (title = 'Initiate Document Collection') => {
-    const close = launchWorkspace(
-      <InitiateCollectionForm documentCase={documentCase} onClose={() => close()} />,
-      { title }
-    );
-  };
-
-  const openEnterCode = () => {
-    const id = openModal({
-      children: (
-        <ConfirmCollectionForm documentCase={documentCase} onClose={() => closeModal(id)} />
-      ),
-      title: 'Enter Finder Code',
-    });
-  };
-
-  const openCancel = () => {
-    const close = launchWorkspace(
-      <CancelCollectionForm documentCase={documentCase} onClose={() => close()} />,
-      { title: 'Cancel Collection' }
-    );
-  };
 
   const openVerify = () => {
     const close = launchWorkspace(
@@ -79,17 +56,22 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
 
   return (
     <Group gap="xs" wrap="nowrap">
-      {/* Prominent Enter Code button — only shown when a collection is pending */}
-      {reportType === 'FOUND' && canCollect && hasPendingCollection && (
-        <Button
-          leftSection={<TablerIcon name="keyframe" size={14} />}
-          color="teal"
-          variant="filled"
-          size="sm"
-          onClick={openEnterCode}
-        >
-          Enter Code
-        </Button>
+      {/* Prominent Enter Code button — only shown when a verification code is pending */}
+      {reportType === 'FOUND' && hasActiveVerification && (
+        <VerifyDocumentCollectionCode
+          documentCase={documentCase}
+          renderTrigger={({ onClick }) => (
+            <Button
+              leftSection={<TablerIcon name="keyframe" size={14} />}
+              color="teal"
+              variant="filled"
+              size="sm"
+              onClick={onClick}
+            >
+              Enter Code
+            </Button>
+          )}
+        />
       )}
 
       <Menu shadow="md" position="bottom-end">
@@ -114,7 +96,7 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
           {/* Edit actions — only available while in DRAFT */}
           <Menu.Item
             leftSection={<TablerIcon name="edit" size={14} />}
-            disabled={!isDraft || hasPendingCollection}
+            disabled={!isDraft || hasActiveExchange}
             onClick={() => {
               const close = launchWorkspace(
                 <UpdateCasedetailsForm
@@ -130,7 +112,7 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
           {documentCase.document && (
             <Menu.Item
               leftSection={<TablerIcon name="fileText" size={14} />}
-              disabled={!isDraft || hasPendingCollection}
+              disabled={!isDraft || hasActiveExchange}
               onClick={() => {
                 const close = launchWorkspace(
                   <UpdateDocumentinfoForm
@@ -145,43 +127,63 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
             </Menu.Item>
           )}
 
-          {reportType === 'FOUND' && canCollect && (
+          {reportType === 'FOUND' && (
             <>
               <Menu.Divider />
-              {hasPendingCollection ? (
+              {hasActiveVerification && (
                 <>
-                  {/* Code already sent — offer to enter, resend, or cancel */}
-                  <Menu.Item
-                    leftSection={<TablerIcon name="keyframe" size={14} />}
-                    onClick={openEnterCode}
-                    color="teal"
-                  >
-                    Enter Code
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<TablerIcon name="send" size={14} />}
-                    onClick={() => openInitiate('Resend Handover Code')}
-                    color="civicBlue"
-                  >
-                    Resend Code
-                  </Menu.Item>
-                  <Menu.Item
-                    leftSection={<TablerIcon name="circleX" size={14} />}
-                    onClick={openCancel}
-                    color="orange"
-                  >
-                    Cancel Collection
-                  </Menu.Item>
+                  <IssueDocumentCollectionCode
+                    documentCase={documentCase}
+                    renderTrigger={({ onClick }) => (
+                      <Menu.Item
+                        leftSection={<TablerIcon name="send" size={14} />}
+                        onClick={onClick}
+                        color="civicBlue"
+                      >
+                        Resend Code
+                      </Menu.Item>
+                    )}
+                  />
+                  <RevokeDocumentCollection
+                    documentCase={documentCase}
+                    renderTrigger={({ onClick }) => (
+                      <Menu.Item
+                        leftSection={<TablerIcon name="keyOff" size={14} />}
+                        onClick={onClick}
+                        color="orange"
+                      >
+                        Revoke Code
+                      </Menu.Item>
+                    )}
+                  />
+                  <CancelDocumentCollection
+                    documentCase={documentCase}
+                    renderTrigger={({ onClick }) => (
+                      <Menu.Item
+                        leftSection={<TablerIcon name="circleX" size={14} />}
+                        onClick={onClick}
+                        color="red"
+                      >
+                        Cancel Collection
+                      </Menu.Item>
+                    )}
+                  />
                 </>
-              ) : (
-                <Menu.Item
-                  leftSection={<TablerIcon name="packageImport" size={14} />}
-                  onClick={() => openInitiate()}
-                  disabled={!isDraft || !extractionComplete}
-                  color="civicBlue"
-                >
-                  Collect
-                </Menu.Item>
+              )}
+              {hasActiveExchange && !hasActiveVerification && (
+                /* Exchange scheduled by finder — staff issues the code */
+                <IssueDocumentCollectionCode
+                  documentCase={documentCase}
+                  renderTrigger={({ onClick }) => (
+                    <Menu.Item
+                      leftSection={<TablerIcon name="packageImport" size={14} />}
+                      onClick={onClick}
+                      color="civicBlue"
+                    >
+                      Issue Code
+                    </Menu.Item>
+                  )}
+                />
               )}
             </>
           )}

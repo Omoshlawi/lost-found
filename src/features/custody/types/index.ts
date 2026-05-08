@@ -6,6 +6,10 @@ import { GrantStaffOperationSchema } from '../utils/validation';
 export type GrantStaffOperationFormData = z.infer<typeof GrantStaffOperationSchema>;
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
+export enum SubmissionMethod {
+  STATION_DROPOFF = "STATION_DROPOFF",
+  AGENT_PICKUP = "AGENT_PICKUP",
+}
 
 export enum CustodyStatus {
   WITH_FINDER = 'WITH_FINDER',

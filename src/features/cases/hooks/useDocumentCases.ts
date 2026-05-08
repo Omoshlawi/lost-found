@@ -3,10 +3,11 @@ import useSWR from 'swr';
 import { StatusTransitionReasonFormData } from '@/features/status-transitions/types';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
-  ActiveCollectionState,
+  ActiveExchangeState,
   CaseDocumentFormData,
   DocumentCase,
   DocumentImage,
+  ExchangeStatus,
   ExtractionStatus,
   FoundDocumentCaseFormData,
   LostDocumentCaseFormData,
@@ -182,45 +183,82 @@ const updateDocumentCase = async (caseId: string, payload: Partial<FoundDocument
   return documentCase.data;
 };
 
-const initiateCollection = async (foundCaseId: string): Promise<{ collectionId: string; expiresAt: string }> => {
-  const result = await apiFetch<{ collectionId: string; expiresAt: string }>(
-    `/documents/cases/found/${foundCaseId}/collect/initiate`,
+export interface InitiateExchangeResponse {
+  exchangeId: string;
+  exchangeNumber: string;
+  verificationId: string;
+  expiresAt: string;
+}
+
+const initiateExchange = async (foundCaseId: string): Promise<InitiateExchangeResponse> => {
+  const result = await apiFetch<InitiateExchangeResponse>(
+    `/exchange/inbound/${foundCaseId}/issue-code`,
     { method: 'POST' }
   );
+  mutate('/exchange/inbound');
   mutate('/documents/cases');
   return result.data;
 };
 
-const confirmCollection = async (foundCaseId: string, data: { code: string }): Promise<DocumentCase> => {
-  const result = await apiFetch<DocumentCase>(
-    `/documents/cases/found/${foundCaseId}/collect/confirm`,
-    { method: 'POST', data }
-  );
-  mutate('/documents/cases');
-  return result.data;
-};
-
-const cancelCollection = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
-  await apiFetch(`/documents/cases/found/${foundCaseId}/collect/cancel`, {
+const verifyExchange = async (
+  foundCaseId: string,
+  data: { code: string }
+): Promise<DocumentCase> => {
+  const result = await apiFetch<DocumentCase>(`/exchange/inbound/${foundCaseId}/verify`, {
     method: 'POST',
     data,
   });
+  mutate('/exchange/inbound');
+  mutate('/documents/cases');
+  return result.data;
+};
+
+const cancelExchange = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
+  await apiFetch(`/exchange/inbound/${foundCaseId}/cancel`, { method: 'POST', data });
+  mutate('/exchange/inbound');
   mutate('/documents/cases');
 };
 
-export const useActiveCollection = (foundCaseId?: string) => {
-  const { data, error, isLoading, mutate: swrMutate } = useSWR<APIFetchResponse<ActiveCollectionState>>(
-    foundCaseId ? `/documents/cases/found/${foundCaseId}/collect/active` : null,
-    { refreshInterval: (data) => (data?.data?.hasActiveCollection ? 4000 : 0) }
+const cancelVerification = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
+  await apiFetch(`/exchange/inbound/${foundCaseId}/cancel-code`, { method: 'POST', data });
+  mutate('/exchange/inbound');
+  mutate('/documents/cases');
+};
+
+export const useActiveExchange = (foundCaseId?: string) => {
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: swrMutate,
+  } = useSWR<APIFetchResponse<ActiveExchangeState>>(
+    foundCaseId ? `/exchange/inbound/${foundCaseId}/active` : null,
+    {
+      refreshInterval: (data) => {
+        const s = data?.data;
+        return s?.hasActiveExchange &&
+          (s.status === ExchangeStatus.SCHEDULED || s.status === ExchangeStatus.IN_PROGRESS)
+          ? 4000
+          : 0;
+      },
+    }
   );
+  const exchange = data?.data;
   return {
-    collection: data?.data,
-    hasActiveCollection: data?.data?.hasActiveCollection ?? false,
+    exchange,
+    hasActiveExchange: exchange?.hasActiveExchange ?? false,
+    hasActiveVerification:
+      (exchange?.hasActiveExchange ?? false) &&
+      exchange?.status === ExchangeStatus.IN_PROGRESS &&
+      !!exchange?.expiresAt,
     isLoading,
     error,
     mutate: swrMutate,
   };
 };
+
+/** @deprecated use useActiveExchange */
+export const useActiveCollection = useActiveExchange;
 
 const verifyfoundDocumentCase = async (
   foundCaseId: string,
@@ -263,9 +301,10 @@ export const useDocumentCaseApi = () => {
     uploadDocumentImage,
     updateCaseDocument,
     updateDocumentCase,
-    initiateCollection,
-    confirmCollection,
-    cancelCollection,
+    initiateExchange,
+    verifyExchange,
+    cancelExchange,
+    cancelVerification,
     verifyfoundDocumentCase,
     rejectFoundDocumentCase,
   };

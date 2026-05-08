@@ -3,12 +3,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Resolver, SubmitHandler, useForm } from 'react-hook-form';
 import { showNotification } from '@mantine/notifications';
 import { useDocumentCases } from '@/features/cases/hooks';
-import { CaseType, FoundDocumentCaseStatus, SubmissionMethod } from '@/features/cases/types';
+import { CaseType, FoundDocumentCaseStatus } from '@/features/cases/types';
 import { useActiveStation } from '@/hooks/useActiveStation';
 import { authClient, handleApiErrors } from '@/lib/api';
 import { createOperation, useStaffAllowedOperations } from '../hooks/useCustody';
 import { useStations } from '../hooks/useStations';
-import { CustodyStatus, DocumentOperationType, DocumentOperationTypeCode } from '../types';
+import {
+  CustodyStatus,
+  DocumentOperationType,
+  DocumentOperationTypeCode,
+  SubmissionMethod,
+} from '../types';
 import { makeNewOperationSchema, NewOperationFormData } from '../utils/validation';
 
 interface UseNewOperationFormOptions {
@@ -89,18 +94,18 @@ export const useNewOperationForm = ({
     // REQUISITION: only show docs at the selected source station
     ...(selectedOpType?.code === DocumentOperationTypeCode.REQUISITION &&
       watchedCounterpartStationId && { currentStationId: watchedCounterpartStationId }),
-    // RECEIPT DROPOFF: filter by submission method + pickup station
+    // RECEIPT DROPOFF: filter DRAFT/WITH_FINDER cases at the active station
     ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
-      watchedReceiptMethod === SubmissionMethod.DROPOFF && {
-        submissionMethod: SubmissionMethod.DROPOFF,
+      watchedReceiptMethod === SubmissionMethod.STATION_DROPOFF && {
+        submissionMethod: SubmissionMethod.STATION_DROPOFF,
         status: FoundDocumentCaseStatus.DRAFT,
         custodyStatus: CustodyStatus.WITH_FINDER,
         ...(activeStationId && { pickupStationId: activeStationId }),
       }),
-    // RECEIPT PICKUP: PICKUP submission method guarantees a collection address exists
+    // RECEIPT PICKUP: filter DRAFT/WITH_FINDER cases in the target area
     ...(selectedOpType?.code === DocumentOperationTypeCode.RECEIPT &&
-      watchedReceiptMethod === SubmissionMethod.PICKUP && {
-        submissionMethod: SubmissionMethod.PICKUP,
+      watchedReceiptMethod === SubmissionMethod.AGENT_PICKUP && {
+        submissionMethod: SubmissionMethod.AGENT_PICKUP,
         custodyStatus: CustodyStatus.WITH_FINDER,
         status: FoundDocumentCaseStatus.DRAFT,
         ...(watchedTargetArea && { collectionArea: watchedTargetArea }),

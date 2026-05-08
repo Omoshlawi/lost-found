@@ -3,7 +3,7 @@ import { Alert, Button, Group, PinInput, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { formatDate } from '@/lib/utils/helpers';
-import { useActiveCollection, useDocumentCaseApi } from '../hooks';
+import { useActiveExchange, useDocumentCaseApi } from '../hooks';
 import { DocumentCase } from '../types';
 
 type ConfirmCollectionFormProps = {
@@ -20,15 +20,15 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { confirmCollection } = useDocumentCaseApi();
-  const { collection } = useActiveCollection(documentCase.foundDocumentCase?.id);
+  const { verifyExchange } = useDocumentCaseApi();
+  const { exchange } = useActiveExchange(documentCase.foundDocumentCase?.id);
 
   const handleConfirm = async () => {
     if (code.length !== 6) return;
     setError(null);
     setIsLoading(true);
     try {
-      await confirmCollection(documentCase.foundDocumentCase!.id, { code });
+      await verifyExchange(documentCase.foundDocumentCase!.id, { code });
       showNotification({
         title: 'Collection confirmed',
         message: 'Case submitted successfully. The finder has been notified.',
@@ -45,8 +45,8 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
   };
 
   const attemptsRemaining =
-    collection?.maxAttempts != null && collection?.attempts != null
-      ? collection.maxAttempts - collection.attempts
+    exchange?.maxAttempts != null && exchange?.attempts != null
+      ? exchange.maxAttempts - exchange.attempts
       : null;
 
   return (
@@ -57,9 +57,9 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
             Ask the finder to share the 6-digit code displayed in their app. Enter it below to
             confirm handover.
           </Text>
-          {collection?.expiresAt && (
+          {exchange?.expiresAt && (
             <Text size="xs" c="dimmed">
-              Expires {formatDate(collection.expiresAt)}
+              Expires {formatDate(exchange.expiresAt)}
               {attemptsRemaining != null && ` · ${attemptsRemaining} attempt${attemptsRemaining !== 1 ? 's' : ''} remaining`}
             </Text>
           )}

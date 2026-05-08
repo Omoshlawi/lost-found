@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SubmissionMethod } from '@/features/cases/types';
+import { SubmissionMethod } from '../types';
 
 export const GrantStaffOperationSchema = z.object({
   userId: z.string().nonempty('Please select a staff member'),
@@ -34,7 +34,7 @@ export const makeNewOperationSchema = (opType?: {
       targetArea: z.string().optional(),
       // RECEIPT-specific filter fields (only used in the UI to populate foundCaseIds)
       receiptSubmissionMethod: z
-        .enum([SubmissionMethod.DROPOFF, SubmissionMethod.PICKUP])
+        .enum([SubmissionMethod.STATION_DROPOFF, SubmissionMethod.AGENT_PICKUP])
         .nullable()
         .optional(),
     })

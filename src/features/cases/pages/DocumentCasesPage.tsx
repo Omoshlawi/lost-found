@@ -1,35 +1,19 @@
 import { useMemo } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ActionIcon, Badge, Button, Group, Menu, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
-import { modals } from '@mantine/modals';
-import { showNotification } from '@mantine/notifications';
-import {
-  DashboardPageHeader,
-  StateFullDataTable,
-  StatusBadge,
-  SystemAuthorized,
-  TablerIcon,
-} from '@/components';
+import { Anchor, Badge, Button, Group, Select, Stack, Tabs, Text, TextInput } from '@mantine/core';
+import { DashboardPageHeader, StateFullDataTable, StatusBadge, TablerIcon } from '@/components';
 import { launchWorkspace } from '@/components/Workspace';
 import { useDocumentTypes } from '@/features/admin/hooks/useDocumentTypes';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
-import { handleApiErrors } from '@/lib/api';
 import { formatDate } from '@/lib/utils/helpers';
-import {
-  FoundDocumentCaseForm,
-  InitiateCollectionForm,
-  LostDocumentCaseForm,
-  RejectFoundDocumentCaseForm,
-  VerifyFoundDocumentCaseForm,
-} from '../forms';
-import { useDocumentCaseApi, useDocumentCases } from '../hooks';
+import { FoundDocumentCaseForm, LostDocumentCaseForm } from '../forms';
+import { useDocumentCases } from '../hooks';
 import {
   CustodyStatus,
   DocumentCase,
   FoundDocumentCaseStatus,
   LostDocumentCaseStatus,
-  SubmissionMethod,
 } from '../types';
 
 type CaseTab = 'all' | 'lost' | 'found';
@@ -53,11 +37,6 @@ const EXTRACTION_STATUS_OPTIONS = [
   { label: 'Processing: In Progress', value: 'IN_PROGRESS' },
   { label: 'Processing: Completed', value: 'COMPLETED' },
   { label: 'Processing: Failed', value: 'FAILED' },
-];
-
-const SUBMISSION_METHOD_OPTIONS = [
-  { label: 'Drop-off', value: SubmissionMethod.DROPOFF },
-  { label: 'Agent Pickup', value: SubmissionMethod.PICKUP },
 ];
 
 const CUSTODY_STATUS_OPTIONS = [
@@ -118,23 +97,6 @@ const DocumentCasesPage = () => {
     );
   };
 
-  const submissionMethod = searchParams.get('submissionMethod');
-
-  const setSubmissionMethod = (value: string | null) => {
-    setSearchParams(
-      (prev) => {
-        if (value) {
-          prev.set('submissionMethod', value);
-        } else {
-          prev.delete('submissionMethod');
-        }
-        prev.set('page', '1');
-        return prev;
-      },
-      { replace: true }
-    );
-  };
-
   const custodyStatus = searchParams.get('custodyStatus');
 
   const setCustodyStatus = (value: string | null) => {
@@ -184,7 +146,6 @@ const DocumentCasesPage = () => {
     ...(status && { status }),
     ...(extractionStatus && { extractionStatus }),
     ...(documentType && { documentType }),
-    ...(submissionMethod && { submissionMethod }),
     ...(custodyStatus && { custodyStatus }),
   });
 
@@ -194,8 +155,6 @@ const DocumentCasesPage = () => {
     [documentTypes]
   );
 
-  const { deleteDocumentCase } = useDocumentCaseApi();
-
   const statusOptions =
     activeTab === 'lost'
       ? LOST_STATUS_OPTIONS
@@ -203,37 +162,19 @@ const DocumentCasesPage = () => {
         ? FOUND_STATUS_OPTIONS
         : null;
 
-  const handleDelete = (report: DocumentCase) => {
-    modals.openConfirmModal({
-      title: 'Delete Case',
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete this case? This action is destructive and can only be
-          reversed by an admin.
-        </Text>
-      ),
-      labels: { confirm: 'Delete', cancel: 'Cancel' },
-      confirmProps: { color: 'red' },
-      onConfirm: async () => {
-        try {
-          await deleteDocumentCase(report.id);
-          showNotification({ title: 'Deleted', message: 'Case deleted.', color: 'green' });
-        } catch (error) {
-          const e = handleApiErrors<{}>(error);
-          if (e.detail) {
-            showNotification({ title: 'Error', message: e.detail, color: 'red' });
-          }
-        }
-      },
-    });
-  };
-
   const columns = useMemo<ColumnDef<DocumentCase>[]>(
     () => [
       {
         header: 'Case No.',
         accessorKey: 'caseNumber',
         enableHiding: false,
+        cell({ row: { original: documentCase } }) {
+          return (
+            <Anchor component={Link} to={documentCase.id}>
+              {documentCase.caseNumber}
+            </Anchor>
+          );
+        },
       },
       {
         header: 'Type',
@@ -328,21 +269,6 @@ const DocumentCasesPage = () => {
         cell: ({ row: { original } }) => formatDate(original.createdAt),
       },
       {
-        header: 'Submission',
-        id: 'submissionMethod',
-        cell: ({ row: { original } }) => {
-          const method = original.foundDocumentCase?.submissionMethod;
-          if (!method) {
-            return '—';
-          }
-          return (
-            <Badge variant="outline" size="xs">
-              {method === SubmissionMethod.DROPOFF ? 'Drop-off' : 'Agent Pickup'}
-            </Badge>
-          );
-        },
-      },
-      {
         header: 'Custody',
         id: 'custodyStatus',
         cell: ({ row: { original } }) => {
@@ -367,120 +293,6 @@ const DocumentCasesPage = () => {
     ],
     [activeTab]
   );
-
-  const actionsColumn: ColumnDef<DocumentCase> = {
-    id: 'actions',
-    size: 40,
-    cell: ({ row: { original: report } }) => {
-      const isFound = !!report.foundDocumentCase;
-      return (
-        <Menu position="bottom-end" width={200}>
-          <Menu.Target>
-            <ActionIcon variant="subtle" size="sm" aria-label="Row actions">
-              <TablerIcon name="dots" size={14} stroke={1.5} />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<TablerIcon name="eye" size={14} />}
-              component={Link}
-              to={`${report.id}`}
-            >
-              View Details
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<TablerIcon name="vectorTriangle" size={14} />}
-              component={Link}
-              to={`/dashboard/matches?matchesTab=semantic&semanticRef=${report.caseNumber}&semanticType=${isFound ? 'found' : 'lost'}`}
-              color="civicBlue"
-            >
-              Similar Cases
-            </Menu.Item>
-            {isFound && (
-              <>
-                <SystemAuthorized
-                  permissions={{ documentCase: ['collect'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
-                  <Menu.Item
-                    leftSection={<TablerIcon name="packageImport" size={14} />}
-                    color="teal"
-                    disabled={
-                      report.foundDocumentCase?.status !== FoundDocumentCaseStatus.DRAFT ||
-                      report.extraction?.extractionStatus !== 'COMPLETED'
-                    }
-                    onClick={() => {
-                      const dismiss = launchWorkspace(
-                        <InitiateCollectionForm documentCase={report} onClose={() => dismiss()} />,
-                        { title: 'Initiate Collection' }
-                      );
-                    }}
-                  >
-                    Collect
-                  </Menu.Item>
-                </SystemAuthorized>
-                <SystemAuthorized
-                  permissions={{ documentCase: ['verify'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
-                  <Menu.Item
-                    leftSection={<TablerIcon name="circleCheck" size={14} />}
-                    color="green"
-                    disabled={
-                      report.foundDocumentCase?.status !== FoundDocumentCaseStatus.SUBMITTED
-                    }
-                    onClick={() => {
-                      const dismiss = launchWorkspace(
-                        <VerifyFoundDocumentCaseForm
-                          documentCase={report}
-                          onClose={() => dismiss()}
-                        />,
-                        { title: 'Verify Found Document Case' }
-                      );
-                    }}
-                  >
-                    Verify
-                  </Menu.Item>
-                </SystemAuthorized>
-                <SystemAuthorized
-                  permissions={{ documentCase: ['reject'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
-                  <Menu.Item
-                    leftSection={<TablerIcon name="circleX" size={14} />}
-                    color="red"
-                    disabled={
-                      report.foundDocumentCase?.status !== FoundDocumentCaseStatus.SUBMITTED
-                    }
-                    onClick={() => {
-                      const dismiss = launchWorkspace(
-                        <RejectFoundDocumentCaseForm
-                          documentCase={report}
-                          onClose={() => dismiss()}
-                        />,
-                        { title: 'Reject Found Document Case' }
-                      );
-                    }}
-                  >
-                    Reject
-                  </Menu.Item>
-                </SystemAuthorized>
-              </>
-            )}
-            <Menu.Divider />
-            <Menu.Item
-              leftSection={<TablerIcon name="trash" size={14} />}
-              color="red"
-              onClick={() => handleDelete(report)}
-            >
-              Delete
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      );
-    },
-  };
-
   return (
     <Stack gap="md">
       <DashboardPageHeader
@@ -504,7 +316,7 @@ const DocumentCasesPage = () => {
       <StateFullDataTable
         {...documentCasesAsync}
         data={documentCasesAsync.reports}
-        columns={[...columns, actionsColumn]}
+        columns={[...columns]}
         renderActions={() => (
           <>
             <Group gap="xs" wrap="nowrap">
@@ -515,7 +327,10 @@ const DocumentCasesPage = () => {
                 leftSection={<TablerIcon name="fileSearch" size={14} />}
                 onClick={() => {
                   const dismiss = launchWorkspace(
-                    <LostDocumentCaseForm onSuccess={() => dismiss()} closeWorkspace={() => dismiss()} />,
+                    <LostDocumentCaseForm
+                      onSuccess={() => dismiss()}
+                      closeWorkspace={() => dismiss()}
+                    />,
                     { title: 'Report Lost Document' }
                   );
                 }}
@@ -529,7 +344,10 @@ const DocumentCasesPage = () => {
                 leftSection={<TablerIcon name="fileCheck" size={14} />}
                 onClick={() => {
                   const dismiss = launchWorkspace(
-                    <FoundDocumentCaseForm onSuccess={() => dismiss()} closeWorkspace={() => dismiss()} />,
+                    <FoundDocumentCaseForm
+                      onSuccess={() => dismiss()}
+                      closeWorkspace={() => dismiss()}
+                    />,
                     { title: 'Report Found Document' }
                   );
                 }}
@@ -576,26 +394,15 @@ const DocumentCasesPage = () => {
               w={160}
             />
             {activeTab === 'found' && (
-              <>
-                <Select
-                  placeholder="Submission"
-                  data={SUBMISSION_METHOD_OPTIONS}
-                  value={submissionMethod}
-                  onChange={setSubmissionMethod}
-                  size="xs"
-                  clearable
-                  w={140}
-                />
-                <Select
-                  placeholder="Custody"
-                  data={CUSTODY_STATUS_OPTIONS}
-                  value={custodyStatus}
-                  onChange={setCustodyStatus}
-                  size="xs"
-                  clearable
-                  w={140}
-                />
-              </>
+              <Select
+                placeholder="Custody"
+                data={CUSTODY_STATUS_OPTIONS}
+                value={custodyStatus}
+                onChange={setCustodyStatus}
+                size="xs"
+                clearable
+                w={140}
+              />
             )}
           </>
         )}
