@@ -11,3 +11,4 @@ export type { ImageUploadRef, ImageUploadProps } from './ImageUpload';
 export { default as ExtractionInteractionsPanel } from './ExtractionInteractionsPanel';
 export { default as CaseExtractionAlert } from './CaseExtractionAlert';
 export { default as CaseCollectionAlert } from './CaseCollectionAlert';
+export { default as ExchangesPanel } from './ExchangesPanel';

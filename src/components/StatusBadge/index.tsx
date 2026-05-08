@@ -16,6 +16,8 @@ const STATUS_COLOR: Record<string, string> = {
   UNDER_REVIEW: 'orange',
   DISPUTED: 'orange',
   CANCELLED: 'gray',
+  // Exchange
+  SCHEDULED: 'civicGold',
   // AI extraction
   IN_PROGRESS: 'civicBlue',
   FAILED: 'red',
@@ -39,6 +41,7 @@ const STATUS_LABEL: Record<string, string> = {
   UNDER_REVIEW: 'Under Review',
   DISPUTED: 'Disputed',
   CANCELLED: 'Cancelled',
+  SCHEDULED: 'Scheduled',
   IN_PROGRESS: 'In Progress',
   FAILED: 'Failed',
   // Match

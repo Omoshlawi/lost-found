@@ -10,6 +10,7 @@ import {
   DocumentCaseActions,
   DocumentImages,
   DocumentInformation,
+  ExchangesPanel,
   ExtractionInteractionsPanel,
   LocationInformation,
   ReportDetails,
@@ -109,6 +110,11 @@ const DocumentCaseDetail = () => {
               AI Processing
             </Tabs.Tab>
           )}
+          {!isLostCase && (
+            <Tabs.Tab value="exchanges" leftSection={<TablerIcon name="arrowsExchange" size={16} />}>
+              Exchanges
+            </Tabs.Tab>
+          )}
         </Tabs.List>
 
         <Tabs.Panel value="document" pt="md">
@@ -180,6 +186,11 @@ const DocumentCaseDetail = () => {
             <Paper withBorder p="lg">
               <ExtractionInteractionsPanel extraction={reportData.extraction} />
             </Paper>
+          </Tabs.Panel>
+        )}
+        {!isLostCase && (
+          <Tabs.Panel value="exchanges" pt="md">
+            <ExchangesPanel foundCaseId={foundCaseId!} />
           </Tabs.Panel>
         )}
       </Tabs>

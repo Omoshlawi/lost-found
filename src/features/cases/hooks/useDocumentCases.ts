@@ -6,6 +6,7 @@ import {
   ActiveExchangeState,
   CaseDocumentFormData,
   DocumentCase,
+  DocumentExchange,
   DocumentImage,
   ExchangeStatus,
   ExtractionStatus,
@@ -259,6 +260,22 @@ export const useActiveExchange = (foundCaseId?: string) => {
 
 /** @deprecated use useActiveExchange */
 export const useActiveCollection = useActiveExchange;
+
+export const useDocumentExchanges = (foundCaseId?: string) => {
+  const { data, isLoading, error, mutate: swrMutate } = useSWR<
+    APIFetchResponse<{ results: DocumentExchange[] }>
+  >(
+    foundCaseId
+      ? `/exchange?foundCaseId=${foundCaseId}&orderBy=-createdAt&limit=50&v=custom:include(station,address,createdBy,completedBy,cancelledBy)`
+      : null
+  );
+  return {
+    exchanges: data?.data?.results ?? [],
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
+};
 
 const verifyfoundDocumentCase = async (
   foundCaseId: string,
