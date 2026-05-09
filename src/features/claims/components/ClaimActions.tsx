@@ -1,7 +1,13 @@
 import { FC } from 'react';
-import { Button, Menu, Text } from '@mantine/core';
+import { Button, Group, Menu, Text } from '@mantine/core';
 import { openConfirmModal } from '@mantine/modals';
 import { launchWorkspace, SystemAuthorized, TablerIcon } from '@/components';
+import {
+  IssueOutboundCollectionCode,
+  RevokeOutboundCollectionCode,
+  VerifyOutboundCollectionCode,
+} from '@/features/cases/components/form-actions';
+import { useActiveOutboundExchange } from '@/features/exchange';
 import {
   RejectClaimForm,
   RejectReviewForm,
@@ -16,6 +22,10 @@ type ClaimActionsProps = {
 };
 
 const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
+  const { exchange, hasActiveExchange, hasActiveVerification } = useActiveOutboundExchange(
+    claim.id
+  );
+
   const handleReject = () => {
     const dismiss = launchWorkspace(<RejectClaimForm claim={claim} onClose={() => dismiss()} />, {
       title: 'Reject Claim',
@@ -68,6 +78,24 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
   const rejectableStatuses: ClaimStatus[] = [ClaimStatus.PENDING, ClaimStatus.VERIFIED];
 
   return (
+    <Group gap="xs" wrap="nowrap">
+      {hasActiveVerification && exchange.exchangeNumber && (
+        <VerifyOutboundCollectionCode
+          claim={claim}
+          exchangeNumber={exchange.exchangeNumber}
+          renderTrigger={({ onClick }) => (
+            <Button
+              leftSection={<TablerIcon name="keyframe" size={14} />}
+              color="teal"
+              variant="filled"
+              size="sm"
+              onClick={onClick}
+            >
+              Enter Code
+            </Button>
+          )}
+        />
+      )}
     <Menu shadow="md" width={200}>
       <Menu.Target>
         <Button
@@ -162,8 +190,60 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
             Delete
           </Menu.Item>
         </SystemAuthorized>
+
+        {hasActiveExchange && exchange.exchangeNumber && (
+          <>
+            <Menu.Divider />
+            <Menu.Label>Collection</Menu.Label>
+            {hasActiveVerification ? (
+              <>
+                <IssueOutboundCollectionCode
+                  claim={claim}
+                  exchangeNumber={exchange.exchangeNumber}
+                  renderTrigger={({ onClick }) => (
+                    <Menu.Item
+                      leftSection={<TablerIcon name="send" size={14} />}
+                      onClick={onClick}
+                      color="teal"
+                    >
+                      Resend Code
+                    </Menu.Item>
+                  )}
+                />
+                <RevokeOutboundCollectionCode
+                  claim={claim}
+                  exchangeNumber={exchange.exchangeNumber}
+                  renderTrigger={({ onClick }) => (
+                    <Menu.Item
+                      leftSection={<TablerIcon name="keyOff" size={14} />}
+                      onClick={onClick}
+                      color="orange"
+                    >
+                      Revoke Code
+                    </Menu.Item>
+                  )}
+                />
+              </>
+            ) : (
+              <IssueOutboundCollectionCode
+                claim={claim}
+                exchangeNumber={exchange.exchangeNumber}
+                renderTrigger={({ onClick }) => (
+                  <Menu.Item
+                    leftSection={<TablerIcon name="packageExport" size={14} />}
+                    onClick={onClick}
+                    color="teal"
+                  >
+                    Issue Code
+                  </Menu.Item>
+                )}
+              />
+            )}
+          </>
+        )}
       </Menu.Dropdown>
     </Menu>
+    </Group>
   );
 };
 

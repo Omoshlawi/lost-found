@@ -8,3 +8,6 @@ export { default as ConfirmCollectionForm } from './ConfirmCollectionForm';
 export { default as CancelCollectionForm } from './CancelCollectionForm';
 export { default as UpdateCasedetailsForm } from './UpdateCasedetailsForm';
 export { default as UpdateDocumentinfoForm } from './UpdateDocumentinfoForm';
+export { default as IssueOutboundCodeForm } from './IssueOutboundCodeForm';
+export { default as ConfirmOutboundCodeForm } from './ConfirmOutboundCodeForm';
+export { default as RevokeOutboundCodeForm } from './RevokeOutboundCodeForm';

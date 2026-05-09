@@ -75,6 +75,61 @@ export const useActiveExchange = (foundCaseId?: string) => {
   };
 };
 
+export const useActiveOutboundExchange = (claimId?: string) => {
+  const url = claimId
+    ? constructUrl('/exchange', {
+        active: true,
+        direction: ExchangeDirection.OUTBOUND,
+        claimId,
+        v: 'custom:include(verifications)',
+      })
+    : null;
+
+  const { data, error, isLoading, mutate: swrMutate } = useSWR<
+    APIFetchResponse<PaginatedData<DocumentExchange & { verifications: ExchangeVerification[] }>>
+  >(url, {
+    refreshInterval: (data) => {
+      const hasActive = (data?.data?.results ?? []).some(
+        (ex) => ex.status === ExchangeStatus.SCHEDULED || ex.status === ExchangeStatus.IN_PROGRESS
+      );
+      return hasActive ? 4000 : 0;
+    },
+  });
+
+  const exchangeList = data?.data?.results ?? [];
+  const activeExchange = exchangeList.find(
+    (ex) => ex.status === ExchangeStatus.SCHEDULED || ex.status === ExchangeStatus.IN_PROGRESS
+  );
+  const pendingVerification = activeExchange?.verifications?.find(
+    (v) => v.status === VerificationStatus.PENDING
+  );
+
+  const exchange: ActiveExchangeState = activeExchange
+    ? {
+        hasActiveExchange: true,
+        exchangeId: activeExchange.id,
+        exchangeNumber: activeExchange.exchangeNumber,
+        status: activeExchange.status,
+        scheduledAt: activeExchange.scheduledAt,
+        expiresAt: pendingVerification?.expiresAt,
+        attempts: pendingVerification?.attempts,
+        maxAttempts: pendingVerification?.maxAttempts,
+      }
+    : { hasActiveExchange: false };
+
+  return {
+    exchange,
+    hasActiveExchange: !!activeExchange,
+    hasActiveVerification:
+      !!activeExchange &&
+      activeExchange.status === ExchangeStatus.IN_PROGRESS &&
+      !!pendingVerification,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
+};
+
 export const useDocumentExchanges = (foundCaseId?: string) => {
   const url = foundCaseId
     ? constructUrl('/exchange', {
@@ -137,5 +192,56 @@ export const useExchangeApi = () => {
     mutate('/exchange');
   };
 
-  return { issueCode, verifyCode, cancelExchange, cancelVerification };
+  const issueOutboundCode = async (exchangeNumber: string): Promise<DocumentExchange> => {
+    const res = await apiFetch<DocumentExchange>(
+      constructUrl('/exchange/issue-code', {
+        direction: ExchangeDirection.OUTBOUND,
+        exchangeNumber,
+      }),
+      { method: 'POST' }
+    );
+    mutate('/exchange');
+    mutate('/claim');
+    return res.data;
+  };
+
+  const verifyOutboundCode = async (
+    exchangeNumber: string,
+    data: { code: string }
+  ): Promise<DocumentExchange> => {
+    const res = await apiFetch<DocumentExchange>(
+      constructUrl('/exchange/verify-code', {
+        direction: ExchangeDirection.OUTBOUND,
+        exchangeNumber,
+      }),
+      { method: 'POST', data }
+    );
+    mutate('/exchange');
+    mutate('/claim');
+    return res.data;
+  };
+
+  const cancelOutboundVerification = async (
+    exchangeNumber: string,
+    data: { reason: string }
+  ): Promise<void> => {
+    await apiFetch(
+      constructUrl('/exchange/cancel-code', {
+        direction: ExchangeDirection.OUTBOUND,
+        exchangeNumber,
+      }),
+      { method: 'POST', data }
+    );
+    mutate('/exchange');
+  };
+
+  return {
+    issueCode,
+    verifyCode,
+    cancelExchange,
+    cancelVerification,
+    issueOutboundCode,
+    verifyOutboundCode,
+    cancelOutboundVerification,
+  };
 };

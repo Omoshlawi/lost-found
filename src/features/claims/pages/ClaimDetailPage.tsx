@@ -15,6 +15,7 @@ import {
   Text,
 } from '@mantine/core';
 import { DashboardPageHeader, ErrorState, TablerIcon } from '@/components';
+import { ExchangesPanel } from '@/features/cases/components';
 import { useAppColors } from '@/hooks/useAppColors';
 import { ClaimActions, ClaimDetailSkeleton } from '../components';
 import useCompareCases from '../hooks/use-compare-cases';
@@ -67,6 +68,9 @@ const ClaimDetailPage = () => {
           </Tabs.Tab>
           <Tabs.Tab value="attachments" leftSection={<TablerIcon name="paperclip" size={12} />}>
             Attachments Comparison
+          </Tabs.Tab>
+          <Tabs.Tab value="exchanges" leftSection={<TablerIcon name="arrowsExchange" size={12} />}>
+            Exchanges
           </Tabs.Tab>
         </Tabs.List>
 
@@ -166,7 +170,7 @@ const ClaimDetailPage = () => {
               <Box style={{ position: 'relative' }}>
                 <Image
                   src={selectedAttachment}
-                  flex={1}
+                  style={{ width: '100%' }}
                   fit="contain"
                   radius="md"
                   fallbackSrc="https://placehold.co/600x400?text=Placeholder"
@@ -180,7 +184,7 @@ const ClaimDetailPage = () => {
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '0 8px',
-                      pointerEvents: 'none', // allow only buttons to capture clicks
+                      pointerEvents: 'none',
                     }}
                   >
                     <ActionIcon
@@ -203,8 +207,19 @@ const ClaimDetailPage = () => {
                   </Box>
                 )}
               </Box>
+              {attachments.length > 1 && (
+                <Text size="xs" c="dimmed" ta="center" mt={4}>
+                  {selectedAttachmentIndex + 1} / {attachments.length}
+                </Text>
+              )}
             </Paper>
           </SimpleGrid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="exchanges" pt="md">
+          {claim?.foundDocumentCaseId && (
+            <ExchangesPanel foundCaseId={claim.foundDocumentCaseId} />
+          )}
         </Tabs.Panel>
       </Tabs>
     </Stack>
