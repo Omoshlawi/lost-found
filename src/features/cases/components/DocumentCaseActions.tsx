@@ -7,7 +7,7 @@ import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
-import { useActiveExchange } from '../hooks';
+import { useActiveExchange } from '@/features/exchange';
 import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
 import {
   CancelDocumentCollection,

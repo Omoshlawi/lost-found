@@ -1,14 +1,10 @@
 import dayjs from 'dayjs';
-import useSWR from 'swr';
 import { StatusTransitionReasonFormData } from '@/features/status-transitions/types';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData, useApi } from '@/lib/api';
 import {
-  ActiveExchangeState,
   CaseDocumentFormData,
   DocumentCase,
-  DocumentExchange,
   DocumentImage,
-  ExchangeStatus,
   ExtractionStatus,
   FoundDocumentCaseFormData,
   LostDocumentCaseFormData,
@@ -184,99 +180,6 @@ const updateDocumentCase = async (caseId: string, payload: Partial<FoundDocument
   return documentCase.data;
 };
 
-export interface InitiateExchangeResponse {
-  exchangeId: string;
-  exchangeNumber: string;
-  verificationId: string;
-  expiresAt: string;
-}
-
-const initiateExchange = async (foundCaseId: string): Promise<InitiateExchangeResponse> => {
-  const result = await apiFetch<InitiateExchangeResponse>(
-    `/exchange/inbound/${foundCaseId}/issue-code`,
-    { method: 'POST' }
-  );
-  mutate('/exchange/inbound');
-  mutate('/documents/cases');
-  return result.data;
-};
-
-const verifyExchange = async (
-  foundCaseId: string,
-  data: { code: string }
-): Promise<DocumentCase> => {
-  const result = await apiFetch<DocumentCase>(`/exchange/inbound/${foundCaseId}/verify`, {
-    method: 'POST',
-    data,
-  });
-  mutate('/exchange/inbound');
-  mutate('/documents/cases');
-  return result.data;
-};
-
-const cancelExchange = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
-  await apiFetch(`/exchange/inbound/${foundCaseId}/cancel`, { method: 'POST', data });
-  mutate('/exchange/inbound');
-  mutate('/documents/cases');
-};
-
-const cancelVerification = async (foundCaseId: string, data: { reason: string }): Promise<void> => {
-  await apiFetch(`/exchange/inbound/${foundCaseId}/cancel-code`, { method: 'POST', data });
-  mutate('/exchange/inbound');
-  mutate('/documents/cases');
-};
-
-export const useActiveExchange = (foundCaseId?: string) => {
-  const {
-    data,
-    error,
-    isLoading,
-    mutate: swrMutate,
-  } = useSWR<APIFetchResponse<ActiveExchangeState>>(
-    foundCaseId ? `/exchange/inbound/${foundCaseId}/active` : null,
-    {
-      refreshInterval: (data) => {
-        const s = data?.data;
-        return s?.hasActiveExchange &&
-          (s.status === ExchangeStatus.SCHEDULED || s.status === ExchangeStatus.IN_PROGRESS)
-          ? 4000
-          : 0;
-      },
-    }
-  );
-  const exchange = data?.data;
-  return {
-    exchange,
-    hasActiveExchange: exchange?.hasActiveExchange ?? false,
-    hasActiveVerification:
-      (exchange?.hasActiveExchange ?? false) &&
-      exchange?.status === ExchangeStatus.IN_PROGRESS &&
-      !!exchange?.expiresAt,
-    isLoading,
-    error,
-    mutate: swrMutate,
-  };
-};
-
-/** @deprecated use useActiveExchange */
-export const useActiveCollection = useActiveExchange;
-
-export const useDocumentExchanges = (foundCaseId?: string) => {
-  const { data, isLoading, error, mutate: swrMutate } = useSWR<
-    APIFetchResponse<{ results: DocumentExchange[] }>
-  >(
-    foundCaseId
-      ? `/exchange?foundCaseId=${foundCaseId}&orderBy=-createdAt&limit=50&v=custom:include(station,address,createdBy,completedBy,cancelledBy)`
-      : null
-  );
-  return {
-    exchanges: data?.data?.results ?? [],
-    isLoading,
-    error,
-    mutate: swrMutate,
-  };
-};
-
 const verifyfoundDocumentCase = async (
   foundCaseId: string,
   data: StatusTransitionReasonFormData
@@ -318,10 +221,6 @@ export const useDocumentCaseApi = () => {
     uploadDocumentImage,
     updateCaseDocument,
     updateDocumentCase,
-    initiateExchange,
-    verifyExchange,
-    cancelExchange,
-    cancelVerification,
     verifyfoundDocumentCase,
     rejectFoundDocumentCase,
   };

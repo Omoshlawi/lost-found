@@ -1,10 +1,24 @@
 import React, { useMemo } from 'react';
 import { ColumnDef, Row } from '@tanstack/react-table';
-import { ActionIcon, Badge, Box, Divider, Group, SimpleGrid, Skeleton, Stack, Text } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Divider,
+  Group,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core';
 import { DataTable, StatusBadge, TablerIcon } from '@/components';
-import { formatDate, formatDateTime } from '@/lib/utils/helpers';
-import { useDocumentExchanges } from '../hooks';
-import { DocumentExchange, ExchangeDirection, ExchangeMethod } from '../types';
+import {
+  DocumentExchange,
+  ExchangeDirection,
+  ExchangeMethod,
+  useDocumentExchanges,
+} from '@/features/exchange';
+import { formatDateTime } from '@/lib/utils/helpers';
 
 const METHOD_LABEL: Record<ExchangeMethod, string> = {
   [ExchangeMethod.STATION_DROPOFF]: 'Station Drop-off',
@@ -27,9 +41,7 @@ function locationLabel(exchange: DocumentExchange): string {
     return exchange.stationId ? '—' : '—';
   }
   if (exchange.address) {
-    return [exchange.address.level3, exchange.address.address1]
-      .filter(Boolean)
-      .join(', ');
+    return [exchange.address.level3, exchange.address.address1].filter(Boolean).join(', ');
   }
   return exchange.addressId ? '—' : '—';
 }

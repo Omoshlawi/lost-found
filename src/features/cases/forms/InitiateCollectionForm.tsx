@@ -3,7 +3,7 @@ import { Alert, Button, Group, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
-import { useDocumentCaseApi } from '../hooks';
+import { useExchangeApi } from '@/features/exchange';
 import { DocumentCase } from '../types';
 
 type InitiateCollectionFormProps = {
@@ -19,7 +19,7 @@ const InitiateCollectionForm: React.FC<InitiateCollectionFormProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { initiateExchange } = useDocumentCaseApi();
+  const { issueCode } = useExchangeApi();
 
   const doc = documentCase.document;
 
@@ -34,7 +34,7 @@ const InitiateCollectionForm: React.FC<InitiateCollectionFormProps> = ({
     setError(null);
     setIsLoading(true);
     try {
-      await initiateExchange(documentCase.foundDocumentCase!.id);
+      await issueCode(documentCase.foundDocumentCase!.id);
       showNotification({
         title: 'Exchange initiated',
         message: 'Handover code sent to the finder. Ask them to share it with you.',

@@ -6,7 +6,7 @@ import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { z } from 'zod';
-import { useDocumentCaseApi } from '../hooks';
+import { useExchangeApi } from '@/features/exchange';
 import { DocumentCase } from '../types';
 
 const schema = z.object({
@@ -26,7 +26,7 @@ const RevokeCodeForm: React.FC<RevokeCodeFormProps> = ({ documentCase, onClose, 
     defaultValues: { reason: '' },
     resolver: zodResolver(schema),
   });
-  const { cancelVerification } = useDocumentCaseApi();
+  const { cancelVerification } = useExchangeApi();
 
   const handleSubmit: SubmitHandler<FormData> = async ({ reason }) => {
     try {

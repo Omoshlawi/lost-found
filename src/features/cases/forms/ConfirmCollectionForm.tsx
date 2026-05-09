@@ -3,7 +3,7 @@ import { Alert, Button, Group, PinInput, Stack, Text } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { formatDate } from '@/lib/utils/helpers';
-import { useActiveExchange, useDocumentCaseApi } from '../hooks';
+import { useActiveExchange, useExchangeApi } from '@/features/exchange';
 import { DocumentCase } from '../types';
 
 type ConfirmCollectionFormProps = {
@@ -20,7 +20,7 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { verifyExchange } = useDocumentCaseApi();
+  const { verifyCode } = useExchangeApi();
   const { exchange } = useActiveExchange(documentCase.foundDocumentCase?.id);
 
   const handleConfirm = async () => {
@@ -28,7 +28,7 @@ const ConfirmCollectionForm: React.FC<ConfirmCollectionFormProps> = ({
     setError(null);
     setIsLoading(true);
     try {
-      await verifyExchange(documentCase.foundDocumentCase!.id, { code });
+      await verifyCode(documentCase.foundDocumentCase!.id, { code });
       showNotification({
         title: 'Collection confirmed',
         message: 'Case submitted successfully. The finder has been notified.',

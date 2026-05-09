@@ -15,7 +15,8 @@ import {
   LocationInformation,
   ReportDetails,
 } from '../components';
-import { useActiveExchange, useDocumentCase } from '../hooks';
+import { useActiveExchange } from '@/features/exchange';
+import { useDocumentCase } from '../hooks';
 import {
   CaseType,
   ExtractionStatus,

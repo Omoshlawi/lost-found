@@ -1,5 +1,5 @@
 import { Badge, Loader, Text } from '@mantine/core';
-import { useActiveExchange } from '@/features/cases/hooks';
+import { useActiveExchange } from '@/features/exchange';
 import { DocumentOperationItem } from '../types';
 
 function CollectionStatusBadge({ item }: { item: DocumentOperationItem }) {

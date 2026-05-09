@@ -2,6 +2,7 @@ import { User } from 'better-auth';
 import { z } from 'zod';
 import { Address } from '@/features/addresses/types';
 import { Station } from '@/features/custody/types';
+import { ExchangeStatus } from '@/features/exchange';
 import { CaseDocumentSchema, FoundDocumentCaseSchema, LostDocumentCaseSchema } from '../utils';
 
 export interface DocumentCase {
@@ -86,20 +87,6 @@ export interface LostDocumentCase {
   updatedAt: string;
   voided: boolean;
 }
-/** Response from GET /exchange/inbound/:foundCaseId/active */
-export interface ActiveExchangeState {
-  hasActiveExchange: boolean;
-  exchangeId?: string;
-  exchangeNumber?: string;
-  status?: ExchangeStatus;
-  scheduledAt?: string;
-  expiresAt?: string;
-  attempts?: number;
-  maxAttempts?: number;
-  /** Only present when the requesting user is the case owner (finder) */
-  code?: string;
-}
-
 export interface FoundDocumentCase {
   id: string;
   caseId: string;
@@ -215,72 +202,6 @@ export enum ExtractionStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   FAILED = 'FAILED',
-}
-
-export enum ExchangeStatus {
-  SCHEDULED = 'SCHEDULED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED',
-}
-
-export enum ExchangeDirection {
-  INBOUND = 'INBOUND',
-  OUTBOUND = 'OUTBOUND',
-}
-
-export enum ExchangeMethod {
-  STATION_DROPOFF = 'STATION_DROPOFF',
-  AGENT_PICKUP = 'AGENT_PICKUP',
-  OWNER_PICKUP = 'OWNER_PICKUP',
-  INHOUSE_DELIVERY = 'INHOUSE_DELIVERY',
-  COURIER_DELIVERY = 'COURIER_DELIVERY',
-}
-
-export interface ExchangeUser {
-  id: string;
-  name: string;
-}
-
-export interface ExchangeStation {
-  id: string;
-  name: string;
-  code: string;
-}
-
-export interface ExchangeAddress {
-  id: string;
-  address1: string;
-  level1: string;
-  level2?: string | null;
-  level3?: string | null;
-}
-
-export interface DocumentExchange {
-  id: string;
-  exchangeNumber: string;
-  direction: ExchangeDirection;
-  method: ExchangeMethod;
-  status: ExchangeStatus;
-  foundCaseId: string;
-  claimId?: string | null;
-  stationId?: string | null;
-  addressId?: string | null;
-  scheduledAt: string;
-  completedAt?: string | null;
-  cancelReason?: string | null;
-  cancelledById?: string | null;
-  createdById: string;
-  completedById?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  // included via v=custom:include(station,address,createdBy,completedBy,cancelledBy)
-  station?: ExchangeStation | null;
-  address?: ExchangeAddress | null;
-  createdBy?: ExchangeUser | null;
-  completedBy?: ExchangeUser | null;
-  cancelledBy?: ExchangeUser | null;
 }
 
 export enum CustodyStatus {

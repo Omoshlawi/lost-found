@@ -6,7 +6,7 @@ import { showNotification } from '@mantine/notifications';
 import { TablerIcon } from '@/components';
 import { handleApiErrors } from '@/lib/api';
 import { z } from 'zod';
-import { useActiveExchange, useDocumentCaseApi } from '../hooks';
+import { useExchangeApi } from '@/features/exchange';
 import { DocumentCase } from '../types';
 
 const schema = z.object({
@@ -30,8 +30,7 @@ const CancelCollectionForm: React.FC<CancelCollectionFormProps> = ({
     defaultValues: { reason: '' },
     resolver: zodResolver(schema),
   });
-  const { cancelExchange } = useDocumentCaseApi();
-  const { exchange } = useActiveExchange(documentCase.foundDocumentCase?.id);
+  const { cancelExchange } = useExchangeApi();
 
   const handleSubmit: SubmitHandler<FormData> = async ({ reason }) => {
     try {

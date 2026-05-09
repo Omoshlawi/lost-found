@@ -1,0 +1,141 @@
+import useSWR from 'swr';
+import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData } from '@/lib/api';
+import {
+  ActiveExchangeState,
+  DocumentExchange,
+  ExchangeDirection,
+  ExchangeStatus,
+  ExchangeVerification,
+  VerificationStatus,
+} from '../types';
+
+export const useExchanges = (params: Record<string, any> = {}, enabled = true) => {
+  const url = constructUrl('/exchange', {
+    v: 'custom:include(verifications,station,address,createdBy,completedBy,cancelledBy)',
+    ...params,
+  });
+  const { data, error, isLoading, mutate: swrMutate } = useSWR<
+    APIFetchResponse<PaginatedData<DocumentExchange>>
+  >(enabled ? url : null);
+  return { exchanges: data?.data?.results ?? [], isLoading, error, mutate: swrMutate };
+};
+
+export const useActiveExchange = (foundCaseId?: string) => {
+  const url = foundCaseId
+    ? constructUrl('/exchange', {
+        active: true,
+        direction: ExchangeDirection.INBOUND,
+        foundCaseId,
+        v: 'custom:include(verifications)',
+      })
+    : null;
+
+  const { data, error, isLoading, mutate: swrMutate } = useSWR<
+    APIFetchResponse<PaginatedData<DocumentExchange & { verifications: ExchangeVerification[] }>>
+  >(url, {
+    refreshInterval: (data) => {
+      const hasActive = (data?.data?.results ?? []).some(
+        (ex) => ex.status === ExchangeStatus.SCHEDULED || ex.status === ExchangeStatus.IN_PROGRESS
+      );
+      return hasActive ? 4000 : 0;
+    },
+  });
+
+  const exchangeList = data?.data?.results ?? [];
+  const activeExchange = exchangeList.find(
+    (ex) => ex.status === ExchangeStatus.SCHEDULED || ex.status === ExchangeStatus.IN_PROGRESS
+  );
+  const pendingVerification = activeExchange?.verifications?.find(
+    (v) => v.status === VerificationStatus.PENDING
+  );
+
+  const exchange: ActiveExchangeState = activeExchange
+    ? {
+        hasActiveExchange: true,
+        exchangeId: activeExchange.id,
+        exchangeNumber: activeExchange.exchangeNumber,
+        status: activeExchange.status,
+        scheduledAt: activeExchange.scheduledAt,
+        expiresAt: pendingVerification?.expiresAt,
+        attempts: pendingVerification?.attempts,
+        maxAttempts: pendingVerification?.maxAttempts,
+      }
+    : { hasActiveExchange: false };
+
+  return {
+    exchange,
+    hasActiveExchange: !!activeExchange,
+    hasActiveVerification:
+      !!activeExchange &&
+      activeExchange.status === ExchangeStatus.IN_PROGRESS &&
+      !!pendingVerification,
+    isLoading,
+    error,
+    mutate: swrMutate,
+  };
+};
+
+export const useDocumentExchanges = (foundCaseId?: string) => {
+  const url = foundCaseId
+    ? constructUrl('/exchange', {
+        foundCaseId,
+        orderBy: '-createdAt',
+        limit: 50,
+        v: 'custom:include(station,address,createdBy,completedBy,cancelledBy)',
+      })
+    : null;
+  const { data, isLoading, error, mutate: swrMutate } = useSWR<
+    APIFetchResponse<PaginatedData<DocumentExchange>>
+  >(url);
+  return { exchanges: data?.data?.results ?? [], isLoading, error, mutate: swrMutate };
+};
+
+export const useExchangeApi = () => {
+  const issueCode = async (foundCaseId: string): Promise<DocumentExchange> => {
+    const res = await apiFetch<DocumentExchange>(
+      constructUrl('/exchange/issue-code', { direction: ExchangeDirection.INBOUND, foundCaseId }),
+      { method: 'POST' }
+    );
+    mutate('/exchange');
+    mutate('/documents/cases');
+    return res.data;
+  };
+
+  const verifyCode = async (
+    foundCaseId: string,
+    data: { code: string }
+  ): Promise<DocumentExchange> => {
+    const res = await apiFetch<DocumentExchange>(
+      constructUrl('/exchange/verify-code', { direction: ExchangeDirection.INBOUND, foundCaseId }),
+      { method: 'POST', data }
+    );
+    mutate('/exchange');
+    mutate('/documents/cases');
+    return res.data;
+  };
+
+  const cancelExchange = async (
+    foundCaseId: string,
+    data: { reason: string }
+  ): Promise<void> => {
+    await apiFetch(
+      constructUrl('/exchange/withdraw', { direction: ExchangeDirection.INBOUND, foundCaseId }),
+      { method: 'POST', data }
+    );
+    mutate('/exchange');
+    mutate('/documents/cases');
+  };
+
+  const cancelVerification = async (
+    foundCaseId: string,
+    data: { reason: string }
+  ): Promise<void> => {
+    await apiFetch(
+      constructUrl('/exchange/cancel-code', { direction: ExchangeDirection.INBOUND, foundCaseId }),
+      { method: 'POST', data }
+    );
+    mutate('/exchange');
+  };
+
+  return { issueCode, verifyCode, cancelExchange, cancelVerification };
+};
