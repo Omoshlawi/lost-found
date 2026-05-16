@@ -58,6 +58,7 @@ const navConfig: NavEntry[] = [
       { icon: 'messageQuestion', label: 'Transition Reasons', href: 'status-transition-reasons' },
       { icon: 'template', label: 'Templates', href: 'templates' },
       { icon: 'shieldLock', label: 'Roles', href: 'roles' },
+      { icon: 'adjustments', label: 'System Settings', href: 'system-settings' },
       { icon: 'users', label: 'Users', href: 'users' },
       { icon: 'layersLinked', label: 'Address Hierarchy', href: 'address-hierarchy' },
       { icon: 'worldPin', label: 'Address Locales', href: 'address-locales' },

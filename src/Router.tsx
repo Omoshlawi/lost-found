@@ -16,7 +16,7 @@ import {
   AddressHierarchyPage,
   AddressLocalesPage,
 } from './features/addresses/pages';
-import { DocumentTypesPage, RolesPage, TransitionReasonsPage } from './features/admin/pages';
+import { DocumentTypesPage, RolesPage, SystemSettingsPage, TransitionReasonsPage } from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import {
@@ -168,6 +168,10 @@ const router = createBrowserRouter([
           {
             path: 'document-types',
             element: <DocumentTypesPage />,
+          },
+          {
+            path: 'system-settings',
+            element: <SystemSettingsPage />,
           },
           {
             path: 'status-transition-reasons',

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DocumentTypeSchema, TransitionReasonSchema } from '../utils';
+import { DocumentTypeSchema, SystemSettingSchema, TransitionReasonSchema } from '../utils';
 
 export interface DocumentType {
   id: string;
@@ -56,3 +56,16 @@ export interface SystemRole {
   label?: string;
   permissions: RolePermission[];
 }
+
+export interface SystemSetting {
+  id: string;
+  key: string;
+  value: string;
+  description?: string;
+  isPublic: boolean;
+  updatedAt: string;
+  updatedBy?: string;
+  voided: boolean;
+}
+
+export type SystemSettingFormData = z.infer<typeof SystemSettingSchema>;

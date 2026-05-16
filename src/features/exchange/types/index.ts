@@ -56,6 +56,26 @@ export interface ExchangeAddress {
   level3?: string | null;
 }
 
+export enum DeliveryZone {
+  LOCAL = 'LOCAL',
+  COUNTY = 'COUNTY',
+  NATIONAL = 'NATIONAL',
+}
+
+export interface DeliveryZoneFee {
+  zone: DeliveryZone;
+  amount: number;
+  currency: string;
+}
+
+export interface DeliveryPolicy {
+  maxAttempts: number;
+  feeNonRefundable: boolean;
+  retryFreeUntilAttempt: number;
+  fallbackMethod: 'OWNER_PICKUP';
+  fees: DeliveryZoneFee[];
+}
+
 export interface DocumentExchange {
   id: string;
   exchangeNumber: string;
@@ -72,6 +92,11 @@ export interface DocumentExchange {
   cancelledById?: string | null;
   createdById: string;
   completedById?: string | null;
+  deliveryZone?: DeliveryZone | null;
+  stationSnapshot?: Record<string, string> | null;
+  addressSnapshot?: Record<string, string> | null;
+  courierProvider?: string | null;
+  trackingNumber?: string | null;
   createdAt: string;
   updatedAt: string;
   verifications?: ExchangeVerification[];

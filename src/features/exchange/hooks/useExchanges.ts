@@ -2,6 +2,7 @@ import useSWR from 'swr';
 import { apiFetch, APIFetchResponse, constructUrl, mutate, PaginatedData } from '@/lib/api';
 import {
   ActiveExchangeState,
+  DeliveryPolicy,
   DocumentExchange,
   ExchangeDirection,
   ExchangeStatus,
@@ -131,6 +132,13 @@ export const useDocumentExchanges = (foundCaseId?: string) => {
   return { exchanges: data?.data?.results ?? [], isLoading, error, mutate: swrMutate };
 };
 
+export const useDeliveryPolicy = () => {
+  const { data, error, isLoading } = useSWR<APIFetchResponse<DeliveryPolicy>>(
+    '/exchange/delivery-policy'
+  );
+  return { policy: data?.data ?? null, isLoading, error };
+};
+
 export const useExchangeApi = () => {
   const issueCode = async (foundCaseId: string): Promise<DocumentExchange> => {
     const res = await apiFetch<DocumentExchange>(
@@ -227,6 +235,21 @@ export const useExchangeApi = () => {
     mutate('/exchange');
   };
 
+  const failDelivery = async (
+    exchangeNumber: string,
+    data: { reason: string }
+  ): Promise<void> => {
+    await apiFetch(
+      constructUrl('/exchange/fail-delivery', { exchangeNumber }),
+      { method: 'POST', data }
+    );
+    mutate('/exchange');
+    mutate('/claim');
+  };
+
+  const getDeliveryLabelUrl = (exchangeNumber: string): string =>
+    constructUrl('/exchange/delivery-label/' + exchangeNumber, {});
+
   return {
     issueCode,
     verifyCode,
@@ -235,5 +258,7 @@ export const useExchangeApi = () => {
     issueOutboundCode,
     verifyOutboundCode,
     cancelOutboundVerification,
+    failDelivery,
+    getDeliveryLabelUrl,
   };
 };

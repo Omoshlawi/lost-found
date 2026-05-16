@@ -19,6 +19,13 @@ export const DocumentTypeSchema = z.object({
   averageReplacementCost: z.number({ coerce: true }).optional(),
 });
 
+export const SystemSettingSchema = z.object({
+  key: z.string().min(1, 'Key is required'),
+  value: z.string().min(1, 'Value is required'),
+  description: z.string().optional(),
+  isPublic: z.boolean().optional(),
+});
+
 export const TransitionReasonSchema = z.object({
   code: z.string().min(1, 'Code is required'),
   label: z.string().min(1, 'Label is required'),
