@@ -103,9 +103,7 @@ const GrantStaffOperationForm: React.FC<GrantStaffOperationFormProps> = ({
                   setSelectedUserOption(value ? { value, label: option.label } : null);
                 }}
                 onSearchChange={(searchValue) =>
-                  userSearch.setFilters(
-                    searchValue ? { searchField: 'email', searchValue } : undefined
-                  )
+                  userSearch.setFilters(searchValue ? { searchField: 'email', searchValue } : {})
                 }
                 filter={({ options }) => options}
                 searchable
