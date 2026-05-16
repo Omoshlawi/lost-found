@@ -1,5 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { ActionIcon, Badge, Menu, Text } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
 import {
   DashboardPageHeader,
   launchWorkspace,
@@ -9,14 +11,48 @@ import {
 } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
+import { handleApiErrors } from '@/lib/api';
 import { SystemSettingForm } from '../forms';
-import { useSystemSettings } from '../hooks';
+import { useSystemSettings, useSystemSettingsApi } from '../hooks';
 import { SystemSetting } from '../types';
 
 const SystemSettingsPage = () => {
   const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
   const settingsAsync = useSystemSettings({ page, limit: pageSize });
+  const { deleteSetting, mutateSettings } = useSystemSettingsApi();
   const { hasAccess } = useUserHasSystemAccess({ setting: ['manage-system'] });
+
+  const handleDelete = (setting: SystemSetting) => {
+    modals.openConfirmModal({
+      title: 'Delete Setting',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete <strong>{setting.key}</strong>? The system will fall back
+          to the code default until it is re-seeded or re-created.
+        </Text>
+      ),
+      labels: { confirm: 'Delete', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await deleteSetting(setting.key);
+          showNotification({ title: 'Success', message: `${setting.key} deleted`, color: 'green' });
+          mutateSettings();
+        } catch (error) {
+          const e = handleApiErrors<{}>(error);
+          if (e.detail) {
+            showNotification({
+              title: 'Error deleting setting',
+              message: e.detail,
+              color: 'red',
+              position: 'top-right',
+            });
+          }
+        }
+      },
+    });
+  };
 
   const handleLaunchForm = (setting?: SystemSetting) => {
     const closeWorkspace = launchWorkspace(
@@ -60,6 +96,13 @@ const SystemSettingsPage = () => {
                       onClick={() => handleLaunchForm(setting)}
                     >
                       Edit
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<TablerIcon name="trash" size={14} />}
+                      color="red"
+                      onClick={() => handleDelete(setting)}
+                    >
+                      Delete
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>

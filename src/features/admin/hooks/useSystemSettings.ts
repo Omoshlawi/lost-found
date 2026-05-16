@@ -3,8 +3,12 @@ import { SystemSetting, SystemSettingFormData } from '../types';
 
 export const useSystemSettings = (filters: Record<string, any> = {}) => {
   const url = constructUrl('/settings', { includeSystemSettings: true, limit: 50, ...filters });
-  const { data, error, isLoading, mutate: revalidate } =
-    useApi<APIFetchResponse<PaginatedData<SystemSetting>>>(url);
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: revalidate,
+  } = useApi<APIFetchResponse<PaginatedData<SystemSetting>>>(url);
   return {
     settings: data?.data?.results ?? [],
     totalCount: data?.data?.totalCount ?? 0,
@@ -25,7 +29,14 @@ export const useSystemSettingsApi = () => {
     return res.data;
   };
 
+  const deleteSetting = async (key: string) => {
+    await apiFetch('/settings', {
+      method: 'DELETE',
+      data: { keyOrPrefix: key, isSystemSetting: true },
+    });
+  };
+
   const mutateSettings = () => mutate('/settings');
 
-  return { updateSetting, mutateSettings };
+  return { updateSetting, deleteSetting, mutateSettings };
 };
