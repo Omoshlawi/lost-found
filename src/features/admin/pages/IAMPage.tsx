@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import {
   ActionIcon,
   Badge,
   Box,
+  Divider,
   Group,
   Menu,
   Paper,
@@ -29,6 +30,288 @@ import { ResourceForm } from '../forms/ResourceForm';
 import { RoleForm } from '../forms/RoleForm';
 import { useResources, useResourcesApi, useRoleRecords, useRoleRecordsApi } from '../hooks/useRoleRecords';
 import { Resource, RoleRecord } from '../types';
+import { BanUserForm, CreateUserForm, SetRoleForm } from '../../users/forms';
+import { useUsers, useUsersApi } from '../../users/hooks';
+import { User } from '../../users/types';
+
+// ─── Users tab ────────────────────────────────────────────────────────────────
+
+const UsersTab = () => {
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
+    useTableUrlFilters({ searchDebounce: 200 });
+  const offset = (page - 1) * pageSize;
+  const usersAsync = useUsers({ limit: pageSize, offset, ...(search && { searchValue: search }) });
+  const { removeUser, revokeAllUserSessions } = useUsersApi();
+  const navigate = useNavigate();
+
+  const handleRemove = (user: User) => {
+    modals.openConfirmModal({
+      title: 'Remove User',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to remove <b>{user.name}</b>? This action is destructive.
+        </Text>
+      ),
+      labels: { confirm: 'Remove', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await removeUser(user.id);
+          showNotification({ title: 'Success', message: 'User removed successfully', color: 'green' });
+          usersAsync.mutate();
+        } catch (error) {
+          const e = handleApiErrors<{}>(error);
+          if (e.detail)
+            showNotification({ title: 'Error removing user', message: e.detail, color: 'red' });
+        }
+      },
+    });
+  };
+
+  const handleRevokeSessions = (user: User) => {
+    modals.openConfirmModal({
+      title: 'Revoke Sessions',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Revoke all active sessions for <b>{user.name}</b>? They will be logged out immediately.
+        </Text>
+      ),
+      labels: { confirm: 'Revoke', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      onConfirm: async () => {
+        try {
+          await revokeAllUserSessions(user.id);
+          showNotification({ title: 'Success', message: `Sessions for ${user.name} revoked`, color: 'green' });
+        } catch (error) {
+          const e = handleApiErrors<{}>(error);
+          if (e.detail)
+            showNotification({ title: 'Error revoking sessions', message: e.detail, color: 'red' });
+        }
+      },
+    });
+  };
+
+  const handleLaunchCreateUser = () => {
+    const closeWorkspace = launchWorkspace(
+      <CreateUserForm closeWorkspace={() => closeWorkspace()} onSuccess={() => usersAsync.mutate()} />,
+      { width: 'narrow', title: 'Add New User' }
+    );
+  };
+
+  const handleLaunchSetRole = (user: User) => {
+    const closeWorkspace = launchWorkspace(
+      <SetRoleForm user={user} closeWorkspace={() => closeWorkspace()} onSuccess={() => usersAsync.mutate()} />,
+      { width: 'narrow', title: `Set Role — ${user.name}` }
+    );
+  };
+
+  const handleLaunchBanUser = (user: User) => {
+    const closeWorkspace = launchWorkspace(
+      <BanUserForm user={user} closeWorkspace={() => closeWorkspace()} onSuccess={() => usersAsync.mutate()} />,
+      { width: 'narrow', title: user.banned ? `Unban ${user.name}` : `Ban ${user.name}` }
+    );
+  };
+
+  const columns = useMemo<ColumnDef<User>[]>(
+    () => [
+      {
+        id: 'expand',
+        header: ({ table }) => (
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())}
+          >
+            <TablerIcon
+              name={table.getIsAllRowsExpanded() ? 'chevronUp' : 'chevronDown'}
+              size={16}
+            />
+          </ActionIcon>
+        ),
+        cell: ({ row }) => (
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => row.toggleExpanded(!row.getIsExpanded())}
+          >
+            <TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={16} />
+          </ActionIcon>
+        ),
+        enableSorting: false,
+        size: 0,
+      },
+      {
+        header: 'Name',
+        accessorKey: 'name',
+        cell: ({ row: { original: user } }) => user.name,
+      },
+      {
+        header: 'Email',
+        accessorKey: 'email',
+        cell: ({ row: { original: user } }) => user.email,
+      },
+      {
+        header: 'Role',
+        accessorKey: 'role',
+        cell: ({ row: { original: user } }) => (
+          <Group gap={4}>
+            {user.role
+              ?.split(',')
+              .filter(Boolean)
+              .map((role) => (
+                <Badge key={role} color={role === 'admin' ? 'red' : 'blue'} size="xs">
+                  {role}
+                </Badge>
+              ))}
+          </Group>
+        ),
+      },
+      {
+        header: 'Status',
+        accessorKey: 'banned',
+        cell: ({ row: { original: user } }) =>
+          user.banned ? (
+            <Badge color="red" size="xs">Banned</Badge>
+          ) : (
+            <Badge color="green" size="xs">Active</Badge>
+          ),
+      },
+      {
+        id: 'actions',
+        header: '',
+        size: 0,
+        cell: ({ row: { original: user } }) => (
+          <Menu shadow="md" width={200}>
+            <Menu.Target>
+              <ActionIcon variant="subtle">
+                <TablerIcon name="dots" style={{ width: '70%', height: '70%' }} stroke={1.5} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Label>Manage User</Menu.Label>
+              <Menu.Divider />
+              <Menu.Item
+                leftSection={<TablerIcon name="eye" size={14} />}
+                onClick={() => navigate(`/dashboard/users/${user.id}`)}
+              >
+                View Details
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<TablerIcon name="userShield" size={14} />}
+                onClick={() => handleLaunchSetRole(user)}
+              >
+                Set Role
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<TablerIcon name="ban" size={14} />}
+                color={user.banned ? 'green' : 'orange'}
+                onClick={() => handleLaunchBanUser(user)}
+              >
+                {user.banned ? 'Unban User' : 'Ban User'}
+              </Menu.Item>
+              <Menu.Item
+                leftSection={<TablerIcon name="logout" size={14} />}
+                color="orange"
+                onClick={() => handleRevokeSessions(user)}
+              >
+                Revoke Sessions
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item
+                leftSection={<TablerIcon name="trash" size={14} />}
+                color="red"
+                onClick={() => handleRemove(user)}
+              >
+                Remove User
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        ),
+      },
+    ],
+    []
+  );
+
+  return (
+    <StateFullDataTable
+      {...usersAsync}
+      data={usersAsync.users}
+      columns={columns}
+      renderActions={() => (
+        <Group gap="xs">
+          <TextInput
+            placeholder="Search by name or email..."
+            leftSection={<TablerIcon name="search" size={14} />}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            size="xs"
+            w={240}
+          />
+        </Group>
+      )}
+      renderExpandedRow={({ original: user }) => (
+        <Box
+          px="xl"
+          py="md"
+          style={{
+            borderTop: '1px solid var(--mantine-color-default-border)',
+            background: 'var(--mantine-color-default-hover)',
+          }}
+        >
+          <Group gap="xl" align="flex-start" wrap="wrap">
+            <Stack gap={4} miw={180}>
+              <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                Identity
+              </Text>
+              <Divider mb={4} />
+              <UserField label="Email" value={user.email} />
+              {user.username && <UserField label="Username" value={user.username} />}
+              <UserField label="Member since" value={new Date(user.createdAt).toDateString()} />
+            </Stack>
+            <Stack gap={4} miw={160}>
+              <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                Access
+              </Text>
+              <Divider mb={4} />
+              <UserField label="Role" value={user.role ?? 'user'} />
+              <UserField
+                label="Status"
+                value={user.banned ? 'Banned' : 'Active'}
+                valueColor={user.banned ? 'red' : 'civicGreen.6'}
+              />
+            </Stack>
+            {user.banned && (
+              <Stack gap={4} miw={200}>
+                <Text size="xs" fw={600} tt="uppercase" c="dimmed" style={{ letterSpacing: '0.06em' }}>
+                  Ban Details
+                </Text>
+                <Divider mb={4} />
+                <UserField label="Reason" value={user.banReason ?? 'No reason provided'} valueColor="red" />
+                {user.banExpires && (
+                  <UserField
+                    label="Expires"
+                    value={new Date(user.banExpires).toLocaleString()}
+                    valueColor="red"
+                  />
+                )}
+              </Stack>
+            )}
+          </Group>
+        </Box>
+      )}
+      onAdd={handleLaunchCreateUser}
+      pagination={{
+        totalCount: usersAsync.totalCount,
+        currentPage: page,
+        pageSize,
+        onChange: setPage,
+        onPageSizeChange: setPageSize,
+      }}
+    />
+  );
+};
 
 // ─── Roles tab ────────────────────────────────────────────────────────────────
 
@@ -161,10 +444,7 @@ const RolesTab = () => {
             <Menu.Dropdown>
               <Menu.Label>Actions</Menu.Label>
               <Menu.Divider />
-              <SystemAuthorized
-                permissions={{ setting: ['manage-system'] }}
-                unauthorizedAction={{ type: 'hide' }}
-              >
+              <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                 <Menu.Item
                   leftSection={<TablerIcon name="edit" size={14} />}
                   onClick={() => handleLaunchFormWorkspace(original)}
@@ -173,10 +453,7 @@ const RolesTab = () => {
                 </Menu.Item>
               </SystemAuthorized>
               {!original.voided && original.canDelete && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
+                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                   <Menu.Item
                     color="red"
                     leftSection={<TablerIcon name="trash" size={14} />}
@@ -187,10 +464,7 @@ const RolesTab = () => {
                 </SystemAuthorized>
               )}
               {original.voided && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
+                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                   <Menu.Item
                     color="green"
                     leftSection={<TablerIcon name="history" size={14} />}
@@ -407,10 +681,7 @@ const ResourcesTab = () => {
             <Menu.Dropdown>
               <Menu.Label>Actions</Menu.Label>
               <Menu.Divider />
-              <SystemAuthorized
-                permissions={{ setting: ['manage-system'] }}
-                unauthorizedAction={{ type: 'hide' }}
-              >
+              <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                 <Menu.Item
                   leftSection={<TablerIcon name="edit" size={14} />}
                   onClick={() => handleLaunchFormWorkspace(original)}
@@ -419,10 +690,7 @@ const ResourcesTab = () => {
                 </Menu.Item>
               </SystemAuthorized>
               {!original.voided && !original.isBuiltIn && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
+                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                   <Menu.Item
                     color="red"
                     leftSection={<TablerIcon name="trash" size={14} />}
@@ -433,10 +701,7 @@ const ResourcesTab = () => {
                 </SystemAuthorized>
               )}
               {original.voided && (
-                <SystemAuthorized
-                  permissions={{ setting: ['manage-system'] }}
-                  unauthorizedAction={{ type: 'hide' }}
-                >
+                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                   <Menu.Item
                     color="green"
                     leftSection={<TablerIcon name="history" size={14} />}
@@ -485,9 +750,7 @@ const ResourcesTab = () => {
                     {action.isBuiltIn && (
                       <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
                     )}
-                    {action.voided && (
-                      <Badge size="xs" color="red">Voided</Badge>
-                    )}
+                    {action.voided && <Badge size="xs" color="red">Voided</Badge>}
                   </Group>
                 </Box>
               ))
@@ -512,22 +775,24 @@ const ResourcesTab = () => {
 
 const IAMPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get('tab') ?? 'roles';
+  const tab = searchParams.get('tab') ?? 'users';
 
   const handleTabChange = (value: string | null) => {
-    // Replace all URL params — resets page/search when switching tabs
-    setSearchParams({ tab: value ?? 'roles' });
+    setSearchParams({ tab: value ?? 'users' });
   };
 
   return (
     <Stack gap="md">
       <DashboardPageHeader
         title="Access Control"
-        subTitle="Manage roles, permissions, and resources"
+        subTitle="Manage users, roles, permissions, and resources"
         icon="shieldLock"
       />
       <Tabs value={tab} onChange={handleTabChange}>
         <Tabs.List>
+          <Tabs.Tab value="users" leftSection={<TablerIcon name="users" size={14} />}>
+            Users
+          </Tabs.Tab>
           <Tabs.Tab value="roles" leftSection={<TablerIcon name="shieldHalf" size={14} />}>
             Roles
           </Tabs.Tab>
@@ -535,6 +800,9 @@ const IAMPage = () => {
             Resources
           </Tabs.Tab>
         </Tabs.List>
+        <Tabs.Panel value="users" pt="md">
+          {tab === 'users' && <UsersTab />}
+        </Tabs.Panel>
         <Tabs.Panel value="roles" pt="md">
           {tab === 'roles' && <RolesTab />}
         </Tabs.Panel>
@@ -547,3 +815,26 @@ const IAMPage = () => {
 };
 
 export default IAMPage;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function UserField({
+  label,
+  value,
+  valueColor,
+}: {
+  label: string;
+  value: string;
+  valueColor?: string;
+}) {
+  return (
+    <Group gap={6} wrap="nowrap" align="baseline">
+      <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+        {label}
+      </Text>
+      <Text size="xs" fw={500} c={valueColor} truncate>
+        {value}
+      </Text>
+    </Group>
+  );
+}

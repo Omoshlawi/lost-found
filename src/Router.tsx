@@ -196,10 +196,7 @@ const router = createBrowserRouter([
           {
             path: 'users',
             element: <Outlet />,
-            children: [
-              { index: true, element: <UsersPage /> },
-              { path: ':id', element: <UserDetailPage /> },
-            ],
+            children: [{ path: ':id', element: <UserDetailPage /> }],
           },
           {
             path: 'templates',

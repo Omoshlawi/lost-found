@@ -59,7 +59,6 @@ const navConfig: NavEntry[] = [
       { icon: 'template', label: 'Templates', href: 'templates' },
       { icon: 'shieldLock', label: 'Access Control', href: 'iam' },
       { icon: 'adjustments', label: 'System Settings', href: 'system-settings' },
-      { icon: 'users', label: 'Users', href: 'users' },
       { icon: 'layersLinked', label: 'Address Hierarchy', href: 'address-hierarchy' },
       { icon: 'worldPin', label: 'Address Locales', href: 'address-locales' },
       { icon: 'mapPin', label: 'Addresses', href: 'addresses' },
