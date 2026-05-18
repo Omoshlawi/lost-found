@@ -140,6 +140,7 @@ const updateTemplate = async (templateKey: string, data: Partial<TemplateFormDat
       name: data.name,
       type: data.type,
       description: data.description,
+      changeNote: data.changeNote || undefined,
       slots:
         data.type && data.metadata
           ? getSlots(data.type, data.metadata as any, data.slots as any)
@@ -153,10 +154,18 @@ const updateTemplate = async (templateKey: string, data: Partial<TemplateFormDat
   return res.data;
 };
 
+const rollbackTemplate = async (key: string, version: number) => {
+  const url = constructUrl(`/templates/${key}/rollback/${version}`);
+  const res = await apiFetch<Template>(url, { method: 'POST' });
+  mutate(`/templates/${key}`);
+  return res.data;
+};
+
 export const usetemplateApi = () => {
   return {
     createTemplate,
     updateTemplate,
+    rollbackTemplate,
   };
 };
 

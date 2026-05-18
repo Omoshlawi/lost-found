@@ -40,6 +40,7 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
       type: (template?.type as TemplateType.Notification | TemplateType.Prompt | TemplateType.Print) || undefined,
       name: template?.name || '',
       description: template?.description || '',
+      changeNote: '',
       slots: (template?.slots || {}) as unknown as Record<string, string>,
       schema: template?.schema || { required: [], optional: [] },
       metadata: {
@@ -428,6 +429,26 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
                     content={field.value}
                     onContentChange={field.onChange}
                     label="Template Content (HTML + Handlebars)"
+                  />
+                )}
+              />
+            </>
+          )}
+          {template && (
+            <>
+              <SectionTitle label="Change Note" />
+              <Controller
+                control={form.control}
+                name="changeNote"
+                render={({ field, fieldState }) => (
+                  <Textarea
+                    {...field}
+                    label="Describe what changed"
+                    description="Saved with this version for audit purposes"
+                    error={fieldState.error?.message}
+                    placeholder="e.g. Updated email subject line for clarity"
+                    autosize
+                    minRows={2}
                   />
                 )}
               />

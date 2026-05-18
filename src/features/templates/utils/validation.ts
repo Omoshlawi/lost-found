@@ -6,6 +6,7 @@ export const templateShema = z.object({
   type: z.enum([TemplateType.Notification, TemplateType.Prompt, TemplateType.Print]),
   name: z.string().nonempty('Name is required'),
   description: z.string().optional(),
+  changeNote: z.string().optional(),
   slots: z.record(z.string(), z.string()),
   schema: z.object({
     required: z.string().array(),

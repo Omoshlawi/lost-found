@@ -12,10 +12,12 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { modals } from '@mantine/modals';
+import { showNotification } from '@mantine/notifications';
 import { DashboardPageHeader, ErrorState, launchWorkspace, TablerIcon } from '@/components';
 import { formatDate } from '@/lib/utils';
 import TemplateForm from '../forms/TemplateForm';
-import { useTemplate, useTemplateVersions } from '../hooks';
+import { useTemplate, useTemplateVersions, usetemplateApi } from '../hooks';
 import { Template } from '../types';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -29,6 +31,7 @@ const TemplateDetailPage = () => {
   const { id: key } = useParams<{ id: string }>();
   const { template, isLoading, error } = useTemplate(key);
   const { versions, isLoading: versionsLoading } = useTemplateVersions(key);
+  const { rollbackTemplate } = usetemplateApi();
 
   const handleEdit = () => {
     const close = launchWorkspace(
@@ -37,7 +40,41 @@ const TemplateDetailPage = () => {
     );
   };
 
-  if (isLoading) return <Loader />;
+  const handleRestore = (version: number) => {
+    modals.openConfirmModal({
+      title: `Restore to v${version}`,
+      centered: true,
+      children: (
+        <Text size="sm">
+          This will replace the current template content with the content from{' '}
+          <Text span fw={600}>v{version}</Text> and save it as a new version. This action can be
+          undone by restoring to any other version.
+        </Text>
+      ),
+      labels: { confirm: 'Restore', cancel: 'Cancel' },
+      confirmProps: { color: 'blue' },
+      onConfirm: async () => {
+        try {
+          await rollbackTemplate(key!, version);
+          showNotification({
+            title: 'Template restored',
+            message: `Template restored to v${version} successfully.`,
+            color: 'green',
+          });
+        } catch {
+          showNotification({
+            title: 'Restore failed',
+            message: 'Could not restore the template. Please try again.',
+            color: 'red',
+          });
+        }
+      },
+    });
+  };
+
+  if (isLoading) {
+    return <Loader />;
+  }
   if (error || !template) {
     return <ErrorState error={error} title="Template" message="Template not found" />;
   }
@@ -117,24 +154,47 @@ const TemplateDetailPage = () => {
                   <Table.Th>Version</Table.Th>
                   <Table.Th>Change Note</Table.Th>
                   <Table.Th>Date</Table.Th>
+                  <Table.Th />
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {versions.map((v) => (
-                  <Table.Tr key={v.id}>
-                    <Table.Td>
-                      <Badge variant="light" size="xs">
-                        v{v.version}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">{v.changeNote ?? '—'}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">{formatDate(v.createdAt)}</Text>
-                    </Table.Td>
-                  </Table.Tr>
-                ))}
+                {versions.map((v) => {
+                  const isCurrent = v.version === template.version;
+                  return (
+                    <Table.Tr key={v.id}>
+                      <Table.Td>
+                        <Group gap="xs">
+                          <Badge variant="light" size="xs">
+                            v{v.version}
+                          </Badge>
+                          {isCurrent && (
+                            <Badge variant="dot" color="green" size="xs">
+                              current
+                            </Badge>
+                          )}
+                        </Group>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm">{v.changeNote ?? '—'}</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm">{formatDate(v.createdAt)}</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        {!isCurrent && (
+                          <Button
+                            variant="subtle"
+                            size="compact-xs"
+                            leftSection={<TablerIcon name="restore" size={12} />}
+                            onClick={() => handleRestore(v.version)}
+                          >
+                            Restore
+                          </Button>
+                        )}
+                      </Table.Td>
+                    </Table.Tr>
+                  );
+                })}
               </Table.Tbody>
             </Table>
           )}
