@@ -5,11 +5,14 @@ import {
   InvoiceTemplateSlots,
   NotificationTemplateMetadata,
   NotificationTemplateSlots,
+  PrintTemplateMetadata,
+  PrintTemplateSlots,
   PromptTemplateMetadata,
   PromptTemplateSlots,
   Template,
   TemplateFormData,
   TemplateType,
+  TemplateVersion,
 } from '../types';
 
 type TemplateFilters = Record<string, string | number | boolean | undefined>;
@@ -69,6 +72,8 @@ const getSlots = (
           ? (slots as PromptTemplateSlots).system
           : undefined,
       } as PromptTemplateSlots;
+    case TemplateType.Print:
+      return { content: (slots as PrintTemplateSlots).content } as PrintTemplateSlots;
     default:
       return {};
   }
@@ -96,6 +101,12 @@ const getMetadata = (
         temperature: (metadata as PromptTemplateMetadata).temperature,
         top_p: (metadata as PromptTemplateMetadata).top_p,
       } as PromptTemplateMetadata;
+    case TemplateType.Print:
+      return {
+        format: (metadata as PrintTemplateMetadata).format,
+        pageSize: (metadata as PrintTemplateMetadata).pageSize,
+        orientation: (metadata as PrintTemplateMetadata).orientation,
+      } as PrintTemplateMetadata;
     default:
       return {};
   }
@@ -147,4 +158,19 @@ export const usetemplateApi = () => {
     createTemplate,
     updateTemplate,
   };
+};
+
+export const useTemplate = (id?: string) => {
+  const { data, isLoading, error } = useSWR<APIFetchResponse<Template>>(
+    id ? `/templates/${id}` : null
+  );
+  return { template: data?.data, isLoading, error };
+};
+
+export const useTemplateVersions = (key?: string) => {
+  const url = constructUrl(`/templates/${key}/versions`, {});
+  const { data, isLoading } = useSWR<APIFetchResponse<{ results: TemplateVersion[] }>>(
+    key ? url : null
+  );
+  return { versions: data?.data?.results ?? [], isLoading };
 };

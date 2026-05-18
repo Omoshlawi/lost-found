@@ -15,7 +15,9 @@ import {
   VerifyClaimForm,
   VerifyReviewForm,
 } from '../forms';
+import { useInvoice } from '../hooks/use-invoice';
 import { Claim, ClaimStatus } from '../types';
+import { downloadInvoicePdf } from '../utils/downloadInvoicePdf';
 
 type ClaimActionsProps = {
   claim: Claim;
@@ -25,6 +27,7 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
   const { exchange, hasActiveExchange, hasActiveVerification } = useActiveOutboundExchange(
     claim.id
   );
+  const { invoice } = useInvoice(claim.id);
 
   const handleReject = () => {
     const dismiss = launchWorkspace(<RejectClaimForm claim={claim} onClose={() => dismiss()} />, {
@@ -191,6 +194,18 @@ const ClaimActions: FC<ClaimActionsProps> = ({ claim }) => {
           </Menu.Item>
         </SystemAuthorized>
 
+        {claim.status === ClaimStatus.VERIFIED && invoice && (
+          <>
+            <Menu.Divider />
+            <Menu.Label>Invoice</Menu.Label>
+            <Menu.Item
+              leftSection={<TablerIcon name="fileDownload" size={14} />}
+              onClick={() => downloadInvoicePdf(invoice.id, invoice.invoiceNumber)}
+            >
+              Download Invoice
+            </Menu.Item>
+          </>
+        )}
         {hasActiveExchange && exchange.exchangeNumber && (
           <>
             <Menu.Divider />

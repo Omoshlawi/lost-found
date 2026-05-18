@@ -54,3 +54,32 @@ export interface ClaimUserResponse {
 export type ClaimFormData = z.infer<typeof claimFormSchema>;
 export type RejectClaimFormData = z.infer<typeof rejectClaimSchema>;
 export type VerifyClaimFormData = z.infer<typeof verifyClaimSchema>;
+
+export enum InvoiceStatus {
+  PENDING = 'PENDING',
+  PARTIALLY_PAID = 'PARTIALLY_PAID',
+  PAID = 'PAID',
+  OVERDUE = 'OVERDUE',
+  CANCELLED = 'CANCELLED',
+}
+
+export interface InvoiceItem {
+  id: string;
+  type: string;
+  label: string;
+  description?: string;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  totalAmount: number;
+  amountPaid: number;
+  balanceDue: number;
+  status: InvoiceStatus;
+  items: InvoiceItem[];
+  claimId: string;
+  createdAt: string;
+  dueDate?: string;
+}

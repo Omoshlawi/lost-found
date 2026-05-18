@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router-dom';
-import { ActionIcon, Anchor, Badge, Button, Menu, Stack } from '@mantine/core';
+import { ActionIcon, Anchor, Badge, Button, Group, Menu, Select, Stack, TextInput } from '@mantine/core';
 import {
   DashboardPageHeader,
   launchWorkspace,
@@ -14,9 +14,23 @@ import TemplateForm from '../forms/TemplateForm';
 import { useTemplates } from '../hooks';
 import { Template } from '../types';
 
+const TYPE_OPTIONS = [
+  { value: 'notification', label: 'Notification' },
+  { value: 'prompt', label: 'Prompt' },
+  { value: 'print', label: 'Print' },
+];
+
 const TemplatesPage = () => {
-  const { page, pageSize, setPage, setPageSize } = useTableUrlFilters();
-  const templatesAsync = useTemplates({ page, limit: pageSize });
+  const { page, pageSize, search, searchInput, setSearchInput, searchParams, setFilter, setPage, setPageSize } =
+    useTableUrlFilters();
+  const typeFilter = searchParams.get('type') ?? null;
+
+  const templatesAsync = useTemplates({
+    page,
+    limit: pageSize,
+    search: search || undefined,
+    type: typeFilter || undefined,
+  });
 
   const handleLaunchTemplateForm = (template?: Template) => {
     const close = launchWorkspace(<TemplateForm template={template} onClose={() => close()} />, {
@@ -54,7 +68,7 @@ const TemplatesPage = () => {
                   <Menu.Item
                     leftSection={<TablerIcon name="eye" size={14} />}
                     component={Link}
-                    to={`${template.id}`}
+                    to={template.key}
                   >
                     View Details
                   </Menu.Item>
@@ -84,19 +98,38 @@ const TemplatesPage = () => {
           },
         ]}
         renderActions={() => (
-          <SystemAuthorized
-            permissions={{ templates: ['create'] }}
-            unauthorizedAction={{ type: 'hide' }}
-          >
-            <Button
-              variant="light"
-              size="xs"
-              leftSection={<TablerIcon name="plus" size={14} />}
-              onClick={() => handleLaunchTemplateForm()}
+          <>
+            <Group gap="xs">
+              <TextInput
+                placeholder="Search by name…"
+                leftSection={<TablerIcon name="search" size={14} />}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.currentTarget.value)}
+                w={200}
+              />
+              <Select
+                placeholder="All types"
+                clearable
+                data={TYPE_OPTIONS}
+                value={typeFilter}
+                onChange={(v) => setFilter('type', v)}
+                w={150}
+              />
+            </Group>
+            <SystemAuthorized
+              permissions={{ templates: ['create'] }}
+              unauthorizedAction={{ type: 'hide' }}
             >
-              Add
-            </Button>
-          </SystemAuthorized>
+              <Button
+                variant="light"
+                size="xs"
+                leftSection={<TablerIcon name="plus" size={14} />}
+                onClick={() => handleLaunchTemplateForm()}
+              >
+                Add
+              </Button>
+            </SystemAuthorized>
+          </>
         )}
         pagination={{
           totalCount: templatesAsync.totalCount,
@@ -125,7 +158,7 @@ const columns: ColumnDef<Template>[] = [
     accessorKey: 'name',
     header: 'Name',
     cell: ({ row: { original } }) => (
-      <Anchor variant="subtle" component={Link} to={`${original.id}`} style={{ color: 'inherit' }}>
+      <Anchor variant="subtle" component={Link} to={original.key} style={{ color: 'inherit' }}>
         {original.name}
       </Anchor>
     ),
@@ -146,7 +179,9 @@ const columns: ColumnDef<Template>[] = [
             ? 'blue'
             : original.type === 'prompt'
               ? 'yellow'
-              : 'green'
+              : original.type === 'print'
+                ? 'teal'
+                : 'gray'
         }
       >
         {original.type}

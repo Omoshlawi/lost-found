@@ -37,7 +37,7 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
   const form = useForm({
     defaultValues: {
       key: template?.key || '',
-      type: template?.type || undefined,
+      type: (template?.type as TemplateType.Notification | TemplateType.Prompt | TemplateType.Print) || undefined,
       name: template?.name || '',
       description: template?.description || '',
       slots: (template?.slots || {}) as unknown as Record<string, string>,
@@ -53,8 +53,8 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
   const reasons = useMemo(
     () => [
       { value: TemplateType.Notification, label: 'Notification' },
-      { value: TemplateType.Invoice, label: 'Invoice' },
       { value: TemplateType.Prompt, label: 'Prompt' },
+      { value: TemplateType.Print, label: 'Print Document' },
     ],
     []
   );
@@ -417,17 +417,17 @@ const TemplateForm: FC<TemplateFormProps> = ({ template, onClose, onSuccess }) =
               />
             </>
           )}
-          {selectedType === TemplateType.Invoice && (
+          {selectedType === TemplateType.Print && (
             <>
-              <SectionTitle label="Invoice" />
+              <SectionTitle label="Print Document" />
               <Controller
                 control={form.control}
-                name="slots.invoice_template"
+                name="slots.content"
                 render={({ field }) => (
                   <RichTextEditorInput
                     content={field.value}
                     onContentChange={field.onChange}
-                    label="Invoice Template"
+                    label="Template Content (HTML + Handlebars)"
                   />
                 )}
               />

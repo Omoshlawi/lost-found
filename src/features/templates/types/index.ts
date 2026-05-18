@@ -15,6 +15,7 @@ export enum TemplateType {
   Notification = 'notification',
   Prompt = 'prompt',
   Invoice = 'invoice',
+  Print = 'print',
 }
 
 export interface TemplateSchema<T extends string> {
@@ -91,6 +92,33 @@ export interface InvoiceTemplate extends BaseTemplate {
   metadata: InvoiceTemplateMetadata;
 }
 
+// Print interfaces
+export interface PrintTemplateSlots {
+  content: string;
+}
+
+export interface PrintTemplateMetadata {
+  format?: 'pdf' | 'html';
+  pageSize?: 'A4' | 'A5' | 'Letter';
+  orientation?: 'portrait' | 'landscape';
+}
+
+export interface PrintTemplate extends BaseTemplate {
+  type: TemplateType.Print;
+  slots: PrintTemplateSlots;
+  schema: TemplateSchema<keyof PrintTemplateSlots>;
+  metadata: PrintTemplateMetadata;
+}
+
+// Version history
+export interface TemplateVersion {
+  id: string;
+  version: number;
+  changedById: string;
+  changeNote?: string;
+  createdAt: string;
+}
+
 // Union type for all templates
-export type Template = NotificationTemplate | PromptTemplate | InvoiceTemplate;
+export type Template = NotificationTemplate | PromptTemplate | InvoiceTemplate | PrintTemplate;
 export type TemplateFormData = z.infer<typeof templateShema>;

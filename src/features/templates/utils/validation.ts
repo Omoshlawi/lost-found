@@ -3,7 +3,7 @@ import { TemplateType } from '../types';
 
 export const templateShema = z.object({
   key: z.string().nonempty('Key is required'),
-  type: z.enum([TemplateType.Notification, TemplateType.Prompt, TemplateType.Invoice]),
+  type: z.enum([TemplateType.Notification, TemplateType.Prompt, TemplateType.Print]),
   name: z.string().nonempty('Name is required'),
   description: z.string().optional(),
   slots: z.record(z.string(), z.string()),
