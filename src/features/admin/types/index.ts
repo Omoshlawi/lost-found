@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DocumentTypeSchema, SystemSettingSchema, TransitionReasonSchema } from '../utils';
+import { DocumentTypeSchema, ResourceActionSchema, ResourceSchema, RoleSchema, SystemSettingSchema, TransitionReasonSchema } from '../utils';
 
 export interface DocumentType {
   id: string;
@@ -56,6 +56,61 @@ export interface SystemRole {
   label?: string;
   permissions: RolePermission[];
 }
+
+// ─── Resource / Role (DB-managed) ────────────────────────────────────────────
+
+export interface ResourceAction {
+  id: string;
+  resourceId: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  isBuiltIn: boolean;
+  voided: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Resource {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  isBuiltIn: boolean;
+  voided: boolean;
+  createdAt: string;
+  updatedAt: string;
+  actions: ResourceAction[];
+}
+
+export interface RolePermissionRecord {
+  id: string;
+  roleId: string;
+  resourceId: string;
+  resource: Resource;
+  resourceActionId: string;
+  resourceAction: ResourceAction;
+  createdAt: string;
+}
+
+export interface RoleRecord {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  canDelete: boolean;
+  canEditPermissions: boolean;
+  voided: boolean;
+  createdAt: string;
+  updatedAt: string;
+  permissions: RolePermissionRecord[];
+}
+
+export type EffectivePermissions = Record<string, string[]>;
+
+export type ResourceFormData = z.infer<typeof ResourceSchema>;
+export type ResourceActionFormData = z.infer<typeof ResourceActionSchema>;
+export type RoleFormData = z.infer<typeof RoleSchema>;
 
 export interface SystemSetting {
   id: string;

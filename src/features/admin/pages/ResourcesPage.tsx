@@ -21,32 +21,31 @@ import {
 } from '@/components';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
-import { RoleForm } from '../forms/RoleForm';
-import { useRoleRecords, useRoleRecordsApi } from '../hooks/useRoleRecords';
-import { RoleRecord } from '../types';
+import { ResourceForm } from '../forms/ResourceForm';
+import { useResources, useResourcesApi } from '../hooks/useRoleRecords';
+import { Resource } from '../types';
 
-const RolesPage = () => {
+const ResourcesPage = () => {
   const { page, pageSize, search } = useTableUrlFilters();
-  const rolesAsync = useRoleRecords({ page, limit: pageSize, search, includeVoided: true });
-  const { deleteRole, restoreRole, mutateRoles } = useRoleRecordsApi();
+  const resourcesAsync = useResources({ page, limit: pageSize, search, includeVoided: true });
+  const { deleteResource, restoreResource, mutateResources } = useResourcesApi();
 
-  const handleDelete = (role: RoleRecord) => {
+  const handleDelete = (resource: Resource) => {
     modals.openConfirmModal({
-      title: 'Delete Role',
+      title: 'Delete Resource',
       centered: true,
       children: (
         <Text size="sm">
-          Delete <b>{role.name}</b>? Users with this role slug in their profile will no longer
-          receive these permissions.
+          Delete <b>{resource.name}</b>? All associated actions and role permissions will also be removed.
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
       confirmProps: { color: 'red' },
       onConfirm: async () => {
         try {
-          await deleteRole(role.id);
-          showNotification({ title: 'Success', message: 'Role deleted', color: 'green' });
-          mutateRoles();
+          await deleteResource(resource.id);
+          showNotification({ title: 'Success', message: 'Resource deleted', color: 'green' });
+          mutateResources();
         } catch (error) {
           const e = handleApiErrors(error);
           showNotification({ title: 'Error', message: e.detail || 'Failed to delete', color: 'red' });
@@ -55,25 +54,25 @@ const RolesPage = () => {
     });
   };
 
-  const handleRestore = async (role: RoleRecord) => {
+  const handleRestore = async (resource: Resource) => {
     try {
-      await restoreRole(role.id);
-      showNotification({ title: 'Success', message: 'Role restored', color: 'green' });
-      mutateRoles();
+      await restoreResource(resource.id);
+      showNotification({ title: 'Success', message: 'Resource restored', color: 'green' });
+      mutateResources();
     } catch (error) {
       const e = handleApiErrors(error);
       showNotification({ title: 'Error', message: e.detail || 'Failed to restore', color: 'red' });
     }
   };
 
-  const handleEdit = (role?: RoleRecord) => {
+  const handleEdit = (resource?: Resource) => {
     const close = launchWorkspace(
-      <RoleForm role={role} closeWorkspace={() => close()} />,
-      { width: 'wide', title: role ? 'Edit Role' : 'Create Role' }
+      <ResourceForm resource={resource} closeWorkspace={() => close()} />,
+      { width: 'wide', title: resource ? 'Edit Resource' : 'Create Resource' }
     );
   };
 
-  const columns = useMemo<ColumnDef<RoleRecord>[]>(
+  const columns = useMemo<ColumnDef<Resource>[]>(
     () => [
       {
         id: 'expand',
@@ -91,7 +90,7 @@ const RolesPage = () => {
         size: 0,
       },
       {
-        header: 'Role',
+        header: 'Resource',
         accessorKey: 'name',
         cell: ({ row: { original } }) => (
           <Stack gap={0}>
@@ -104,17 +103,17 @@ const RolesPage = () => {
         header: 'Type',
         id: 'type',
         cell: ({ row: { original } }) =>
-          !original.canDelete ? (
-            <Badge size="xs" variant="dot" color="gray">System</Badge>
+          original.isBuiltIn ? (
+            <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
           ) : (
             <Badge size="xs" variant="dot" color="blue">Custom</Badge>
           ),
       },
       {
-        header: 'Permissions',
-        id: 'perms',
+        header: 'Actions',
+        id: 'actions_count',
         cell: ({ row: { original } }) => (
-          <Badge variant="light">{original.permissions.length}</Badge>
+          <Badge variant="light">{original.actions.filter((a) => !a.voided).length}</Badge>
         ),
       },
       {
@@ -144,7 +143,7 @@ const RolesPage = () => {
                   Edit
                 </Menu.Item>
               </SystemAuthorized>
-              {!original.voided && original.canDelete && (
+              {!original.voided && !original.isBuiltIn && (
                 <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
                   <Menu.Item color="red" leftSection={<TablerIcon name="trash" size={14} />} onClick={() => handleDelete(original)}>
                     Delete
@@ -169,67 +168,53 @@ const RolesPage = () => {
   return (
     <Stack gap="md">
       <DashboardPageHeader
-        title="Roles"
-        subTitle="Manage system roles and their permissions"
-        icon="shieldLock"
+        title="Resources"
+        subTitle="Manage permission resources and their actions"
+        icon="apiApp"
         traiiling={
           <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
-            <ActionIcon variant="filled" onClick={() => handleEdit()} aria-label="Create role">
+            <ActionIcon variant="filled" onClick={() => handleEdit()} aria-label="Create resource">
               <TablerIcon name="plus" size={16} />
             </ActionIcon>
           </SystemAuthorized>
         }
       />
       <StateFullDataTable
-        title="Roles"
-        data={rolesAsync.roles}
-        isLoading={rolesAsync.isLoading}
-        error={rolesAsync.error as Error}
+        title="Resources"
+        data={resourcesAsync.resources}
+        isLoading={resourcesAsync.isLoading}
+        error={resourcesAsync.error as Error}
         columns={columns}
-        renderExpandedRow={({ original }) => {
-          const permTree = original.permissions.reduce<
-            Record<string, { resourceName: string; actions: typeof original.permissions }>
-          >((acc, perm) => {
-            const key = perm.resource.slug;
-            if (!acc[key]) acc[key] = { resourceName: perm.resource.name, actions: [] };
-            acc[key].actions.push(perm);
-            return acc;
-          }, {});
-
-          return (
-            <Paper p="sm">
-              <Stack gap="xs">
-                <Text size="sm" fw={600}>{original.name} Permissions</Text>
-                {original.permissions.length === 0 ? (
-                  <Text size="sm" c="dimmed">No permissions assigned.</Text>
-                ) : (
-                  Object.entries(permTree).map(([resource, node]) => (
-                    <Box key={resource}>
-                      <Group gap="xs">
-                        <Text size="sm" c="dimmed">├─</Text>
-                        <Badge variant="default" color="gray" size="xs">{node.resourceName}</Badge>
-                        <Text size="xs" ff="monospace" c="dimmed">{resource}</Text>
-                      </Group>
-                      <Stack gap={4} pl="lg" mt={4}>
-                        {node.actions.map((perm) => (
-                          <Group key={perm.id} gap="xs">
-                            <Text size="sm" c="dimmed">└─</Text>
-                            <Text size="sm">{perm.resourceAction.name}</Text>
-                            <Text size="xs" ff="monospace" c="dimmed">{perm.resourceAction.slug}</Text>
-                          </Group>
-                        ))}
-                      </Stack>
-                    </Box>
-                  ))
-                )}
-              </Stack>
-            </Paper>
-          );
-        }}
-        nothingFoundMessage="No roles configured."
+        renderExpandedRow={({ original }) => (
+          <Paper p="sm">
+            <Stack gap="xs">
+              <Text size="sm" fw={600}>{original.name} Actions</Text>
+              {original.actions.length === 0 ? (
+                <Text size="sm" c="dimmed">No actions defined.</Text>
+              ) : (
+                original.actions.map((action) => (
+                  <Box key={action.id}>
+                    <Group gap="xs">
+                      <Text size="sm" c="dimmed">└─</Text>
+                      <Text size="sm">{action.name}</Text>
+                      <Text size="xs" ff="monospace" c="dimmed">{action.slug}</Text>
+                      {action.isBuiltIn && (
+                        <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
+                      )}
+                      {action.voided && (
+                        <Badge size="xs" color="red">Voided</Badge>
+                      )}
+                    </Group>
+                  </Box>
+                ))
+              )}
+            </Stack>
+          </Paper>
+        )}
+        nothingFoundMessage="No resources configured."
       />
     </Stack>
   );
 };
 
-export default RolesPage;
+export default ResourcesPage;

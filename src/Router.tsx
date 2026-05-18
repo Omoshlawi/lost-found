@@ -16,7 +16,7 @@ import {
   AddressHierarchyPage,
   AddressLocalesPage,
 } from './features/addresses/pages';
-import { DocumentTypesPage, RolesPage, SystemSettingsPage, TransitionReasonsPage } from './features/admin/pages';
+import { DocumentTypesPage, ResourcesPage, RolesPage, SystemSettingsPage, TransitionReasonsPage } from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
 import {
@@ -180,6 +180,10 @@ const router = createBrowserRouter([
           {
             path: 'roles',
             element: <RolesPage />,
+          },
+          {
+            path: 'resources',
+            element: <ResourcesPage />,
           },
           {
             path: 'addresses',
