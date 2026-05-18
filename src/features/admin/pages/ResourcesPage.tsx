@@ -9,6 +9,7 @@ import {
   Paper,
   Stack,
   Text,
+  TextInput,
 } from '@mantine/core';
 import { modals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
@@ -19,6 +20,7 @@ import {
   SystemAuthorized,
   TablerIcon,
 } from '@/components';
+import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import { useTableUrlFilters } from '@/hooks/useTableUrlFilters';
 import { handleApiErrors } from '@/lib/api';
 import { ResourceForm } from '../forms/ResourceForm';
@@ -26,9 +28,11 @@ import { useResources, useResourcesApi } from '../hooks/useRoleRecords';
 import { Resource } from '../types';
 
 const ResourcesPage = () => {
-  const { page, pageSize, search } = useTableUrlFilters();
+  const { page, pageSize, search, searchInput, setSearchInput, setPage, setPageSize } =
+    useTableUrlFilters();
   const resourcesAsync = useResources({ page, limit: pageSize, search, includeVoided: true });
   const { deleteResource, restoreResource, mutateResources } = useResourcesApi();
+  const { hasAccess } = useUserHasSystemAccess({ setting: ['manage-system'] });
 
   const handleDelete = (resource: Resource) => {
     modals.openConfirmModal({
@@ -36,7 +40,8 @@ const ResourcesPage = () => {
       centered: true,
       children: (
         <Text size="sm">
-          Delete <b>{resource.name}</b>? All associated actions and role permissions will also be removed.
+          Are you sure you want to delete <b>{resource.name}</b>? All associated actions and role
+          permissions will also be removed.
         </Text>
       ),
       labels: { confirm: 'Delete', cancel: 'Cancel' },
@@ -48,7 +53,11 @@ const ResourcesPage = () => {
           mutateResources();
         } catch (error) {
           const e = handleApiErrors(error);
-          showNotification({ title: 'Error', message: e.detail || 'Failed to delete', color: 'red' });
+          showNotification({
+            title: 'Error',
+            message: e.detail || 'Failed to delete',
+            color: 'red',
+          });
         }
       },
     });
@@ -61,13 +70,17 @@ const ResourcesPage = () => {
       mutateResources();
     } catch (error) {
       const e = handleApiErrors(error);
-      showNotification({ title: 'Error', message: e.detail || 'Failed to restore', color: 'red' });
+      showNotification({
+        title: 'Error',
+        message: e.detail || 'Failed to restore',
+        color: 'red',
+      });
     }
   };
 
-  const handleEdit = (resource?: Resource) => {
-    const close = launchWorkspace(
-      <ResourceForm resource={resource} closeWorkspace={() => close()} />,
+  const handleLaunchFormWorkspace = (resource?: Resource) => {
+    const closeWorkspace = launchWorkspace(
+      <ResourceForm resource={resource} closeWorkspace={() => closeWorkspace()} />,
       { width: 'wide', title: resource ? 'Edit Resource' : 'Create Resource' }
     );
   };
@@ -77,12 +90,23 @@ const ResourcesPage = () => {
       {
         id: 'expand',
         header: ({ table }) => (
-          <ActionIcon variant="subtle" color="gray" onClick={() => table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())}>
-            <TablerIcon name={table.getIsAllRowsExpanded() ? 'chevronUp' : 'chevronDown'} size={16} />
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())}
+          >
+            <TablerIcon
+              name={table.getIsAllRowsExpanded() ? 'chevronUp' : 'chevronDown'}
+              size={16}
+            />
           </ActionIcon>
         ),
         cell: ({ row }) => (
-          <ActionIcon variant="subtle" color="gray" onClick={() => row.toggleExpanded(!row.getIsExpanded())}>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => row.toggleExpanded(!row.getIsExpanded())}
+          >
             <TablerIcon name={row.getIsExpanded() ? 'chevronUp' : 'chevronDown'} size={16} />
           </ActionIcon>
         ),
@@ -94,8 +118,12 @@ const ResourcesPage = () => {
         accessorKey: 'name',
         cell: ({ row: { original } }) => (
           <Stack gap={0}>
-            <Text size="sm" fw={600}>{original.name}</Text>
-            <Text size="xs" c="dimmed" ff="monospace">{original.slug}</Text>
+            <Text size="sm" fw={600}>
+              {original.name}
+            </Text>
+            <Text size="xs" c="dimmed" ff="monospace">
+              {original.slug}
+            </Text>
           </Stack>
         ),
       },
@@ -104,9 +132,13 @@ const ResourcesPage = () => {
         id: 'type',
         cell: ({ row: { original } }) =>
           original.isBuiltIn ? (
-            <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
+            <Badge size="xs" variant="dot" color="gray">
+              Built-in
+            </Badge>
           ) : (
-            <Badge size="xs" variant="dot" color="blue">Custom</Badge>
+            <Badge size="xs" variant="dot" color="blue">
+              Custom
+            </Badge>
           ),
       },
       {
@@ -121,9 +153,13 @@ const ResourcesPage = () => {
         accessorKey: 'voided',
         cell: ({ row: { original } }) =>
           original.voided ? (
-            <Badge size="xs" color="red">Voided</Badge>
+            <Badge size="xs" color="red">
+              Voided
+            </Badge>
           ) : (
-            <Badge size="xs" color="green">Active</Badge>
+            <Badge size="xs" color="green">
+              Active
+            </Badge>
           ),
       },
       {
@@ -133,26 +169,48 @@ const ResourcesPage = () => {
         cell: ({ row: { original } }) => (
           <Menu shadow="md" width={200}>
             <Menu.Target>
-              <ActionIcon variant="subtle"><TablerIcon name="dots" size={16} /></ActionIcon>
+              <ActionIcon variant="subtle">
+                <TablerIcon name="dots" size={16} />
+              </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Label>Actions</Menu.Label>
               <Menu.Divider />
-              <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
-                <Menu.Item leftSection={<TablerIcon name="edit" size={14} />} onClick={() => handleEdit(original)}>
+              <SystemAuthorized
+                permissions={{ setting: ['manage-system'] }}
+                unauthorizedAction={{ type: 'hide' }}
+              >
+                <Menu.Item
+                  leftSection={<TablerIcon name="edit" size={14} />}
+                  onClick={() => handleLaunchFormWorkspace(original)}
+                >
                   Edit
                 </Menu.Item>
               </SystemAuthorized>
               {!original.voided && !original.isBuiltIn && (
-                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
-                  <Menu.Item color="red" leftSection={<TablerIcon name="trash" size={14} />} onClick={() => handleDelete(original)}>
+                <SystemAuthorized
+                  permissions={{ setting: ['manage-system'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
+                  <Menu.Item
+                    color="red"
+                    leftSection={<TablerIcon name="trash" size={14} />}
+                    onClick={() => handleDelete(original)}
+                  >
                     Delete
                   </Menu.Item>
                 </SystemAuthorized>
               )}
               {original.voided && (
-                <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
-                  <Menu.Item color="green" leftSection={<TablerIcon name="history" size={14} />} onClick={() => handleRestore(original)}>
+                <SystemAuthorized
+                  permissions={{ setting: ['manage-system'] }}
+                  unauthorizedAction={{ type: 'hide' }}
+                >
+                  <Menu.Item
+                    color="green"
+                    leftSection={<TablerIcon name="history" size={14} />}
+                    onClick={() => handleRestore(original)}
+                  >
                     Restore
                   </Menu.Item>
                 </SystemAuthorized>
@@ -171,38 +229,51 @@ const ResourcesPage = () => {
         title="Resources"
         subTitle="Manage permission resources and their actions"
         icon="apiApp"
-        traiiling={
-          <SystemAuthorized permissions={{ setting: ['manage-system'] }} unauthorizedAction={{ type: 'hide' }}>
-            <ActionIcon variant="filled" onClick={() => handleEdit()} aria-label="Create resource">
-              <TablerIcon name="plus" size={16} />
-            </ActionIcon>
-          </SystemAuthorized>
-        }
       />
       <StateFullDataTable
-        title="Resources"
+        {...resourcesAsync}
         data={resourcesAsync.resources}
-        isLoading={resourcesAsync.isLoading}
-        error={resourcesAsync.error as Error}
         columns={columns}
+        renderActions={() => (
+          <TextInput
+            placeholder="Search resources..."
+            leftSection={<TablerIcon name="search" size={14} />}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            size="xs"
+            w={200}
+          />
+        )}
         renderExpandedRow={({ original }) => (
           <Paper p="sm">
             <Stack gap="xs">
-              <Text size="sm" fw={600}>{original.name} Actions</Text>
+              <Text size="sm" fw={600}>
+                {original.name} Actions
+              </Text>
               {original.actions.length === 0 ? (
-                <Text size="sm" c="dimmed">No actions defined.</Text>
+                <Text size="sm" c="dimmed">
+                  No actions defined.
+                </Text>
               ) : (
                 original.actions.map((action) => (
                   <Box key={action.id}>
                     <Group gap="xs">
-                      <Text size="sm" c="dimmed">└─</Text>
+                      <Text size="sm" c="dimmed">
+                        └─
+                      </Text>
                       <Text size="sm">{action.name}</Text>
-                      <Text size="xs" ff="monospace" c="dimmed">{action.slug}</Text>
+                      <Text size="xs" ff="monospace" c="dimmed">
+                        {action.slug}
+                      </Text>
                       {action.isBuiltIn && (
-                        <Badge size="xs" variant="dot" color="gray">Built-in</Badge>
+                        <Badge size="xs" variant="dot" color="gray">
+                          Built-in
+                        </Badge>
                       )}
                       {action.voided && (
-                        <Badge size="xs" color="red">Voided</Badge>
+                        <Badge size="xs" color="red">
+                          Voided
+                        </Badge>
                       )}
                     </Group>
                   </Box>
@@ -211,6 +282,14 @@ const ResourcesPage = () => {
             </Stack>
           </Paper>
         )}
+        onAdd={hasAccess ? () => handleLaunchFormWorkspace() : undefined}
+        pagination={{
+          totalCount: resourcesAsync.totalCount,
+          currentPage: page,
+          pageSize,
+          onChange: setPage,
+          onPageSizeChange: setPageSize,
+        }}
         nothingFoundMessage="No resources configured."
       />
     </Stack>
