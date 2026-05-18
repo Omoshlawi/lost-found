@@ -11,11 +11,7 @@ import {
   TwoFactorVerifyPage,
   VerifyEmailPage,
 } from '@/features/landing/pages';
-import {
-  AddressesPage,
-  AddressHierarchyPage,
-  AddressLocalesPage,
-} from './features/addresses/pages';
+import { AddressManagementPage } from './features/addresses/pages';
 import { DocumentTypesPage, IAMPage, SystemSettingsPage, TransitionReasonsPage } from './features/admin/pages';
 import { DocumentCaseDetail, DocumentCasesPage } from './features/cases/pages';
 import { ClaimDetailPage, ClaimsPage } from './features/claims/pages';
@@ -182,16 +178,8 @@ const router = createBrowserRouter([
             element: <IAMPage />,
           },
           {
-            path: 'addresses',
-            element: <AddressesPage />,
-          },
-          {
-            path: 'address-hierarchy',
-            element: <AddressHierarchyPage />,
-          },
-          {
-            path: 'address-locales',
-            element: <AddressLocalesPage />,
+            path: 'address-management',
+            element: <AddressManagementPage />,
           },
           {
             path: 'users',
