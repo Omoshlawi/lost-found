@@ -11,7 +11,7 @@ export interface DocumentCase {
   userId: string;
   user?: User;
   addressId: string;
-  extraction?: AIExtraction;
+  extractions?: AIExtraction[];
   address?: Address;
   eventDate: string;
   tags: string[];
@@ -214,25 +214,44 @@ export enum CustodyStatus {
 
 export interface AIExtraction {
   id: string;
+  docaiJobId?: string;
   extractionStatus: ExtractionStatus;
-  currentStep: 'VISION' | 'TEXT' | 'POST_PROCESSING' | null;
+  currentStep: 'VISION' | 'STRUCTURE' | null;
   ocrConfidence?: number;
   extractionConfidence?: number;
-  fallbackTriggered?: boolean;
+  documentTypeCode?: string;
+  warnings?: string[];
+  failureReason?: string;
+  extractionResult?: Record<string, unknown>;
   createdAt: string;
-  aiextractionInteractions?: AIExtractionInteraction[];
 }
 
-export type AIExtractionInteractionType = 'VISION_EXTRACTION' | 'TEXT_EXTRACTION';
+export interface DocaiStage {
+  stage_id: string;
+  stage: string;
+  status: string;
+  error: string | null;
+  usage: Record<string, unknown> | null;
+  started_at: string | null;
+  completed_at: string;
+  conversations: DocaiConversation[];
+}
 
-export interface AIExtractionInteraction {
-  id: string;
-  extractionType: AIExtractionInteractionType;
-  success: boolean;
-  errorMessage?: string | null;
-  confidence?: number | null;
-  createdAt: string;
-  aiInteraction?: AiInteraction;
+export interface DocaiConversation {
+  conversation_id: string;
+  round: number;
+  page: number | null;
+  role: string;
+  content: string;
+  success: boolean | null;
+  created_at: string;
+}
+
+export interface DocaiJobStages {
+  job_id: string;
+  job_type: string;
+  job_status: string;
+  stages: DocaiStage[];
 }
 
 export interface AdditionalField {

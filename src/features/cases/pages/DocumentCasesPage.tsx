@@ -237,7 +237,7 @@ const DocumentCasesPage = () => {
         header: 'AI Processing',
         id: 'extraction',
         cell: ({ row: { original } }) => {
-          const extraction = original.extraction;
+          const extraction = original.extractions?.[0];
           const isManualLost = !!original.lostDocumentCase && !original.lostDocumentCase.auto;
           if (!extraction || isManualLost) {
             return (
@@ -247,9 +247,8 @@ const DocumentCasesPage = () => {
             );
           }
           const STEP_LABEL: Record<string, string> = {
-            VISION: 'Image Analysis',
-            TEXT: 'Data Reading',
-            POST_PROCESSING: 'Post Processing',
+            VISION: 'Image Scan',
+            STRUCTURE: 'Data Reading',
           };
           return (
             <Stack gap={2}>

@@ -3,9 +3,8 @@ import { TablerIcon } from '@/components';
 import { AIExtraction, CaseType } from '../types';
 
 const STEP_LABEL: Record<string, string> = {
-  VISION: 'Image Analysis',
-  TEXT: 'Data Reading',
-  POST_PROCESSING: 'Post Processing',
+  VISION: 'Image Scan',
+  STRUCTURE: 'Data Reading',
 };
 
 interface CaseExtractionAlertProps {

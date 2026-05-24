@@ -33,7 +33,7 @@ export const useDocumentCase = (reportId?: string) => {
     undefined,
     {
       refreshInterval: (latest) => {
-        const status = latest?.data?.extraction?.extractionStatus;
+        const status = latest?.data?.extractions?.[0]?.extractionStatus;
         return status === ExtractionStatus.PENDING || status === ExtractionStatus.IN_PROGRESS
           ? 3000
           : 0;

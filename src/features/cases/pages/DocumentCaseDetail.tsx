@@ -82,7 +82,7 @@ const DocumentCaseDetail = () => {
       />
 
       <CaseExtractionAlert
-        extraction={reportData.extraction}
+        extraction={reportData.extractions?.[0]}
         reportType={reportType}
         lostAuto={reportData.lostDocumentCase?.auto}
       />
@@ -106,7 +106,7 @@ const DocumentCaseDetail = () => {
           <Tabs.Tab value="additional" leftSection={<TablerIcon name="fileText" size={16} />}>
             Additional
           </Tabs.Tab>
-          {reportData.extraction && (
+          {(reportData.extractions?.length ?? 0) > 0 && (
             <Tabs.Tab value="extraction" leftSection={<TablerIcon name="robot" size={16} />}>
               AI Processing
             </Tabs.Tab>
@@ -134,7 +134,7 @@ const DocumentCaseDetail = () => {
               document={reportData.document!}
               reportType={reportType}
               status={status}
-              failed={reportData.extraction?.extractionStatus !== ExtractionStatus.COMPLETED}
+              failed={reportData.extractions?.[0]?.extractionStatus !== ExtractionStatus.COMPLETED}
             />
           </Paper>
         </Tabs.Panel>
@@ -182,10 +182,10 @@ const DocumentCaseDetail = () => {
           </Paper>
         </Tabs.Panel>
 
-        {reportData.extraction && (
+        {(reportData.extractions?.length ?? 0) > 0 && (
           <Tabs.Panel value="extraction" pt="md">
             <Paper withBorder p="lg">
-              <ExtractionInteractionsPanel extraction={reportData.extraction} />
+              <ExtractionInteractionsPanel extractions={reportData.extractions ?? []} />
             </Paper>
           </Tabs.Panel>
         )}
