@@ -204,6 +204,12 @@ export enum ExtractionStatus {
   FAILED = 'FAILED',
 }
 
+export enum ExtractionResolutionType {
+  RESUBMIT_IMAGE = 'RESUBMIT_IMAGE',
+  SUBMIT_NEW_CASE = 'SUBMIT_NEW_CASE',
+  STAFF_HANDLING = 'STAFF_HANDLING',
+}
+
 export enum CustodyStatus {
   WITH_FINDER = 'WITH_FINDER',
   IN_CUSTODY = 'IN_CUSTODY',
@@ -223,6 +229,8 @@ export interface AIExtraction {
   warnings?: string[];
   failureReason?: string;
   extractionResult?: Record<string, unknown>;
+  resolutionType?: ExtractionResolutionType;
+  resolutionMessage?: string;
   createdAt: string;
 }
 

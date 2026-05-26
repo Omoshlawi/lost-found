@@ -33,7 +33,9 @@ export const useDocumentCase = (reportId?: string) => {
     undefined,
     {
       refreshInterval: (latest) => {
-        const status = latest?.data?.extractions?.[0]?.extractionStatus;
+        const status = latest?.data?.extractions
+          ?.slice()
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.extractionStatus;
         return status === ExtractionStatus.PENDING || status === ExtractionStatus.IN_PROGRESS
           ? 3000
           : 0;
@@ -210,6 +212,17 @@ const rejectFoundDocumentCase = async (
   return documentCase.data;
 };
 
+const resolveExtractionFailure = async (
+  caseId: string,
+  data: { resolutionType: string; resolutionMessage: string }
+) => {
+  await apiFetch(`/documents/cases/${caseId}/extractions/resolve`, {
+    method: 'PATCH',
+    data,
+  });
+  mutate('/documents/cases');
+};
+
 export const useDocumentCaseApi = () => {
   return {
     createFoundDocumentCase,
@@ -223,5 +236,6 @@ export const useDocumentCaseApi = () => {
     updateDocumentCase,
     verifyfoundDocumentCase,
     rejectFoundDocumentCase,
+    resolveExtractionFailure,
   };
 };

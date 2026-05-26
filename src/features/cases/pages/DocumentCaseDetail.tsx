@@ -82,9 +82,12 @@ const DocumentCaseDetail = () => {
       />
 
       <CaseExtractionAlert
-        extraction={reportData.extractions?.[0]}
+        extraction={reportData.extractions
+          ?.slice()
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]}
         reportType={reportType}
         lostAuto={reportData.lostDocumentCase?.auto}
+        documentCase={reportData}
       />
 
       {hasActiveVerification && <CaseCollectionAlert documentCase={reportData} />}
@@ -134,7 +137,9 @@ const DocumentCaseDetail = () => {
               document={reportData.document!}
               reportType={reportType}
               status={status}
-              failed={reportData.extractions?.[0]?.extractionStatus !== ExtractionStatus.COMPLETED}
+              failed={reportData.extractions
+                ?.slice()
+                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.extractionStatus !== ExtractionStatus.COMPLETED}
             />
           </Paper>
         </Tabs.Panel>

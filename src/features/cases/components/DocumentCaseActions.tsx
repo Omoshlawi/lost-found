@@ -4,11 +4,18 @@ import { Button, Group, Menu } from '@mantine/core';
 import { launchWorkspace, TablerIcon } from '@/components';
 import { useUserHasSystemAccess } from '@/hooks/useSystemAccess';
 import RejectFoundDocumentCaseForm from '../forms/RejectFoundDocumentCaseForm';
+import ResolveExtractionForm from '../forms/ResolveExtractionForm';
 import UpdateCasedetailsForm from '../forms/UpdateCasedetailsForm';
 import UpdateDocumentinfoForm from '../forms/UpdateDocumentinfoForm';
 import VerifyFoundDocumentCaseForm from '../forms/VerifyFoundDocumentCaseForm';
 import { useActiveExchange } from '@/features/exchange';
-import { CaseType, DocumentCase, FoundDocumentCaseStatus, LostDocumentCaseStatus } from '../types';
+import {
+  CaseType,
+  DocumentCase,
+  ExtractionStatus,
+  FoundDocumentCaseStatus,
+  LostDocumentCaseStatus,
+} from '../types';
 import {
   CancelDocumentCollection,
   IssueDocumentCollectionCode,
@@ -32,6 +39,16 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
 }) => {
   const { hasAccess: canVerify } = useUserHasSystemAccess({ documentCase: ['verify'] });
   const { hasAccess: canReject } = useUserHasSystemAccess({ documentCase: ['reject'] });
+  const { hasAccess: canResolveExtraction } = useUserHasSystemAccess({
+    documentCase: ['resolveExtraction'],
+  });
+
+  const latestExtraction = documentCase.extractions
+    ?.slice()
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  const hasUnresolvedFailure =
+    latestExtraction?.extractionStatus === ExtractionStatus.FAILED &&
+    !latestExtraction?.resolutionType;
 
   const isSubmitted = status === FoundDocumentCaseStatus.SUBMITTED;
   const isDraft =
@@ -185,6 +202,27 @@ const DocumentCaseActions: React.FC<DocumentCaseActionsProps> = ({
                   )}
                 />
               )}
+            </>
+          )}
+
+          {canResolveExtraction && hasUnresolvedFailure && (
+            <>
+              <Menu.Divider />
+              <Menu.Item
+                leftSection={<TablerIcon name="messageCircle" size={14} />}
+                color="yellow"
+                onClick={() => {
+                  const close = launchWorkspace(
+                    <ResolveExtractionForm
+                      documentCase={documentCase}
+                      onClose={() => close()}
+                    />,
+                    { title: 'Resolve Extraction Failure' }
+                  );
+                }}
+              >
+                Resolve Extraction
+              </Menu.Item>
             </>
           )}
 

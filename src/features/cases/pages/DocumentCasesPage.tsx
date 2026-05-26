@@ -237,7 +237,9 @@ const DocumentCasesPage = () => {
         header: 'AI Processing',
         id: 'extraction',
         cell: ({ row: { original } }) => {
-          const extraction = original.extractions?.[0];
+          const extraction = original.extractions
+            ?.slice()
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
           const isManualLost = !!original.lostDocumentCase && !original.lostDocumentCase.auto;
           if (!extraction || isManualLost) {
             return (
