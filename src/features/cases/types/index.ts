@@ -231,6 +231,7 @@ export interface AIExtraction {
   extractionResult?: Record<string, unknown>;
   resolutionType?: ExtractionResolutionType;
   resolutionMessage?: string;
+  resolvedById?: string;
   createdAt: string;
 }
 
