@@ -1,66 +1,99 @@
-# Mantine Vite template
+# CitizenLink — Web Dashboard
+
+Staff admin portal for the CitizenLink civic platform. Manages document cases, exchange workflows, custody operations, claims, matches, users, roles, and system configuration.
+
+## Tech Stack
+
+- **Framework**: React 19 + React Router v7
+- **Build**: Vite
+- **UI**: Mantine v8
+- **Data Fetching**: SWR
+- **State**: Zustand
+- **Testing**: Vitest + React Testing Library
+- **Package Manager**: yarn
+
+The Vite dev server proxies `/api` to `localhost:2000` (the NestJS backend).
+
+## Quick Start
+
+```bash
+yarn install
+yarn dev
+```
+
+App available at `http://localhost:5173`.
+
+## Commands
+
+```bash
+yarn dev              # Start dev server
+yarn build            # Production build
+yarn preview          # Preview production build locally
+yarn test             # Run vitest + lint + typecheck
+yarn vitest           # Run vitest only
+yarn vitest:watch     # Watch mode
+yarn eslint           # Lint
+yarn prettier:write   # Format all files
+yarn prettier:check   # Check formatting
+yarn storybook        # Start Storybook
+yarn storybook:build  # Build Storybook
+```
 
 ## Features
 
-This template comes with the following features:
+**Cases** — Lost/found document case management. Collection flow: Issue Code → Enter Handover Code → confirm. Outbound handover support. Resend/Revoke verification code actions.
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Vitest](https://vitest.dev/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
+**Claims** — Claim verification and review workflow.
 
-## npm scripts
+**Matches** — Match list and detail views.
 
-## Build and dev scripts
+**Custody** (`src/features/custody/`) — Physical document custody operations. Operation types: RECEIPT, TRANSFER_OUT, TRANSFER_IN, REQUISITION, HANDOVER, DISPOSAL, RETURN.
 
-- `dev` – start development server
-- `build` – build production version of the app
-- `preview` – locally preview production build
+**Exchange** — Exchange scheduling, code lifecycle, and courier delivery actions (Print Label, Mark Failed).
 
-### Testing scripts
+**Station Context** (`src/features/station-context/`) — Post-login station selection at `/select-station`. Staff must have an active station before accessing the dashboard.
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `vitest` – runs vitest tests
-- `vitest:watch` – starts vitest watch
-- `test` – runs `vitest`, `prettier:check`, `lint` and `typecheck` scripts
+**Admin** (`src/features/admin/`) — Document types, IAM (roles/permissions), system settings, transition reasons.
 
-### Other scripts
+**Users** — User list, detail, and role assignment.
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+**Addresses** — Address CRUD management.
 
-## Docker Setup Guide
+**Status Transitions** — Status workflow management.
 
-This application is containerized utilizing a multi-stage Docker build, serving the optimized Vite production bundle via an Nginx web server.
+**Templates** — Notification/email template management with version history and rollback.
 
-### Prerequisites
+## Project Structure
 
-- [Docker](https://www.docker.com/get-started)
-- Docker Compose V2
+```
+src/
+├── features/
+│   ├── cases/           # Case management + collection forms
+│   ├── claims/          # Claim verification
+│   ├── matches/         # Match review
+│   ├── custody/         # Physical custody operations
+│   ├── exchange/        # Exchange workflows + delivery actions
+│   ├── station-context/ # Station selection + guard
+│   ├── admin/           # Document types, IAM, settings, transition reasons
+│   ├── users/           # User management
+│   ├── addresses/       # Address management
+│   ├── status-transitions/ # Status workflow management
+│   ├── templates/       # Template management
+│   ├── dashboard/       # Dashboard home
+│   ├── settings/        # User settings
+│   └── ui/              # Shared UI components
+└── ...
+```
 
-### Running the Application
-
-You can easily spin up the container network locally using Docker Compose:
+## Docker
 
 ```bash
-# Build the image and start the container in detached mode
+# Build and run production container (Nginx serves the Vite bundle)
 docker compose up --build -d
 ```
 
-Once running, the application will be predictably available at: **http://localhost:8080**
+The Nginx config mirrors the Vite proxy — `/api` and `/socket.io` requests are forwarded to the backend server.
 
-### Stopping the Application
+## Design System
 
-To safely shut down and remove the container, run:
-
-```bash
-docker compose down
-```
-
-### Proxy Configuration Notes
-
-Since this image serves pre-built static files, the Vite proxy (`vite.config.mjs`) is intentionally bypassed. Instead, the application's `nginx.conf` acts as a reverse proxy matching the development configuration. Requests targeting `/api` or `/socket.io` are gracefully routed to the respective backend servers without triggering cross-origin errors.
+**Civic Editorial**: Primary Deep Navy `#003b5a`, Secondary Sky Blue `#006397`, Tertiary Civic Gold `#e8b84b`, Success Civic Green `#1d9e75`. Zero border radius. See `src/features/ui/` for design tokens.
