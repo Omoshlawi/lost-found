@@ -35,7 +35,7 @@ export const useDocumentCase = (reportId?: string) => {
       refreshInterval: (latest) => {
         const status = latest?.data?.extractions
           ?.slice()
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.extractionStatus;
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.extractionStatus;
         return status === ExtractionStatus.PENDING || status === ExtractionStatus.IN_PROGRESS
           ? 3000
           : 0;
